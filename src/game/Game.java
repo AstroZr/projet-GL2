@@ -50,7 +50,7 @@ public class Game implements Runnable {
      * Initialise tous les états et classes du jeu.
      * L'ordre d'initialisation est important car certains états peuvent dépendre d'autres.
      * 
-     * TODO: Implémenter l'initialisation des états (Menu, World, Pause, Settings, etc.)
+     * TODO: Implémenter l'initialisation des états (Menu, Pause, Settings, etc.)
      */
     private void initClasses() {
         // Initialiser tous les états du jeu

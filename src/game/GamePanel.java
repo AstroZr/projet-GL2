@@ -21,6 +21,8 @@ import inputs.MouseInputs;
  * - Délègue le rendu à l'instance de Game
  */
 public class GamePanel extends JPanel {
+    private final int GAME_WIDTH = 1920;
+    private final int GAME_HEIGHT = 1080;
     
     // === GESTION DES ENTRÉES ===
     private MouseInputs mouseInputs;  // Gestionnaire des entrées souris
