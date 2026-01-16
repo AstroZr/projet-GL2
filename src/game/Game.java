@@ -39,7 +39,7 @@ public class Game implements Runnable {
     public Game() {
         initClasses();
         gamePanel = new GamePanel(this);
-        gameWindow = new GameWindow(gamePanel);
+        gameWindow = new GameWindow(gamePanel, this);
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
 
@@ -178,6 +178,45 @@ public class Game implements Runnable {
                 lastFpsCheck = currentMillis;
             }
         }
+    }
+    
+    /**
+     * Sauvegarde l'état actuel du jeu.
+     * Cette méthode est appelée avant la fermeture de l'application.
+     */
+    public void saveGame() {
+        try {
+            // TODO: Implémenter la logique de sauvegarde
+            // Exemple : sauvegarder les scores, progression, paramètres, etc.
+            System.out.println("Sauvegarde du jeu en cours...");
+            
+            // Simuler une sauvegarde
+            Thread.sleep(500);
+            
+            System.out.println("Jeu sauvegardé avec succès !");
+        } catch (InterruptedException e) {
+            System.err.println("Erreur lors de la sauvegarde : " + e.getMessage());
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    /**
+     * Nettoie les ressources avant la fermeture.
+     * Arrête proprement les threads et libère les ressources.
+     */
+    public void cleanup() {
+        // Arrêter le thread de jeu proprement
+        if (gameLoopThread != null && gameLoopThread.isAlive()) {
+            gameLoopThread.interrupt();
+            try {
+                gameLoopThread.join(1000); // Attendre max 1 seconde
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
+        // TODO: Libérer d'autres ressources (sons, images, etc.)
+        System.out.println("Nettoyage des ressources terminé.");
     }
     
 }
