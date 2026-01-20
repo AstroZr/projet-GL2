@@ -1,10 +1,10 @@
-package inputs;
+package Groupe6.inputs;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import game.GamePanel;
+import Groupe6.game.GamePanel;
 
 /**
  * Gestionnaire des entrées souris - Capture et traite les événements de souris.

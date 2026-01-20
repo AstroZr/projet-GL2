@@ -1,4 +1,4 @@
-package game;
+package Groupe6.game;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -54,7 +54,7 @@ public class Game implements Runnable {
      */
     private void initClasses() {
         // Initialiser tous les états du jeu
-        throw new UnsupportedOperationException("Unimplemented method 'initClasses'");
+        //throw new UnsupportedOperationException("Unimplemented method 'initClasses'");
     }
 
     /**
@@ -71,6 +71,7 @@ public class Game implements Runnable {
      */
     private void update() {
         throw new UnsupportedOperationException("Unimplemented method 'update'");
+        
     }
 
     /**
@@ -91,6 +92,7 @@ public class Game implements Runnable {
             g2d.setFont(new Font("Arial", Font.PLAIN, 14));
             g2d.drawString("FPS: " + currentFPS + " | UPS: " + currentUPS, 10, 20);
         }
+        
     }
 
     /**

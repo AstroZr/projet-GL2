@@ -1,11 +1,12 @@
-package game;
+package Groupe6.game;
 
-import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
-import inputs.KeyboardInputs;
-import inputs.MouseInputs;
+import javax.swing.JPanel;
+
+import Groupe6.inputs.KeyboardInputs;
+import Groupe6.inputs.MouseInputs;
 
 /**
  * Panneau de jeu - Composant graphique principal responsable du rendu et des entrées.

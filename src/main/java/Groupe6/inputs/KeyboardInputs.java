@@ -1,9 +1,9 @@
-package inputs;
+package Groupe6.inputs;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import game.GamePanel;
+import Groupe6.game.GamePanel;
 
 /**
  * Gestionnaire des entrées clavier - Capture et traite les événements clavier.

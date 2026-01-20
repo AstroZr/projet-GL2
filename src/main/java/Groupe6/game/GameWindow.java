@@ -1,4 +1,4 @@
-package game;
+package Groupe6.game;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

@@ -1,6 +1,6 @@
-package main;
+package Groupe6.mathdoku;
 
-import game.Game;
+import Groupe6.game.Game;
 
 /**
  * Classe principale du jeu - Point d'entrée de l'application.
@@ -13,8 +13,9 @@ import game.Game;
  * - Point d'entrée unique de l'application
  * - Crée et maintient l'instance de Game
  */
-public class Main {
-    
+public class App 
+{
+
     // === INSTANCE DU JEU ===
     private static Game game;
 
@@ -35,3 +36,4 @@ public class Main {
         game = new Game();
     }
 }
+
