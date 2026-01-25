@@ -20,13 +20,13 @@ import java.awt.image.BufferedImage;
  * UTILISATION :
  * Les sous-classes doivent implémenter les méthodes abstraites pour :
  * - Le rendu du bouton (draw)
- * - L'action à effectuer lors du clic (onClick)
+ * - L'action à effectuer lors du clic (AppliquerAction)
  */
 public abstract class Bouton {
     // === PROPRIÉTÉS GÉOMÉTRIQUES ===
-    /** Position X du bouton sur l'écran (coin supérieur gauche) */
+    /** Position X du bouton sur l'écran */
     protected int x;
-    /** Position Y du bouton sur l'écran (coin supérieur gauche) */
+    /** Position Y du bouton sur l'écran */
     protected int y;
     /** Largeur du bouton en pixels */
     protected int largeur;
@@ -53,8 +53,8 @@ public abstract class Bouton {
      * Constructeur du bouton.
      * Initialise toutes les propriétés et crée la zone de délimitation.
      * 
-     * @param x Position X du bouton (coin supérieur gauche)
-     * @param y Position Y du bouton (coin supérieur gauche)
+     * @param x Position X du bouton 
+     * @param y Position Y du bouton 
      * @param largeur Largeur du bouton en pixels
      * @param hauteur Hauteur du bouton en pixels
      * @param index Index initial de l'image à afficher dans le tableau
@@ -96,6 +96,15 @@ public abstract class Bouton {
         sourisEnfonce = false;
     }
 
+    /**
+     * Méthode abstraite pour l'action à effectuer lors du clic sur le bouton.
+     * 
+     * UTILISATION :
+     * Les sous-classes doivent implémenter cette méthode pour définir l'action
+     * à effectuer lors du clic sur le bouton.
+     */
+    public abstract void AppliquerAction();
+
     // ========================================
     // === GETTERS ET SETTERS ===
     // ========================================
@@ -127,7 +136,7 @@ public abstract class Bouton {
     /**
      * Récupère la position Y du bouton.
      * 
-     * @return La position Y (coin supérieur gauche)
+     * @return La position Y 
      */
     public int getY() {
         return y;
@@ -136,7 +145,7 @@ public abstract class Bouton {
     /**
      * Définit la position Y du bouton et met à jour la délimitation.
      * 
-     * @param y La nouvelle position Y (coin supérieur gauche)
+     * @param y La nouvelle position Y 
      */
     public void setY(int y) {
         this.y = y;
@@ -146,7 +155,7 @@ public abstract class Bouton {
     /**
      * Récupère la position X du bouton.
      * 
-     * @return La position X (coin supérieur gauche)
+     * @return La position X 
      */
     public int getX() {
         return x;
@@ -155,7 +164,7 @@ public abstract class Bouton {
     /**
      * Définit la position X du bouton et met à jour la délimitation.
      * 
-     * @param x La nouvelle position X (coin supérieur gauche)
+     * @param x La nouvelle position X 
      */
     public void setX(int x) {
         this.x = x;
@@ -174,7 +183,7 @@ public abstract class Bouton {
     /**
      * Définit la largeur du bouton et met à jour la délimitation.
      * 
-     * @param largeur La nouvelle largeur en pixels (doit être positive)
+     * @param largeur La nouvelle largeur en pixels 
      */
     public void setLargeur(int largeur) {
         this.largeur = largeur;
@@ -193,7 +202,7 @@ public abstract class Bouton {
     /**
      * Définit la hauteur du bouton et met à jour la délimitation.
      * 
-     * @param hauteur La nouvelle hauteur en pixels (doit être positive)
+     * @param hauteur La nouvelle hauteur en pixels 
      */
     public void setHauteur(int hauteur) {
         this.hauteur = hauteur;

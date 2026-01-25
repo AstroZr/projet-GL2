@@ -35,6 +35,7 @@ public class Game implements Runnable {
     private int currentFPS = 0;             // FPS actuels mesurés
     private int currentUPS = 0;             // UPS actuels mesurés
     private boolean debug = false;          // Active/désactive l'affichage debug
+    private boolean repeindreFlag = false;  // Active/désactive le flag de repeindre
 
     public Game() {
         initClasses();
@@ -143,13 +144,17 @@ public class Game implements Runnable {
                 update();            // Mise à jour de la logique du jeu
                 updates++;
                 accumulator -= NANOS_PER_UPDATE; // Retirer un "tick" de l'accumulateur
+                repeindreFlag = true;
             }
             
             // === PHASE 2: RENDERING (FPS) - DÉCOUPLÉ ===
             // Le rendu est complètement indépendant de la logique
             // On peut rendre à n'importe quelle fréquence (limitée par TARGET_FPS)
-            gamePanel.repaint();
-            frames++;
+            if (repeindreFlag) {
+                gamePanel.repaint();
+                frames++;
+                repeindreFlag = false;
+            }
             
             // === PHASE 3: LIMITATION FPS ET ÉCONOMIE CPU ===
             // Calculer le temps disponible avant le prochain frame
