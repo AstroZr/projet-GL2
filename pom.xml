@@ -39,6 +39,75 @@
           <mainClass>Groupe6.mathdoku.App</mainClass>
         </configuration>
       </plugin>
+
+      <!-- Plugin pour générer un JAR exécutable (fat JAR) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>Groupe6.mathdoku.App</mainClass>
+                </transformer>
+              </transformers>
+              <finalName>${project.artifactId}-${project.version}-executable</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Plugin pour générer la Javadoc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <charset>UTF-8</charset>
+          <docencoding>UTF-8</docencoding>
+          <locale>fr_FR</locale>
+          <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+          </additionalOptions>
+        </configuration>
+      </plugin>
+
+      <!-- Plugin pour vérifier le style de code avec Checkstyle -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
+          <linkXRef>false</linkXRef>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>10.12.5</version>
+          </dependency>
+        </dependencies>
+      </plugin>
     </plugins>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

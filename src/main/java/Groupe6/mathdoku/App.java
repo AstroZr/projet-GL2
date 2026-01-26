@@ -13,8 +13,7 @@ import Groupe6.game.Game;
  * - Point d'entrée unique de l'application
  * - Crée et maintient l'instance de Game
  */
-public class App 
-{
+public class App {
 
     // === INSTANCE DU JEU ===
     private static Game game;
@@ -25,14 +24,14 @@ public class App
      * @param args Arguments de ligne de commande (non utilisés)
      */
     public static void main(String[] args) {
-        Init();
+        init();
     }
 
     /**
      * Initialise le jeu en créant une nouvelle instance de Game.
      * Cette méthode configure tous les composants nécessaires au démarrage du jeu.
      */
-    private static void Init() {
+    private static void init() {
         game = new Game();
     }
 }

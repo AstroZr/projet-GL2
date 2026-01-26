@@ -2,7 +2,6 @@ package Groupe6.game;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-
 import javax.swing.JPanel;
 
 import Groupe6.inputs.KeyboardInputs;
