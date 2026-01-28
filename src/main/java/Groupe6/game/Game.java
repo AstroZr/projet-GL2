@@ -5,6 +5,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import Groupe6.etats.Start;
+import Groupe6.etats.EtatJeu;
+
 /**
  * Classe centrale du jeu - Gère la boucle de jeu et coordonne les composants.
  * 
@@ -37,6 +40,8 @@ public class Game implements Runnable {
     private boolean debug = false;          // Active/désactive l'affichage debug
     private boolean repeindreFlag = false;  // Active/désactive le flag de repeindre
 
+    private Start start;
+
     public Game() {
         initClasses();
         gamePanel = new GamePanel(this);
@@ -56,6 +61,7 @@ public class Game implements Runnable {
     private void initClasses() {
         // Initialiser tous les états du jeu
         //throw new UnsupportedOperationException("Unimplemented method 'initClasses'");
+        start = new Start(this);
     }
 
     /**
@@ -71,7 +77,13 @@ public class Game implements Runnable {
      * Délègue la mise à jour à l'état approprié.
      */
     private void update() {
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        switch (EtatJeu.getEtatActuel()) {
+            case START:
+                start.update();
+                break;
+            default:
+                break;
+        }
         
     }
 
@@ -86,6 +98,13 @@ public class Game implements Runnable {
      * @param g Contexte graphique utilisé pour le dessin
      */
     public void render(Graphics g) {
+        switch (EtatJeu.getEtatActuel()) {
+            case START:
+                start.draw(g);
+                break;
+            default:
+                break;
+        }
         // Affichage de l'overlay FPS/UPS si le mode debug est activé
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
@@ -226,4 +245,7 @@ public class Game implements Runnable {
         System.out.println("Nettoyage des ressources terminé.");
     }
     
+    public Start getStart() {
+        return start;
+    }
 }

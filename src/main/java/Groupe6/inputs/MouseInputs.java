@@ -3,8 +3,11 @@ package Groupe6.inputs;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.function.BiConsumer;
 
 import Groupe6.game.GamePanel;
+import Groupe6.etats.MethodesEtats;
+import Groupe6.etats.EtatJeu;
 
 /**
  * Gestionnaire des entrées souris - Capture et traite les événements de souris.
@@ -38,6 +41,29 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
     // ========================================
 
     /**
+     * Méthode générique pour gérer tous les événements souris.
+     * Délègue l'événement à l'état approprié selon le GameState actuel.
+     * 
+     * @param e Événement souris à traiter
+     * @param action Action à exécuter sur l'état (ex: mouseMoved, mousePressed)
+     */
+    private void handleMouseEvent(MouseEvent e, BiConsumer<MethodesEtats, MouseEvent> action) {
+        MethodesEtats state = null;
+
+        // Sélectionner l'état approprié selon le GameState actuel
+        switch (EtatJeu.getEtatActuel()) {
+            case START:
+                state = gamePanel.getGame().getStart();
+                break;
+            default:
+                throw new IllegalStateException("État de jeu non géré: " + EtatJeu.getEtatActuel());
+        }
+        if (state != null) {
+            action.accept(state, e);
+        }
+    }
+
+    /**
      * Appelé lorsque la souris est déplacée avec un bouton enfoncé.
      * Utile pour les actions de drag (déplacement de caméra, sélection, etc.).
      * 
@@ -45,9 +71,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseDragged(MouseEvent e) {
-        // TODO: Implémenter la gestion du drag
-        // Exemple: déplacement de caméra, sélection de zone
-        throw new UnsupportedOperationException("Unimplemented method 'mouseDragged'");
+        handleMouseEvent(e, (state, event) -> state.mouseDragged(event));
     }
 
     /**
@@ -58,9 +82,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseMoved(MouseEvent e) {
-        // TODO: Implémenter la gestion du mouvement
-        // Exemple: highlight de boutons, affichage de tooltips
-        throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
+        handleMouseEvent(e, (state, event) -> state.mouseMoved(event));
     }
 
     // ========================================
@@ -75,9 +97,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO: Implémenter la gestion des clics
-        // Exemple: interaction avec boutons, sélection d'objets
-        throw new UnsupportedOperationException("Unimplemented method 'mouseClicked'");
+        handleMouseEvent(e, (state, event) -> state.mouseClicked(event));
     }
 
     /**
@@ -88,9 +108,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseEntered(MouseEvent e) {
-        // TODO: Implémenter si nécessaire
-        // Exemple: activation de certains contrôles
-        throw new UnsupportedOperationException("Unimplemented method 'mouseEntered'");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -101,9 +119,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseExited(MouseEvent e) {
-        // TODO: Implémenter si nécessaire
-        // Exemple: désactivation de certains contrôles
-        throw new UnsupportedOperationException("Unimplemented method 'mouseExited'");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -114,9 +130,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO: Implémenter la gestion des pressions
-        // Exemple: début d'un drag, début d'attaque
-        throw new UnsupportedOperationException("Unimplemented method 'mousePressed'");
+        handleMouseEvent(e, (state, event) -> state.mousePressed(event));
     }
 
     /**
@@ -127,8 +141,6 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
      */
     @Override
     public void mouseReleased(MouseEvent e) {
-        // TODO: Implémenter la gestion des relâchements
-        // Exemple: fin d'un drag, fin d'attaque
-        throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
+        handleMouseEvent(e, (state, event) -> state.mouseReleased(event));
     }
 }
