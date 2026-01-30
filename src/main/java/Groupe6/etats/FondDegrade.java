@@ -24,8 +24,10 @@ public class FondDegrade {
     public FondDegrade() {
         this.width = 0;
         this.height = 0;
-        this.cielNuit = new Color(0x1a, 0x1a, 0x4a);
-        this.aurore = new Color(0xff, 0x8c, 0x64);
+        this.cielNuit = Color.decode("#C08497");
+        this.aurore = Color.decode("#F7E3AF");
+        //this.cielNuit = new Color(0x1a, 0x1a, 0x4a);
+        //this.aurore = new Color(0xff, 0x8c, 0x64);
     }
 
     /**

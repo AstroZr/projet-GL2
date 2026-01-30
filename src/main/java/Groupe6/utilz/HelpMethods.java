@@ -12,25 +12,29 @@ public class HelpMethods{
 
 
     public static BufferedImage GetSpriteAtlas(String path){
-    BufferedImage img = null;
-    InputStream is = HelpMethods.class.getResourceAsStream(path);
+        BufferedImage img = null;
+        InputStream is = HelpMethods.class.getResourceAsStream(path);
 
-    if(is == null){
-        System.out.println("Le chemin spécifié est invalide : " + path);
-        return null;
+        if(is == null){
+            System.out.println("Le chemin spécifié est invalide : " + path);
+            return null;
+        }
+        
+        try {
+            img = javax.imageio.ImageIO.read(is);
+        }  catch (IOException e) {
+            System.err.println("Erreur lors de la lecture de l'image : " + path);
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return img;
     }
     
-    try {
-        img = javax.imageio.ImageIO.read(is);
-    } catch (IOException e) {
-        e.printStackTrace();
-    } finally {
-        try {
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-    }
-    }
-    return img;
-}
 }

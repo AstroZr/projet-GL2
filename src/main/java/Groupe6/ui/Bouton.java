@@ -244,5 +244,7 @@ public abstract class Bouton {
         this.sourisSurvol = sourisSurvol;
     }
 
-    protected abstract void chargerImages();
+    protected void chargerImages(){
+        
+    }
 }

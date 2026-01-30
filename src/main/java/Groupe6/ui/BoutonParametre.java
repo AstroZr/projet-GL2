@@ -6,5 +6,10 @@ public class BoutonParametre extends Bouton {
         super(x, y, largeur, hauteur, index);
         chargerImages();
     }
+
+    @Override
+    public void appliquerAction() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }
