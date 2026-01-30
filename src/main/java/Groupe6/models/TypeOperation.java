@@ -4,7 +4,8 @@ public enum TypeOperation {
     ADDITION("+"),
     SOUSTRACTION("-"),
     MULTIPLICATION("*"),
-    DIVISION("/");
+    DIVISION("/"),
+    AUCUNE("");
 
     private final String symbole;
 
