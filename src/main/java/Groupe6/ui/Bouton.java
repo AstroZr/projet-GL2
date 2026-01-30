@@ -60,13 +60,12 @@ public abstract class Bouton {
      * @param index Index initial de l'image à afficher dans le tableau
      * @param img Tableau d'images pour les différents états du bouton (ne doit pas être null)
      */
-    public Bouton(int x, int y, int largeur, int hauteur, int index, BufferedImage[] img) {
+    public Bouton(int x, int y, int largeur, int hauteur, int index) {
         this.x = x;
         this.y = y;
         this.largeur = largeur;
         this.hauteur = hauteur;
         this.index = index;
-        this.img = img;
         creationDelimitation();
     }
 

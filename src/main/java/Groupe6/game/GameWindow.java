@@ -66,7 +66,7 @@ public class GameWindow extends JFrame {
             @Override
             public void windowGainedFocus(WindowEvent e) {
                 // TODO: Implémenter la reprise du jeu
-                throw new UnsupportedOperationException("Unimplemented method 'windowGainedFocus'");
+                System.out.println("Window gained focus");
             }
 
             /**
@@ -78,7 +78,7 @@ public class GameWindow extends JFrame {
             @Override
             public void windowLostFocus(WindowEvent e) {
                 // TODO: Implémenter la mise en pause automatique
-                throw new UnsupportedOperationException("Unimplemented method 'windowLostFocus'");
+                System.out.println("Window lost focus");
             }
         });
     }

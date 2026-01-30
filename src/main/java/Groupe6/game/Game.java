@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 
 import Groupe6.etats.Start;
 import Groupe6.etats.EtatJeu;
+import Groupe6.etats.Menu;
 
 /**
  * Classe centrale du jeu - Gère la boucle de jeu et coordonne les composants.
@@ -37,10 +38,11 @@ public class Game implements Runnable {
     // === SUIVI DES PERFORMANCES ===
     private int currentFPS = 0;             // FPS actuels mesurés
     private int currentUPS = 0;             // UPS actuels mesurés
-    private boolean debug = false;          // Active/désactive l'affichage debug
+    private boolean debug = true;          // Active/désactive l'affichage debug
     private boolean repeindreFlag = false;  // Active/désactive le flag de repeindre
 
     private Start start;
+    private Menu menu;
 
     public Game() {
         initClasses();
@@ -62,6 +64,7 @@ public class Game implements Runnable {
         // Initialiser tous les états du jeu
         //throw new UnsupportedOperationException("Unimplemented method 'initClasses'");
         start = new Start(this);
+        menu = new Menu(this);
     }
 
     /**
@@ -80,6 +83,9 @@ public class Game implements Runnable {
         switch (EtatJeu.getEtatActuel()) {
             case START:
                 start.update();
+                break;
+            case MENU:
+                menu.update();
                 break;
             default:
                 break;
@@ -101,6 +107,9 @@ public class Game implements Runnable {
         switch (EtatJeu.getEtatActuel()) {
             case START:
                 start.draw(g);
+                break;
+            case MENU:
+                menu.draw(g);
                 break;
             default:
                 break;
@@ -245,7 +254,14 @@ public class Game implements Runnable {
         System.out.println("Nettoyage des ressources terminé.");
     }
     
+    public GamePanel getGamePanel() {
+        return gamePanel;
+    }
     public Start getStart() {
         return start;
+    }
+
+    public Menu getMenu() {
+        return menu;
     }
 }

@@ -1,6 +1,5 @@
 package Groupe6.etats;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -18,6 +17,7 @@ import Groupe6.game.Game;
  */
 public class Start extends Etats implements MethodesEtats {
 
+    private FondDegrade fondDegrade;
 
     /**
      * Constructeur de l'état de démarrage du jeu.
@@ -34,6 +34,7 @@ public class Start extends Etats implements MethodesEtats {
      */
     private void initClasses() {
         boutons = new ArrayList<>();
+        fondDegrade = new FondDegrade();
     }
 
     /**
@@ -42,16 +43,17 @@ public class Start extends Etats implements MethodesEtats {
     @Override
     public void update() {
         // Mise à jour de l'état de démarrage du jeu
+        fondDegrade.update();
     }
 
     /**
      * Dessine l'état de démarrage du jeu.
+     * Fond en dégradé type soleil levant : ciel nocturne en haut, aurore orange/corail en bas.
      */
     @Override
     public void draw(Graphics g) {
-        // Affichage de l'état de démarrage du jeu
-        g.setColor(Color.WHITE);
-        g.drawString("Start", 100, 100);
+        // Mise en cache des dimensions au premier draw (évite recalcul à chaque frame)
+        fondDegrade.draw(g);
     }
 
     /**
