@@ -20,7 +20,7 @@ import java.awt.image.BufferedImage;
  * UTILISATION :
  * Les sous-classes doivent implémenter les méthodes abstraites pour :
  * - Le rendu du bouton (draw)
- * - L'action à effectuer lors du clic (AppliquerAction)
+ * - L'action à effectuer lors du clic (appliquerAction)
  */
 public abstract class Bouton {
     // === PROPRIÉTÉS GÉOMÉTRIQUES ===
@@ -60,13 +60,12 @@ public abstract class Bouton {
      * @param index Index initial de l'image à afficher dans le tableau
      * @param img Tableau d'images pour les différents états du bouton (ne doit pas être null)
      */
-    public Bouton(int x, int y, int largeur, int hauteur, int index, BufferedImage[] img) {
+    public Bouton(int x, int y, int largeur, int hauteur, int index) {
         this.x = x;
         this.y = y;
         this.largeur = largeur;
         this.hauteur = hauteur;
         this.index = index;
-        this.img = img;
         creationDelimitation();
     }
 
@@ -103,7 +102,7 @@ public abstract class Bouton {
      * Les sous-classes doivent implémenter cette méthode pour définir l'action
      * à effectuer lors du clic sur le bouton.
      */
-    public abstract void AppliquerAction();
+    public abstract void appliquerAction();
 
     // ========================================
     // === GETTERS ET SETTERS ===

@@ -2,7 +2,10 @@ package Groupe6.inputs;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.function.BiConsumer;
 
+import Groupe6.etats.EtatJeu;
+import Groupe6.etats.MethodesEtats;
 import Groupe6.game.GamePanel;
 
 /**
@@ -31,6 +34,31 @@ public class KeyboardInputs implements KeyListener {
     public KeyboardInputs(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
     }
+    // ========================================
+    // === GESTION DES ÉVÉNEMENTS CLAVIER ===
+    // ========================================
+    /**
+     * Méthode générique pour gérer tous les événements clavier.
+     * Délègue l'événement à l'état approprié selon le GameState actuel.
+     * 
+     * @param e Événement clavier à traiter
+     * @param action Action à exécuter sur l'état (ex: keyPressed, keyReleased)
+     */
+    private void handleKeyEvent(KeyEvent e, BiConsumer<MethodesEtats, KeyEvent> action) {
+        MethodesEtats state = null;
+        switch (EtatJeu.getEtatActuel()) {
+            case START:
+                state = gamePanel.getGame().getStart();
+                break;
+            case MENU:
+                state = gamePanel.getGame().getMenu();
+                break;
+            default:
+                throw new IllegalStateException("État de jeu non géré: " + EtatJeu.getEtatActuel());
+        }
+        if (state != null) 
+            action.accept(state, e);
+    }
 
     /**
      * Appelé lorsqu'une touche est pressée.
@@ -40,9 +68,7 @@ public class KeyboardInputs implements KeyListener {
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        // TODO: Implémenter la gestion des touches pressées
-        // Exemple: déplacement du joueur, saut, attaque
-        throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
+        handleKeyEvent(e, (state, event) -> state.keyPressed(event));
     }
 
     /**
@@ -53,9 +79,7 @@ public class KeyboardInputs implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        // TODO: Implémenter la gestion des touches relâchées
-        // Exemple: arrêt du déplacement, fin d'attaque
-        throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
+        handleKeyEvent(e, (state, event) -> state.keyReleased(event));
     }
 
     /**
@@ -67,7 +91,6 @@ public class KeyboardInputs implements KeyListener {
      */
     @Override
     public void keyTyped(KeyEvent e) {
-        // TODO: Implémenter si nécessaire pour la saisie de texte
-        throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
+        handleKeyEvent(e, (state, event) -> state.keyTyped(event));
     }
 }
