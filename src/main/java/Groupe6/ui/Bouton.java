@@ -243,4 +243,6 @@ public abstract class Bouton {
     public void setSourisSurvol(boolean sourisSurvol) {
         this.sourisSurvol = sourisSurvol;
     }
+
+    protected abstract void chargerImages();
 }
