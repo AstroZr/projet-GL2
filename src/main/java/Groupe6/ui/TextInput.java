@@ -17,8 +17,8 @@ public class TextInput {
     private final String placeholder;
     private final int maxLength;
     private boolean focused;
-
-    /** Valeurs précalculées par update() pour draw() (aucune décision dans draw). */
+   
+    /** Valeurs précalculées par update() pour draw() */
     private Color borderColor;
     private Color textColor;
     private String displayText;
