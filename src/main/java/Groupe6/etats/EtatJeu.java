@@ -1,22 +1,14 @@
 package Groupe6.etats;
 
 /**
- * Enumération des états du jeu.
- * 
+ * Énumération des états possibles de l'application (machine à états).
+ * Mémorise l'état courant et le précédent pour permettre retours ou transitions.
+ *
  * @author Lounol72
  * @version 1.0
  * @since 2026-01-28
- * 
- * FONCTIONNALITÉS :
- * - Gère les états du jeu
- * - Gère l'état actuel et l'état précédent du jeu
- * 
- * ARCHITECTURE :
- * - Enumération des états du jeu
- * - Gère l'état actuel et l'état précédent du jeu
  */
 public enum EtatJeu {
-    /** État de démarrage du jeu */
     START,
     MENU,
     GRILLE,
@@ -28,28 +20,20 @@ public enum EtatJeu {
     private static EtatJeu etatPrecedent = START;
     
 
-    /**
-     * Récupère l'état précédent du jeu.
-     * 
-     * @return L'état précédent du jeu
-     */
+    /** Retourne l’état actif juste avant le changement courant. */
     public static EtatJeu getEtatPrecedent() {
         return etatPrecedent;
     }
 
-    /**
-     * Récupère l'état actuel du jeu.
-     * 
-     * @return L'état actuel du jeu
-     */
+    /** Retourne l’état actuellement affiché. */
     public static EtatJeu getEtatActuel() {
         return etatActuel;
     }
 
     /**
-     * Définit l'état actuel du jeu.
-     * 
-     * @param etat L'état à définir
+     * Change l'état courant ; l'ancien état est conservé dans etatPrecedent.
+     *
+     * @param etat Nouvel état actif
      */
     public static void setEtatActuel(EtatJeu etat) {
         etatPrecedent = etatActuel;

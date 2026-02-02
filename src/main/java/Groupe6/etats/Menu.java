@@ -6,23 +6,26 @@ import java.awt.event.MouseEvent;
 
 import Groupe6.game.Game;
 
+/**
+ * État « menu principal » : écran d’accueil avec boutons (jouer, paramètres, etc.).
+ * Implémentation en cours ; les méthodes déléguent encore à UnsupportedOperationException.
+ */
 public class Menu extends Etats implements MethodesEtats {
+
     public Menu(Game game) {
         super(game);
     }
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
-    
+
     @Override
     public void draw(Graphics g) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'draw'");
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
