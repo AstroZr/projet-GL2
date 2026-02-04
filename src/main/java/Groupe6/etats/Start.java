@@ -6,125 +6,132 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import Groupe6.game.Game;
-
+import Groupe6.ui.Bouton;
+import Groupe6.ui.BoutonConnexion;
+import Groupe6.ui.TextInput;
 
 /**
- * Classe représentant l'état de démarrage du jeu.
- * 
+ * État d’écran de démarrage : fond en dégradé (aurore), champ pseudo et bouton connexion.
+ * Premier état affiché au lancement.
+ *
  * @author Lounol72
  * @version 1.0
  * @since 2026-01-28
  */
 public class Start extends Etats implements MethodesEtats {
 
-    private FondDegrade fondDegrade;
+    private static final int LARGEUR_CHAMP = 400;
+    private static final int HAUTEUR_CHAMP = 36;
+    private static final int LARGEUR_BOUTON = 200;
+    private static final int HAUTEUR_BOUTON = 44;
+    private static final int MAX_PSEUDO = 20;
 
-    /**
-     * Constructeur de l'état de démarrage du jeu.
-     * 
-     * @param game Instance du jeu
-     */
+    private FondDegrade fondDegrade;
+    private TextInput textInput;
+
     public Start(Game game) {
         super(game);
         initClasses();
     }
 
-    /**
-     * Initialise les classes de l'état de démarrage du jeu.
-     */
     private void initClasses() {
         boutons = new ArrayList<>();
         fondDegrade = new FondDegrade();
+        int cx = 960;
+        int cy = 520;
+        textInput = new TextInput(
+                cx - LARGEUR_CHAMP / 2,
+                cy - HAUTEUR_CHAMP - 20,
+                LARGEUR_CHAMP,
+                HAUTEUR_CHAMP,
+                "Pseudo...",
+                MAX_PSEUDO);
+        boutons.add(new BoutonConnexion(
+                cx - LARGEUR_BOUTON / 2,
+                cy + 10,
+                LARGEUR_BOUTON,
+                HAUTEUR_BOUTON,
+                0));
     }
 
-    /**
-     * Met à jour l'état de démarrage du jeu.
-     */
     @Override
     public void update() {
-        // Mise à jour de l'état de démarrage du jeu
         fondDegrade.update();
+        textInput.update();
     }
 
-    /**
-     * Dessine l'état de démarrage du jeu.
-     * Fond en dégradé type soleil levant : ciel nocturne en haut, aurore orange/corail en bas.
-     */
     @Override
     public void draw(Graphics g) {
-        // Mise en cache des dimensions au premier draw (évite recalcul à chaque frame)
         fondDegrade.draw(g);
+        textInput.draw(g);
+        for (Bouton b : boutons) {
+            b.draw(g);
+        }
     }
 
-    /**
-     * Gère les entrées clavier.
-     */
     @Override
     public void keyTyped(KeyEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        textInput.handleKeyTyped(e);
     }
 
-    /**
-     * Gère les entrées clavier.
-     */
     @Override
     public void keyReleased(KeyEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Rien de spécifique
     }
 
-    /**
-     * Gère les entrées clavier.
-     */
     @Override
     public void keyPressed(KeyEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Rien de spécifique
     }
 
-    /**
-     * Gère les entrées souris.
-     */
     @Override
     public void mouseMoved(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        for (Bouton b : boutons) {
+            b.setSourisSurvol(isIn(e, b));
+        }
     }
 
-    /**
-     * Gère les entrées souris.
-     */
     @Override
     public void mouseDragged(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Optionnel : garder le focus du champ pendant le drag
     }
 
-    /**
-     * Gère les entrées souris.
-     */
     @Override
     public void mouseClicked(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Géré via pressed + released pour le bouton
     }
 
-    /**
-     * Gère les entrées souris.
-     */
     @Override
     public void mousePressed(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (textInput.contains(e.getX(), e.getY())) {
+            textInput.setFocused(true);
+            return;
+        }
+        textInput.setFocused(false);
+        for (Bouton b : boutons) {
+            if (isIn(e, b)) {
+                b.setSourisEnfonce(true);
+            }
+        }
     }
 
-    /**
-     * Gère les entrées souris.
-     */
     @Override
     public void mouseReleased(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        for (Bouton b : boutons) {
+            if (b.isSourisEnfonce() && isIn(e, b)) {
+                b.appliquerAction();
+            }
+            b.setSourisEnfonce(false);
+        }
     }
 
-    /**
-     * Met à jour les textes.
-     */
     @Override
     public void updateTexts() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Optionnel : mise à jour de libellés dynamiques
+    }
+
+    /** Retourne le pseudo saisi (pour la connexion). */
+    public String getPseudoSaisi() {
+        return textInput.getTextTrimmed();
     }
 }
