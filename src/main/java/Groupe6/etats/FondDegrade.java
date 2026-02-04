@@ -19,6 +19,8 @@ import static Groupe6.utilz.Constants.animationBG;
  * du GamePanel à la construction (évite NPE dans Start).
  */
 public class FondDegrade {
+    
+    private static volatile FondDegrade instance = null;
 
     private int width;
     private int height;
@@ -46,7 +48,7 @@ public class FondDegrade {
     private int indexSmallNuagePlusADroite;
     private int indexBigNuagePlusADroite;
 
-    private static final float scrollSpeed = 1.5f; 
+    private static final float scrollSpeed = 0.75f; 
     private static final float BigSpeed = scrollSpeed * 0.5f;
     private Random rdn;
     
@@ -55,18 +57,18 @@ public class FondDegrade {
     private final int BIG_NUAGE_HEIGHT_DEFAULT = 101;
     private final int SMALL_NUAGE_1_WIDTH_DEFAULT = 74;
     private final int SMALL_NUAGE_1_HEIGHT_DEFAULT = 24;
-    private final float scaling = 1.0f;
+    private final float scaling = 1.5f;
 
-    private final int BIG_NUAGE_Y = 110;
+    private final int BIG_NUAGE_Y = (int)(1920 / 4);
     private final int BIG_NUAGE_WIDTH = (int)(BIG_NUAGE_WIDTH_DEFAULT * scaling);
     private final int BIG_NUAGE_HEIGHT = (int)(BIG_NUAGE_HEIGHT_DEFAULT * scaling);
 
     private final int SMALL_NUAGE_BASE_Y = 120;
-    private final int SMALL_NUAGE_1_WIDTH = (int)(SMALL_NUAGE_1_WIDTH_DEFAULT* scaling);
-    private final int SMALL_NUAGE_1_HEIGHT = (int)(SMALL_NUAGE_1_HEIGHT_DEFAULT * scaling);
+    private final int SMALL_NUAGE_1_WIDTH = (int)(SMALL_NUAGE_1_WIDTH_DEFAULT* scaling * 1.5f);
+    private final int SMALL_NUAGE_1_HEIGHT = (int)(SMALL_NUAGE_1_HEIGHT_DEFAULT * scaling * 1.5f);
     private final int SMALL_NUAGE_VARIANCE = 280;
 
-    public FondDegrade() {
+    private FondDegrade() {
         this.width = 0;
         this.height = 0;
         this.rdn = new Random();
@@ -74,6 +76,17 @@ public class FondDegrade {
         chargerCouleurs();
         chargerNuages();
         initNuagePos();
+    }
+
+    public static FondDegrade getInstance() {
+      if ( instance != null) return instance; 
+      
+      synchronized ( FondDegrade.class) {
+        if ( instance == null) {
+          instance = new FondDegrade();
+        }
+      }
+      return instance;
     }
 
     private void chargerCouleurs(){

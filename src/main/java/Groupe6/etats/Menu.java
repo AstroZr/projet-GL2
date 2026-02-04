@@ -11,19 +11,24 @@ import Groupe6.game.Game;
  * Implémentation en cours ; les méthodes déléguent encore à UnsupportedOperationException.
  */
 public class Menu extends Etats implements MethodesEtats {
-
+    private FondDegrade fond;
     public Menu(Game game) {
         super(game);
+        initClasses();
+    }
+
+    private void initClasses() {
+      this.fond = FondDegrade.getInstance();
     }
 
     @Override
     public void update() {
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+      fond.update();
     }
 
     @Override
     public void draw(Graphics g) {
-        throw new UnsupportedOperationException("Unimplemented method 'draw'");
+      fond.draw(g);
     }
 
     @Override

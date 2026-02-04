@@ -36,7 +36,7 @@ public class Start extends Etats implements MethodesEtats {
 
     private void initClasses() {
         boutons = new ArrayList<>();
-        fondDegrade = new FondDegrade();
+        fondDegrade = FondDegrade.getInstance();
         int cx = 960;
         int cy = 520;
         textInput = new TextInput(
