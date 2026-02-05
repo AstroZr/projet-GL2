@@ -22,7 +22,7 @@ public class BoutonConnexion extends Bouton {
         super.draw(g);
         if (img == null || index < 0 || index >= img.length || img[index] == null) {
             g.setColor(Color.BLACK);
-            g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 16));
+            g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 18));
             String libelle = "Connexion";
             int lw = g.getFontMetrics().stringWidth(libelle);
             int lx = x + (largeur - lw) / 2;
@@ -33,6 +33,7 @@ public class BoutonConnexion extends Bouton {
 
     @Override
     public void appliquerAction() {
+      // TODO: Charger les données du joueur selon le pseudo ( nom du fichier .json)
         EtatJeu.setEtatActuel(EtatJeu.MENU);
     }
 }
