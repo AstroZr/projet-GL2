@@ -1,6 +1,7 @@
 package Groupe6.ui;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /**
  * Bouton « Paramètres » : ouvre l’écran des options (implémentation à venir).
  */
@@ -24,6 +25,25 @@ import Groupe6.utilz.HelpMethods;
  */
 public class BoutonParametre extends Bouton {
 
+=======
+import java.awt.image.BufferedImage;
+
+import Groupe6.etats.EtatJeu;
+import Groupe6.utilz.HelpMethods;
+
+/**
+ * Bouton permettant d'ouvrir le menu des paramètres du jeu.
+ * 
+ * FONCTIONNALITÉS :
+ * - Ouvre l'écran des paramètres
+ * - Charge les images du bouton depuis les ressources
+ * 
+ * UTILISATION :
+ * Bouton utilisé dans le menu principal pour accéder aux paramètres
+ */
+public class BoutonParametre extends Bouton {
+
+>>>>>>> c834f44ae80db84f62b3b4f1b720d0bf51bec63f
     /**
      * Constructeur du bouton paramètre.
      * 
@@ -33,7 +53,10 @@ public class BoutonParametre extends Bouton {
      * @param hauteur Hauteur du bouton
      * @param index Index de l'image du bouton
      */
+<<<<<<< HEAD
 >>>>>>> c834f44 (Ajout des classes BoutonAide, BoutonChangeurEtat, BoutonConnexion et BoutonParametre avec gestion des images et actions appropriées pour chaque bouton.)
+=======
+>>>>>>> c834f44ae80db84f62b3b4f1b720d0bf51bec63f
     public BoutonParametre(int x, int y, int largeur, int hauteur, int index) {
         super(x, y, largeur, hauteur, index);
         chargerImages();
