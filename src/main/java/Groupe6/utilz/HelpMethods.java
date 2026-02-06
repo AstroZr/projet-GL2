@@ -13,6 +13,8 @@ public class HelpMethods {
     public static final String ASSETS = "/assets/";
     public static final String BOUTONS = ASSETS + "boutons/";
     public static final String NUAGES = ASSETS + "nuages/";
+    
+    public static final String LOGO = ASSETS + "logo/";
 
     /**
      * Charge une image depuis le classpath (ex. /assets/nuages/xxx.png).

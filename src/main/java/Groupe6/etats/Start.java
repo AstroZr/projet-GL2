@@ -4,12 +4,13 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonConnexion;
 import Groupe6.ui.TextInput;
-
+import Groupe6.utilz.HelpMethods;
 /**
  * État d’écran de démarrage : fond en dégradé (aurore), champ pseudo et bouton connexion.
  * Premier état affiché au lancement.
@@ -25,6 +26,11 @@ public class Start extends Etats implements MethodesEtats {
     private static final int LARGEUR_BOUTON = 200;
     private static final int HAUTEUR_BOUTON = 44;
     private static final int MAX_PSEUDO = 20;
+    private final int LOGO_X_POS = 0;
+    private final int LOGO_Y_POS = 0; 
+    private final int LOGO_DEFAULT_SIZE = 512; 
+    private final int LOGO_SIZE = (int)(LOGO_DEFAULT_SIZE * 1.0); 
+    private BufferedImage logo;
 
     private FondDegrade fondDegrade;
     private TextInput textInput;
@@ -36,7 +42,7 @@ public class Start extends Etats implements MethodesEtats {
 
     private void initClasses() {
         boutons = new ArrayList<>();
-        fondDegrade = new FondDegrade();
+        fondDegrade = FondDegrade.getInstance();
         int cx = 960;
         int cy = 520;
         textInput = new TextInput(
@@ -52,6 +58,7 @@ public class Start extends Etats implements MethodesEtats {
                 LARGEUR_BOUTON,
                 HAUTEUR_BOUTON,
                 0));
+        logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
     }
 
     @Override
@@ -64,6 +71,7 @@ public class Start extends Etats implements MethodesEtats {
     public void draw(Graphics g) {
         fondDegrade.draw(g);
         textInput.draw(g);
+        g.drawImage(logo, LOGO_X_POS, LOGO_Y_POS, LOGO_SIZE, LOGO_SIZE, null);
         for (Bouton b : boutons) {
             b.draw(g);
         }
