@@ -19,7 +19,6 @@ public abstract class Bouton {
     protected int largeur;
     protected int hauteur;
     protected Rectangle delimitation;
-    protected int index;
     protected BufferedImage[] img;
     protected boolean sourisSurvol;
     protected boolean sourisEnfonce;
@@ -28,12 +27,11 @@ public abstract class Bouton {
     private RoundRectangle2D rect;
     private Color[] backgroundColor;
 
-    public Bouton(int x, int y, int largeur, int hauteur, int index) {
+    public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;
         this.y = y;
         this.largeur = largeur;
         this.hauteur = hauteur;
-        this.index = index;
         creationDelimitation();
         backgroundColor = new Color[3]; // 3 états : 0 normal, 1 hover, 2 clicked
         backgroundColor[0] = new Color(200, 200, 200, 180);
@@ -55,12 +53,8 @@ public abstract class Bouton {
     public abstract void appliquerAction();
 
     /** Dessine le bouton (image si disponible, sinon rectangle gris avec bordure). */
-    public void draw(Graphics g) {
-        if (img != null && index >= 0 && index < img.length && img[index] != null) {
-            g.drawImage(img[index], x, y, largeur, hauteur, null);
-        } else {
-          drawBackground(g);
-        }
+    public void draw(Graphics g) { 
+        drawBackground(g);
     }
 
     public Rectangle getDelimitation() {
@@ -121,11 +115,6 @@ public abstract class Bouton {
 
     public void setSourisSurvol(boolean sourisSurvol) {
         this.sourisSurvol = sourisSurvol;
-    }
-
-    /** Charge les images du bouton (normal, survol, enfoncé) ; à surcharger par les sous-classes. */
-    protected void chargerImages() {
-      // TODO:Charger les images des boutons
     }
     private void drawBackground(Graphics g) {
       Graphics2D g2d = (Graphics2D) g;

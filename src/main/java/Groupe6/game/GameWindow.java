@@ -44,7 +44,7 @@ public class GameWindow extends JFrame {
         });
     }
 
-    private void handleWindowClosing() {
+    public void handleWindowClosing() {
         int choice = JOptionPane.showConfirmDialog(
             this,
             "Voulez-vous sauvegarder avant de quitter ?",
