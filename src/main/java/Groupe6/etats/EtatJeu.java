@@ -14,7 +14,8 @@ public enum EtatJeu {
     GRILLE,
     PARAMETRES,
     ASTUCES,
-    SELECTION;
+    SELECTION,
+    QUITTER;
 
     private static EtatJeu etatActuel = START;
     private static EtatJeu etatPrecedent = START;

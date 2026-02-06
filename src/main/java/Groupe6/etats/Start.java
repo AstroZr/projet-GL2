@@ -57,7 +57,8 @@ public class Start extends Etats implements MethodesEtats {
                 cy + 10,
                 LARGEUR_BOUTON,
                 HAUTEUR_BOUTON,
-                0));
+                EtatJeu.MENU,
+                "Connexion"));
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
     }
 

@@ -4,9 +4,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.function.BiConsumer;
 
+import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
+// import Groupe6.etats.Grille;
 import Groupe6.etats.Menu;
+import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 
 
@@ -29,6 +33,8 @@ public class Game implements Runnable {
 
     private Start start;
     private Menu menu;
+    private Parametres parametres;
+    // private Grille grille;
 
     public Game() {
         initClasses();
@@ -43,6 +49,8 @@ public class Game implements Runnable {
     private void initClasses() {
         start = new Start(this);
         menu = new Menu(this);
+        parametres = new Parametres(this);
+        // grille = new Grille(this);
     }
 
     private void startGameLoop() {
@@ -50,38 +58,43 @@ public class Game implements Runnable {
         gameLoopThread.start();
     }
 
-    private void update() {
+    private MethodesEtats getCurrentState() {
         switch (EtatJeu.getEtatActuel()) {
             case START:
-                start.update();
-                break;
+                return start;
             case MENU:
-                menu.update();
-                break;
+                return menu;
+            case GRILLE:
+                return menu; // TODO: return grille;
+            case PARAMETRES:
+                return parametres;
+            case QUITTER:
+                quitterJeu();
+                return menu;
+            case ASTUCES:
+            case SELECTION:
             default:
-                break;
+                throw new IllegalStateException("État de jeu non géré: " + EtatJeu.getEtatActuel());
         }
-        
+    }
+
+    private void update() {
+        getCurrentState().update();
     }
 
     public void render(Graphics g) {
-        switch (EtatJeu.getEtatActuel()) {
-            case START:
-                start.draw(g);
-                break;
-            case MENU:
-                menu.draw(g);
-                break;
-            default:
-                break;
-        }
+        getCurrentState().draw(g);
+        
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.PLAIN, 14));
             g2d.drawString("FPS: " + currentFPS + " | UPS: " + currentUPS, 10, 20);
         }
-        
+    }
+
+    private void quitterJeu() {
+        gameWindow.handleWindowClosing();
     }
 
     /** Boucle principale : UPS fixe (accumulateur), rendu découplé, limitation FPS. */
@@ -173,4 +186,12 @@ public class Game implements Runnable {
     public Menu getMenu() {
         return menu;
     }
+
+    public Parametres getParametres() {
+        return parametres;
+    }
+
+    // public Grille getGrille() {
+    //     return grille;
+    // }
 }

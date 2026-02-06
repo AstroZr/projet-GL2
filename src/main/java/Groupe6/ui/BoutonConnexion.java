@@ -9,15 +9,14 @@ import Groupe6.etats.EtatJeu;
 /**
  * Bouton « Connexion » : au clic, change l’état vers MENU (ou déclenche la connexion).
  */
-public class BoutonConnexion extends Bouton {
-    
-  private final String label = "Connexion";
+public class BoutonConnexion extends BoutonChangeurEtat {
+    private String label;
   private int lw = -1;
   private int lx = -1;
   private int ly = -1;
-    public BoutonConnexion(int x, int y, int largeur, int hauteur, int index) {
-        super(x, y, largeur, hauteur, index);
-        chargerImages();
+    public BoutonConnexion(int x, int y, int largeur, int hauteur, EtatJeu action, String label) {
+        super(x, y, largeur, hauteur, action, label);
+        this.label = label;
     }
 
     /** Dessine l’image ou, à défaut, un rectangle avec le libellé « Connexion ». */
@@ -34,9 +33,7 @@ public class BoutonConnexion extends Bouton {
         g.drawString(label, this.lx, this.ly);
     }
 
-    @Override
     public void appliquerAction() {
-        // TODO: Charger les informations du joueur selon le pseudo reçu (pseudo.json)
-        EtatJeu.setEtatActuel(EtatJeu.MENU);
+        super.appliquerAction();
     }
 }

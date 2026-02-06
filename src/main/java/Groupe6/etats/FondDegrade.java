@@ -11,7 +11,7 @@ import java.awt.AlphaComposite;
 import java.util.Random;
 
 import Groupe6.utilz.HelpMethods;
-import static Groupe6.utilz.Constants.animationBG;
+import Groupe6.utilz.Constants;
 
 /**
  * Fond d'écran en dégradé vertical (type aurore : ciel sombre en haut, clair en bas).
@@ -137,7 +137,7 @@ public class FondDegrade {
 
     /** Mise à jour logique du fond (nuages, etc.) ; à appeler chaque frame. */
     public void update() {
-      if (!animationBG) {
+      if (!Constants.animationBG) {
         return;
       }
       updateBigNuages();

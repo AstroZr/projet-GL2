@@ -3,14 +3,25 @@ package Groupe6.etats;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import Groupe6.game.Game;
+import Groupe6.ui.Bouton;
+import Groupe6.ui.BoutonChangeurEtat;
+import Groupe6.ui.BoutonConnexion;
+import Groupe6.ui.TextInput;
+import Groupe6.utilz.HelpMethods;
 
 /**
  * État « menu principal » : écran d’accueil avec boutons (jouer, paramètres, etc.).
  * Implémentation en cours ; les méthodes déléguent encore à UnsupportedOperationException.
  */
 public class Menu extends Etats implements MethodesEtats {
+
+    private static final int LARGEUR_BOUTON = 200;
+    private static final int HAUTEUR_BOUTON = 44;
+
+
     private FondDegrade fond;
     public Menu(Game game) {
         super(game);
@@ -18,7 +29,34 @@ public class Menu extends Etats implements MethodesEtats {
     }
 
     private void initClasses() {
-      this.fond = FondDegrade.getInstance();
+        boutons = new ArrayList<>();
+        this.fond = FondDegrade.getInstance();
+        int cx = 960;
+        int cy = 450;
+        boutons.add(new BoutonChangeurEtat(
+                cx - LARGEUR_BOUTON / 2,
+                cy,
+                LARGEUR_BOUTON,
+                HAUTEUR_BOUTON,
+                EtatJeu.GRILLE,
+                "Jouer"));
+
+        boutons.add(new BoutonChangeurEtat(
+                cx - LARGEUR_BOUTON / 2,
+                cy + 64,
+                LARGEUR_BOUTON,
+                HAUTEUR_BOUTON,
+                EtatJeu.PARAMETRES,
+                "Paramètres"));
+
+        boutons.add(new BoutonChangeurEtat(
+                cx - LARGEUR_BOUTON / 2,
+                cy + 128,
+                LARGEUR_BOUTON,
+                HAUTEUR_BOUTON,
+                EtatJeu.QUITTER,
+                "Quitter"));
+
     }
 
     @Override
@@ -28,7 +66,10 @@ public class Menu extends Etats implements MethodesEtats {
 
     @Override
     public void draw(Graphics g) {
-      fond.draw(g);
+        fond.draw(g);
+        for (Bouton b : boutons) {
+            b.draw(g);
+        }
     }
 
     @Override
@@ -51,8 +92,9 @@ public class Menu extends Etats implements MethodesEtats {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseMoved'");
+        for (Bouton b : boutons) {
+            b.setSourisSurvol(isIn(e, b));
+        }
     }
 
     @Override
@@ -69,14 +111,21 @@ public class Menu extends Etats implements MethodesEtats {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mousePressed'");
+        for (Bouton b : boutons) {
+            if (isIn(e, b)) {
+                b.setSourisEnfonce(true);
+            }
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
+        for (Bouton b : boutons) {
+            if (b.isSourisEnfonce() && isIn(e, b)) {
+                b.appliquerAction();
+            }
+            b.setSourisEnfonce(false);
+        }
     }
 
     @Override

@@ -5,9 +5,8 @@ package Groupe6.ui;
  */
 public class BoutonAide extends Bouton {
     
-    public BoutonAide(int x, int y, int largeur, int hauteur, int index) {
-        super(x, y, largeur, hauteur, index);
-        chargerImages();
+    public BoutonAide(int x, int y, int largeur, int hauteur) {
+        super(x, y, largeur, hauteur);
     }
 
     @Override
