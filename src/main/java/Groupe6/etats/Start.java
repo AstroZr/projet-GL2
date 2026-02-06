@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
-import Groupe6.ui.BoutonConnexion;
+import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.HelpMethods;
 /**
@@ -52,13 +52,22 @@ public class Start extends Etats implements MethodesEtats {
                 HAUTEUR_CHAMP,
                 "Pseudo...",
                 MAX_PSEUDO);
-        boutons.add(new BoutonConnexion(
+        boutons.add(new BoutonChangeurEtat(
                 cx - LARGEUR_BOUTON / 2,
                 cy + 10,
                 LARGEUR_BOUTON,
                 HAUTEUR_BOUTON,
-                EtatJeu.MENU,
-                "Connexion"));
+                EtatJeu.CREATION,
+                "Creation"
+                ));
+        boutons.add( new BoutonChangeurEtat(
+                cx - LARGEUR_BOUTON / 2,
+                cy + 10,
+                LARGEUR_BOUTON,
+                HAUTEUR_BOUTON,
+                EtatJeu.CONNEXION,
+                "Connexion"
+                ));
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
     }
 

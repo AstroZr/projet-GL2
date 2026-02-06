@@ -15,10 +15,12 @@ public enum EtatJeu {
     PARAMETRES,
     ASTUCES,
     SELECTION,
+    CREATION,
+    CONNEXION,
     QUITTER;
 
-    private static EtatJeu etatActuel = START;
-    private static EtatJeu etatPrecedent = START;
+    private static EtatJeu etatActuel =START;
+    private static EtatJeu etatPrecedent = START ;
     
 
     /** Retourne l’état actif juste avant le changement courant. */
