@@ -5,7 +5,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.function.BiConsumer;
 
-import Groupe6.etats.EtatJeu;
 import Groupe6.etats.MethodesEtats;
 import Groupe6.game.GamePanel;
 
@@ -21,26 +20,8 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
     }
 
     private void handleMouseEvent(MouseEvent e, BiConsumer<MethodesEtats, MouseEvent> action) {
-        MethodesEtats state = null;
-        switch (EtatJeu.getEtatActuel()) {
-            case START:
-                state = gamePanel.getGame().getStart();
-                break;
-            case MENU:
-                state = gamePanel.getGame().getMenu();
-                break;
-            case GRILLE:
-                state = gamePanel.getGame().getMenu(); // TODO: getGrille()
-                break;
-            case PARAMETRES:
-                state = gamePanel.getGame().getParametres();
-                break;
-            default:
-                throw new IllegalStateException("État de jeu non géré: " + EtatJeu.getEtatActuel());
-        }
-        if (state != null) {
-            action.accept(state, e);
-        }
+        MethodesEtats state = gamePanel.getGame().getCurrentState();
+        action.accept(state, e);
     }
 
     @Override

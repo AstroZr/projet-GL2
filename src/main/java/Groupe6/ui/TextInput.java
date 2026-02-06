@@ -118,4 +118,12 @@ public class TextInput {
     public Rectangle getBounds() {
         return bounds;
     }
+
+    /** Met à jour la position et la taille du champ (pour repositionnement au resize). */
+    public void setBounds(int x, int y, int width, int height) {
+        bounds.x = x;
+        bounds.y = y;
+        bounds.width = width;
+        bounds.height = height;
+    }
 }

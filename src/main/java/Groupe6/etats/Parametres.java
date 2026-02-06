@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
+import Groupe6.utilz.Constants;
 
 /**
  * État « paramètres » : écran de configuration du jeu.
@@ -27,10 +28,8 @@ public class Parametres extends Etats implements MethodesEtats {
     private void initClasses() {
         boutons = new ArrayList<>();
         this.fond = FondDegrade.getInstance();
-        int cx = 960;
-        int cy = 800;
-        
-        // Bouton Retour au menu
+        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (Constants.game_height * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
         boutons.add(new BoutonChangeurEtat(
                 cx - LARGEUR_BOUTON / 2,
                 cy,
@@ -46,7 +45,21 @@ public class Parametres extends Etats implements MethodesEtats {
     }
 
     @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        applyLayout(gameWidth, gameHeight);
+    }
+
+    @Override
+    protected void applyLayout(int w, int h) {
+        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (h * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
+        boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(0).setY(cy);
+    }
+
+    @Override
     public void draw(Graphics g) {
+        ensureLayoutUpToDate();
         fond.draw(g);
         for (Bouton b : boutons) {
             b.draw(g);

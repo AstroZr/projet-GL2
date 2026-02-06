@@ -10,6 +10,7 @@ import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.ui.BoutonConnexion;
 import Groupe6.ui.TextInput;
+import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
 
 /**
@@ -31,8 +32,8 @@ public class Menu extends Etats implements MethodesEtats {
     private void initClasses() {
         boutons = new ArrayList<>();
         this.fond = FondDegrade.getInstance();
-        int cx = 960;
-        int cy = 450;
+        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (Constants.game_height * Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
         boutons.add(new BoutonChangeurEtat(
                 cx - LARGEUR_BOUTON / 2,
                 cy,
@@ -65,7 +66,25 @@ public class Menu extends Etats implements MethodesEtats {
     }
 
     @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        applyLayout(gameWidth, gameHeight);
+    }
+
+    @Override
+    protected void applyLayout(int w, int h) {
+        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (h * Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
+        boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(0).setY(cy);
+        boutons.get(1).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(1).setY(cy + 64);
+        boutons.get(2).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(2).setY(cy + 128);
+    }
+
+    @Override
     public void draw(Graphics g) {
+        ensureLayoutUpToDate();
         fond.draw(g);
         for (Bouton b : boutons) {
             b.draw(g);

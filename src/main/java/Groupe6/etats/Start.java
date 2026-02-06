@@ -10,6 +10,7 @@ import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.ui.TextInput;
+import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
 /**
  * État d’écran de démarrage : fond en dégradé (aurore), champ pseudo et bouton connexion.
@@ -21,11 +22,8 @@ import Groupe6.utilz.HelpMethods;
  */
 public class Start extends Etats implements MethodesEtats {
 
-    private static final int LARGEUR_CHAMP = 400;
-    private static final int HAUTEUR_CHAMP = 36;
     private static final int LARGEUR_BOUTON = 200;
     private static final int HAUTEUR_BOUTON = 44;
-    private static final int MAX_PSEUDO = 20;
     private final int LOGO_X_POS = 0;
     private final int LOGO_Y_POS = 0; 
     private final int LOGO_DEFAULT_SIZE = 512; 
@@ -33,7 +31,7 @@ public class Start extends Etats implements MethodesEtats {
     private BufferedImage logo;
 
     private FondDegrade fondDegrade;
-    private TextInput textInput;
+
 
     public Start(Game game) {
         super(game);
@@ -43,15 +41,9 @@ public class Start extends Etats implements MethodesEtats {
     private void initClasses() {
         boutons = new ArrayList<>();
         fondDegrade = FondDegrade.getInstance();
-        int cx = 960;
-        int cy = 520;
-        textInput = new TextInput(
-                cx - LARGEUR_CHAMP / 2,
-                cy - HAUTEUR_CHAMP - 20,
-                LARGEUR_CHAMP,
-                HAUTEUR_CHAMP,
-                "Pseudo...",
-                MAX_PSEUDO);
+        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (Constants.game_height * Constants.Ratios.Start.RATIO_START_FORM_Y);
+
         boutons.add(new BoutonChangeurEtat(
                 cx - LARGEUR_BOUTON / 2,
                 cy + 10,
@@ -61,7 +53,7 @@ public class Start extends Etats implements MethodesEtats {
                 "Creation"
                 ));
         boutons.add( new BoutonChangeurEtat(
-                cx - LARGEUR_BOUTON / 2,
+                cx / 2,
                 cy + 10,
                 LARGEUR_BOUTON,
                 HAUTEUR_BOUTON,
@@ -74,13 +66,28 @@ public class Start extends Etats implements MethodesEtats {
     @Override
     public void update() {
         fondDegrade.update();
-        textInput.update();
+
+    }
+
+    @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        applyLayout(gameWidth, gameHeight);
+    }
+
+    @Override
+    protected void applyLayout(int w, int h) {
+        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (h * Constants.Ratios.Start.RATIO_START_FORM_Y);
+        boutons.get(0).setX(cx / 2);
+        boutons.get(0).setY(cy + 10);
+        boutons.get(1).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(1).setY(cy + 10);
     }
 
     @Override
     public void draw(Graphics g) {
+        ensureLayoutUpToDate();
         fondDegrade.draw(g);
-        textInput.draw(g);
         g.drawImage(logo, LOGO_X_POS, LOGO_Y_POS, LOGO_SIZE, LOGO_SIZE, null);
         for (Bouton b : boutons) {
             b.draw(g);
@@ -89,7 +96,7 @@ public class Start extends Etats implements MethodesEtats {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        textInput.handleKeyTyped(e);
+      // Rien de spécifique
     }
 
     @Override
@@ -121,11 +128,7 @@ public class Start extends Etats implements MethodesEtats {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (textInput.contains(e.getX(), e.getY())) {
-            textInput.setFocused(true);
-            return;
-        }
-        textInput.setFocused(false);
+
         for (Bouton b : boutons) {
             if (isIn(e, b)) {
                 b.setSourisEnfonce(true);
@@ -148,8 +151,5 @@ public class Start extends Etats implements MethodesEtats {
         // Optionnel : mise à jour de libellés dynamiques
     }
 
-    /** Retourne le pseudo saisi (pour la connexion). */
-    public String getPseudoSaisi() {
-        return textInput.getTextTrimmed();
-    }
+
 }
