@@ -60,11 +60,13 @@ public class Menu extends Etats implements MethodesEtats {
 
     }
 
+    /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
       fond.update();
     }
 
+    /** Recalcule les positions des boutons selon les nouvelles dimensions. */
     @Override
     public void updateLayout(int gameWidth, int gameHeight) {
         applyLayout(gameWidth, gameHeight);
@@ -82,6 +84,7 @@ public class Menu extends Etats implements MethodesEtats {
         boutons.get(2).setY(cy + 128);
     }
 
+    /** Dessine le fond animé et tous les boutons du menu. */
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
@@ -109,6 +112,7 @@ public class Menu extends Etats implements MethodesEtats {
         throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
     }
 
+    /** Met à jour l'état de survol des boutons selon la position de la souris. */
     @Override
     public void mouseMoved(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -128,6 +132,7 @@ public class Menu extends Etats implements MethodesEtats {
         throw new UnsupportedOperationException("Unimplemented method 'mouseClicked'");
     }
 
+    /** Marque le bouton sous la souris comme enfoncé lors de l'appui. */
     @Override
     public void mousePressed(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -137,6 +142,7 @@ public class Menu extends Etats implements MethodesEtats {
         }
     }
 
+    /** Déclenche l'action du bouton si le clic est valide (appui puis relâchement sur le même bouton). */
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {

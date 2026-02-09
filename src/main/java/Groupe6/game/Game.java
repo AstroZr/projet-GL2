@@ -14,7 +14,7 @@ import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
-
+import Groupe6.etats.Creation;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
@@ -37,6 +37,7 @@ public class Game implements Runnable {
     private Menu menu;
     private Parametres parametres;
     private Connexion connexion;
+    private Creation creation;
     // private Grille grille;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
@@ -62,6 +63,8 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.PARAMETRES, parametres);
         connexion = new Connexion(this);
         stateByEnum.put(EtatJeu.CONNEXION, connexion);
+        creation = new Creation(this);
+        stateByEnum.put(EtatJeu.CREATION, creation);
         // grille = new Grille(this); stateByEnum.put(EtatJeu.GRILLE, grille);
     }
 

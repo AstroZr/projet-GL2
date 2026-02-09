@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
-import Groupe6.ui.TextInput;
+
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
 /**
@@ -27,7 +27,7 @@ public class Start extends Etats implements MethodesEtats {
     private final int LOGO_X_POS = 0;
     private final int LOGO_Y_POS = 0; 
     private final int LOGO_DEFAULT_SIZE = 512; 
-    private final int LOGO_SIZE = (int)(LOGO_DEFAULT_SIZE * 1.0); 
+    private final int LOGO_SIZE = (int)(LOGO_DEFAULT_SIZE * 0.5f); 
     private BufferedImage logo;
 
     private FondDegrade fondDegrade;
@@ -63,12 +63,14 @@ public class Start extends Etats implements MethodesEtats {
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
     }
 
+    /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
         fondDegrade.update();
 
     }
 
+    /** Recalcule les positions des boutons selon les nouvelles dimensions. */
     @Override
     public void updateLayout(int gameWidth, int gameHeight) {
         applyLayout(gameWidth, gameHeight);
@@ -84,6 +86,7 @@ public class Start extends Etats implements MethodesEtats {
         boutons.get(1).setY(cy + 10);
     }
 
+    /** Dessine le fond animé, le logo et tous les boutons de l'écran de démarrage. */
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
@@ -94,21 +97,25 @@ public class Start extends Etats implements MethodesEtats {
         }
     }
 
+    /** Aucune action clavier spécifique pour cet écran. */
     @Override
     public void keyTyped(KeyEvent e) {
       // Rien de spécifique
     }
 
+    /** Aucune action clavier spécifique pour cet écran. */
     @Override
     public void keyReleased(KeyEvent e) {
         // Rien de spécifique
     }
 
+    /** Aucune action clavier spécifique pour cet écran. */
     @Override
     public void keyPressed(KeyEvent e) {
         // Rien de spécifique
     }
 
+    /** Met à jour l'état de survol des boutons selon la position de la souris. */
     @Override
     public void mouseMoved(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -116,16 +123,19 @@ public class Start extends Etats implements MethodesEtats {
         }
     }
 
+    /** Aucune action spécifique lors du drag de la souris. */
     @Override
     public void mouseDragged(MouseEvent e) {
         // Optionnel : garder le focus du champ pendant le drag
     }
 
+    /** Les clics sont gérés via mousePressed et mouseReleased pour une meilleure détection. */
     @Override
     public void mouseClicked(MouseEvent e) {
         // Géré via pressed + released pour le bouton
     }
 
+    /** Marque le bouton sous la souris comme enfoncé lors de l'appui. */
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -136,6 +146,7 @@ public class Start extends Etats implements MethodesEtats {
         }
     }
 
+    /** Déclenche l'action du bouton si le clic est valide (appui puis relâchement sur le même bouton). */
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -146,6 +157,7 @@ public class Start extends Etats implements MethodesEtats {
         }
     }
 
+    /** Aucune mise à jour de texte dynamique pour cet écran. */
     @Override
     public void updateTexts() {
         // Optionnel : mise à jour de libellés dynamiques

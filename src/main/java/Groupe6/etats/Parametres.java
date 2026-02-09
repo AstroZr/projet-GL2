@@ -39,11 +39,13 @@ public class Parametres extends Etats implements MethodesEtats {
                 "Retour"));
     }
 
+    /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
         fond.update();
     }
 
+    /** Recalcule la position du bouton Retour selon les nouvelles dimensions. */
     @Override
     public void updateLayout(int gameWidth, int gameHeight) {
         applyLayout(gameWidth, gameHeight);
@@ -57,6 +59,7 @@ public class Parametres extends Etats implements MethodesEtats {
         boutons.get(0).setY(cy);
     }
 
+    /** Dessine le fond animé et le bouton Retour. */
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
@@ -81,6 +84,7 @@ public class Parametres extends Etats implements MethodesEtats {
         // Non implémenté
     }
 
+    /** Met à jour l'état de survol du bouton Retour selon la position de la souris. */
     @Override
     public void mouseMoved(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -98,6 +102,7 @@ public class Parametres extends Etats implements MethodesEtats {
         // Non implémenté
     }
 
+    /** Marque le bouton Retour comme enfoncé lors de l'appui. */
     @Override
     public void mousePressed(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -107,6 +112,7 @@ public class Parametres extends Etats implements MethodesEtats {
         }
     }
 
+    /** Déclenche l'action du bouton Retour si le clic est valide. */
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {

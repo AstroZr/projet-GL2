@@ -66,10 +66,12 @@ public class TextInput {
         return bounds.contains(x, y);
     }
 
+    /** Définit si le champ a le focus (affecte la couleur de la bordure). */
     public void setFocused(boolean focused) {
         this.focused = focused;
     }
 
+    /** Indique si le champ a actuellement le focus. */
     public boolean isFocused() {
         return focused;
     }
@@ -107,6 +109,7 @@ public class TextInput {
         text.setLength(0);
     }
 
+    /** Définit le texte du champ (tronqué à maxLength si nécessaire). */
     public void setText(String s) {
         text.setLength(0);
         if (s != null) {
@@ -115,6 +118,7 @@ public class TextInput {
         }
     }
 
+    /** Retourne la zone de délimitation du champ. */
     public Rectangle getBounds() {
         return bounds;
     }

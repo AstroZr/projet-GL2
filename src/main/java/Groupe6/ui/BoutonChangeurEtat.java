@@ -29,6 +29,7 @@ public class BoutonChangeurEtat extends Bouton {
         this.label = label;
     }
 
+    /** Dessine le bouton avec son libellé centré. */
     @Override
     public void draw(Graphics g) {
         super.draw(g);
@@ -41,6 +42,7 @@ public class BoutonChangeurEtat extends Bouton {
         g.drawString(label, lx, ly);
     }
 
+    /** Change l'état du jeu vers l'état associé à ce bouton. */
     public void appliquerAction() {
         EtatJeu.setEtatActuel(action);
     }

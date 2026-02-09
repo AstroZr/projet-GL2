@@ -9,8 +9,11 @@ import Groupe6.etats.EtatJeu;
  */
 public class BoutonConnexion extends BoutonChangeurEtat {
 
-    public BoutonConnexion(int x, int y, int largeur, int hauteur, EtatJeu action, String label) {
-        super(x, y, largeur, hauteur, action, label);
+    /**
+     * Constructeur du bouton de connexion.
+     */
+    public BoutonConnexion(int x, int y, int largeur, int hauteur) {
+        super(x, y, largeur, hauteur, EtatJeu.MENU, "Connexion");
     }
 
     /** Dessine l’image ou, à défaut, un rectangle avec le libellé « Connexion ». */
@@ -19,7 +22,9 @@ public class BoutonConnexion extends BoutonChangeurEtat {
         super.draw(g);
     }
 
+    /** Déclenche la connexion du joueur puis change l'état vers MENU. */
     public void appliquerAction() {
+      // TODO: Ajouter la fonctionnalité de connexion du joueur
         super.appliquerAction();
     }
 }
