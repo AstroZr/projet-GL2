@@ -3,7 +3,8 @@ package Groupe6.etats;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-
+import java.awt.Graphics;
+import java.awt.Color;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.utilz.Constants;
@@ -55,6 +56,20 @@ public abstract class Etats {
             lastLayoutWidth = Constants.game_width;
             lastLayoutHeight = Constants.game_height;
         }
+    }
+    /** DEBUG: Affiche une grille de carrées de 20x20 pixels afin de rendre le design de l'UI plus simple*/
+    protected final void drawGrid(Graphics g) {
+        
+      int w = Constants.game_width;
+      int h = Constants.game_height;
+      final int dw = w / 3;
+      final int dh = h / 3;
+      g.setColor(Color.RED);
+      for (int x = 0; x <= w ; x+= dw)
+        g.drawLine(x,0,x,h);
+      for (int y = 0; y <= h; y+= dh)
+        g.drawLine(0, y, w,y);
+
     }
 
     /** Applique le positionnement des éléments UI pour les dimensions données. */

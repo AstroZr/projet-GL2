@@ -83,12 +83,7 @@ public class Creation extends Etats implements MethodesEtats{
   /** Gère le focus du champ de texte et le survol du bouton selon la position de la souris. */
   @Override
   public void mouseMoved(MouseEvent e) {
-    if (textInput.contains(e.getX(), e.getY())) {
-      textInput.setFocused(true);
-      return;
-    }
     bouton.setSourisSurvol(isIn(e, bouton));
-    textInput.setFocused(false);
   }
 
   @Override
@@ -109,6 +104,11 @@ public class Creation extends Etats implements MethodesEtats{
     if (isIn(e, bouton)) {
       bouton.setSourisEnfonce(true);
     }
+    if (textInput.contains(e.getX(), e.getY())) {
+      textInput.setFocused(true);
+      return;
+    }
+    textInput.setFocused(false);
   }
 
   /** Déclenche l'action du bouton de création si le clic est valide. */
