@@ -19,8 +19,8 @@ import Groupe6.utilz.HelpMethods;
  */
 public class Menu extends Etats implements MethodesEtats {
 
-    private static final int LARGEUR_BOUTON = 200;
-    private static final int HAUTEUR_BOUTON = 44;
+    private static final int LARGEUR_BOUTON = 400;
+    private static final int HAUTEUR_BOUTON = 55;
 
 
     private FondDegrade fond;

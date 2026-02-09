@@ -32,6 +32,15 @@ public class Constants {
             /** Hauteur de référence pour l'image du nom du jeu (NameApp.png) en 1080p. */
             public static final int NAME_APP_REF_HEIGHT = 80;
         }
+        public static class Creation {
+            public static final float RATIO_LOGO_Y = 140f / 1080f;
+            public static final int ESPACEMENT_LOGO_NAME_REF = 40;
+            public static final int ESPACEMENT_NAME_TITLE_REF = 24;
+            public static final int ESPACEMENT_TITLE_CHAMP_REF = 32;
+            public static final int ESPACEMENT_CHAMP_BOUTON_REF = 24;
+            public static final int NAME_APP_REF_HEIGHT = 80;
+            public static final int TITLE_FONT_SIZE_REF = 24;
+        }
         public static class Menu {
             /** Ratio vertical pour la base des boutons du menu (≈ 41,7 % de la hauteur). */
             public static final float RATIO_MENU_BUTTONS_Y = 450f / 1080f;

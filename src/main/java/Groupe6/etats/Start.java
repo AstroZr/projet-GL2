@@ -135,7 +135,7 @@ public class Start extends Etats implements MethodesEtats {
         for (Bouton b : boutons) {
             b.draw(g);
         }
-        super.drawGrid(g);
+        // super.drawGrid(g);
     }
 
     /** Aucune action clavier spécifique pour cet écran. */
