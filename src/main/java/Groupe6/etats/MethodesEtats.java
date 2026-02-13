@@ -35,5 +35,13 @@ public interface MethodesEtats {
     void mouseReleased(MouseEvent e);
 
     void updateTexts();
+
+    /**
+     * Recalcule les positions des éléments UI (boutons, champs) après un resize.
+     * Implémentation par défaut vide pour les états sans UI ou sans réaction au resize.
+     */
+    default void updateLayout(int gameWidth, int gameHeight) {
+        // vide par défaut
+    }
 }
 

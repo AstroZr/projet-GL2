@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
+import Groupe6.utilz.Constants;
 
 /**
  * État « paramètres » : écran de configuration du jeu.
@@ -27,10 +28,8 @@ public class Parametres extends Etats implements MethodesEtats {
     private void initClasses() {
         boutons = new ArrayList<>();
         this.fond = FondDegrade.getInstance();
-        int cx = 960;
-        int cy = 800;
-        
-        // Bouton Retour au menu
+        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (Constants.game_height * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
         boutons.add(new BoutonChangeurEtat(
                 cx - LARGEUR_BOUTON / 2,
                 cy,
@@ -40,13 +39,30 @@ public class Parametres extends Etats implements MethodesEtats {
                 "Retour"));
     }
 
+    /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
         fond.update();
     }
 
+    /** Recalcule la position du bouton Retour selon les nouvelles dimensions. */
+    @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        applyLayout(gameWidth, gameHeight);
+    }
+
+    @Override
+    protected void applyLayout(int w, int h) {
+        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cy = (int) (h * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
+        boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
+        boutons.get(0).setY(cy);
+    }
+
+    /** Dessine le fond animé et le bouton Retour. */
     @Override
     public void draw(Graphics g) {
+        ensureLayoutUpToDate();
         fond.draw(g);
         for (Bouton b : boutons) {
             b.draw(g);
@@ -68,6 +84,7 @@ public class Parametres extends Etats implements MethodesEtats {
         // Non implémenté
     }
 
+    /** Met à jour l'état de survol du bouton Retour selon la position de la souris. */
     @Override
     public void mouseMoved(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -85,6 +102,7 @@ public class Parametres extends Etats implements MethodesEtats {
         // Non implémenté
     }
 
+    /** Marque le bouton Retour comme enfoncé lors de l'appui. */
     @Override
     public void mousePressed(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -94,6 +112,7 @@ public class Parametres extends Etats implements MethodesEtats {
         }
     }
 
+    /** Déclenche l'action du bouton Retour si le clic est valide. */
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {

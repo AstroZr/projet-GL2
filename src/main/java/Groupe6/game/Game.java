@@ -4,7 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.function.BiConsumer;
+import java.util.EnumMap;
+import java.util.Map;
 
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
@@ -12,7 +13,8 @@ import Groupe6.etats.EtatJeu;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
-
+import Groupe6.etats.Connexion;
+import Groupe6.etats.Creation;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
@@ -34,7 +36,12 @@ public class Game implements Runnable {
     private Start start;
     private Menu menu;
     private Parametres parametres;
+    private Connexion connexion;
+    private Creation creation;
     // private Grille grille;
+
+    /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
+    private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
 
     public Game() {
         initClasses();
@@ -48,9 +55,17 @@ public class Game implements Runnable {
 
     private void initClasses() {
         start = new Start(this);
+        stateByEnum.put(EtatJeu.START, start);
         menu = new Menu(this);
+        stateByEnum.put(EtatJeu.MENU, menu);
+        stateByEnum.put(EtatJeu.GRILLE, menu); // TODO: grille
         parametres = new Parametres(this);
-        // grille = new Grille(this);
+        stateByEnum.put(EtatJeu.PARAMETRES, parametres);
+        connexion = new Connexion(this);
+        stateByEnum.put(EtatJeu.CONNEXION, connexion);
+        creation = new Creation(this);
+        stateByEnum.put(EtatJeu.CREATION, creation);
+        // grille = new Grille(this); stateByEnum.put(EtatJeu.GRILLE, grille);
     }
 
     private void startGameLoop() {
@@ -58,24 +73,18 @@ public class Game implements Runnable {
         gameLoopThread.start();
     }
 
-    private MethodesEtats getCurrentState() {
-        switch (EtatJeu.getEtatActuel()) {
-            case START:
-                return start;
-            case MENU:
-                return menu;
-            case GRILLE:
-                return menu; // TODO: return grille;
-            case PARAMETRES:
-                return parametres;
-            case QUITTER:
-                quitterJeu();
-                return menu;
-            case ASTUCES:
-            case SELECTION:
-            default:
-                throw new IllegalStateException("État de jeu non géré: " + EtatJeu.getEtatActuel());
+    /** Retourne l'état courant (pour update, render et délégation clavier/souris). */
+    public MethodesEtats getCurrentState() {
+        EtatJeu e = EtatJeu.getEtatActuel();
+        if (e == EtatJeu.QUITTER) {
+            quitterJeu();
+            return stateByEnum.get(EtatJeu.MENU);
         }
+        MethodesEtats state = stateByEnum.get(e);
+        if (state == null) {
+            throw new IllegalStateException("État de jeu non géré: " + e);
+        }
+        return state;
     }
 
     private void update() {
@@ -84,7 +93,7 @@ public class Game implements Runnable {
 
     public void render(Graphics g) {
         getCurrentState().draw(g);
-        
+
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);

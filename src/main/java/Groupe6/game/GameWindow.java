@@ -20,7 +20,7 @@ public class GameWindow extends JFrame {
         add(gamePanel);
         setTitle("GL2 Projet");
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
         pack();
         setVisible(true);
 

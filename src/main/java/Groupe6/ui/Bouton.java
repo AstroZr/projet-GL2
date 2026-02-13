@@ -57,62 +57,76 @@ public abstract class Bouton {
         drawBackground(g);
     }
 
+    /** Retourne la zone de délimitation du bouton. */
     public Rectangle getDelimitation() {
         return delimitation;
     }
 
+    /** Définit la zone de délimitation du bouton. */
     public void setDelimitation(Rectangle delimitation) {
         this.delimitation = delimitation;
     }
 
+    /** Retourne la position Y du bouton. */
     public int getY() {
         return y;
     }
 
+    /** Définit la position Y du bouton et met à jour la délimitation. */
     public void setY(int y) {
         this.y = y;
         creationDelimitation();
     }
 
+    /** Retourne la position X du bouton. */
     public int getX() {
         return x;
     }
 
+    /** Définit la position X du bouton et met à jour la délimitation. */
     public void setX(int x) {
         this.x = x;
         creationDelimitation();
     }
 
+    /** Retourne la largeur du bouton. */
     public int getLargeur() {
         return largeur;
     }
 
+    /** Définit la largeur du bouton et met à jour la délimitation. */
     public void setLargeur(int largeur) {
         this.largeur = largeur;
         creationDelimitation();
     }
 
+    /** Retourne la hauteur du bouton. */
     public int getHauteur() {
         return hauteur;
     }
 
+    /** Définit la hauteur du bouton et met à jour la délimitation. */
     public void setHauteur(int hauteur) {
         this.hauteur = hauteur;
         creationDelimitation();
     }
 
+    /** Indique si le bouton est actuellement enfoncé. */
     public boolean isSourisEnfonce() {
         return sourisEnfonce;
     }
 
+    /** Définit l'état d'enfoncement du bouton. */
     public void setSourisEnfonce(boolean sourisEnfonce) {
         this.sourisEnfonce = sourisEnfonce;
     }
 
+    /** Indique si la souris survole le bouton. */
     public boolean isSourisSurvol() {
         return sourisSurvol;
     }
 
+    /** Définit l'état de survol du bouton. */
     public void setSourisSurvol(boolean sourisSurvol) {
         this.sourisSurvol = sourisSurvol;
     }
