@@ -50,4 +50,5 @@ public class Constants {
             public static final float RATIO_PARAMETRES_BUTTON_Y = 800f / 1080f;
         }
     }
+
 }

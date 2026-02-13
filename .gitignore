@@ -5,3 +5,5 @@ Semantique.md
 .classpath
 .project
 .bin/
+.settings/
+.classpath
