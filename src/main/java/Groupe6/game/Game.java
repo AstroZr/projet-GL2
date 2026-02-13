@@ -9,7 +9,7 @@ import java.util.Map;
 
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
-// import Groupe6.etats.Grille;
+import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
@@ -38,7 +38,7 @@ public class Game implements Runnable {
     private Parametres parametres;
     private Connexion connexion;
     private Creation creation;
-    // private Grille grille;
+    private Jeu jeu;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
@@ -58,14 +58,14 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.START, start);
         menu = new Menu(this);
         stateByEnum.put(EtatJeu.MENU, menu);
-        stateByEnum.put(EtatJeu.GRILLE, menu); // TODO: grille
         parametres = new Parametres(this);
         stateByEnum.put(EtatJeu.PARAMETRES, parametres);
         connexion = new Connexion(this);
         stateByEnum.put(EtatJeu.CONNEXION, connexion);
         creation = new Creation(this);
         stateByEnum.put(EtatJeu.CREATION, creation);
-        // grille = new Grille(this); stateByEnum.put(EtatJeu.GRILLE, grille);
+        jeu = new Jeu(this);
+        stateByEnum.put(EtatJeu.GRILLE, jeu);
     }
 
     private void startGameLoop() {
@@ -200,7 +200,7 @@ public class Game implements Runnable {
         return parametres;
     }
 
-    // public Grille getGrille() {
-    //     return grille;
-    // }
+    public Jeu getJeu() {
+        return jeu;
+    }
 }
