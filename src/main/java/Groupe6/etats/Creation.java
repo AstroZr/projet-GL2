@@ -11,6 +11,7 @@ import Groupe6.ui.BoutonCreation;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LayoutScale;
 
 /**
  * État création de compte : logo, titre app, titre « Création », champ identifiant, bouton. Fond inchangé.
@@ -33,6 +34,7 @@ public class Creation extends Etats implements MethodesEtats {
     /** Centre horizontal calculé dans applyLayout, cohérent avec logo/nom. */
     private int centerX;
 
+    private LayoutScale layoutScale;
     private TextInput textInput;
     private FondDegrade fond;
     private BoutonCreation bouton;
@@ -43,6 +45,7 @@ public class Creation extends Etats implements MethodesEtats {
     }
 
     private void initClasses() {
+        layoutScale = LayoutScale.getInstance();
         fond = FondDegrade.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
@@ -57,26 +60,18 @@ public class Creation extends Etats implements MethodesEtats {
         textInput.update();
     }
 
-    @Override
-    public void updateLayout(int gameWidth, int gameHeight) {
-        applyLayout(gameWidth, gameHeight);
-    }
-
     /** Bloc logo → nom app → titre « Création » → champ → bouton, centré, scaling depuis Constants. */
     @Override
     protected void applyLayout(int w, int h) {
-        float scaleX = (float) w / Constants.REF_WIDTH;
-        float scaleY = (float) h / Constants.REF_HEIGHT;
-        float scale = Math.min(scaleX, scaleY);
-        centerX = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        layoutScale.update(w,h);
+        centerX = layoutScale.centerX();
         int cx = centerX;
 
-        logoSize = (int) (LOGO_DEFAULT_SIZE * scale);
+        logoSize = layoutScale.scaleUniform(LOGO_DEFAULT_SIZE);
         logoX = cx - logoSize / 2;
-        logoY = (int) (h * Constants.Ratios.Creation.RATIO_LOGO_Y);
-
-        int gapLogoName = (int) (Constants.Ratios.Creation.ESPACEMENT_LOGO_NAME_REF * scale);
-        nameAppHeight = (int) (Constants.Ratios.Creation.NAME_APP_REF_HEIGHT * scale);
+        logoY = layoutScale.ratioY(Constants.Ratios.Creation.RATIO_LOGO_Y);
+        int gapLogoName = layoutScale.scaleUniform(Constants.Ratios.Creation.ESPACEMENT_LOGO_NAME_REF);
+        nameAppHeight = layoutScale.scaleUniform(Constants.Ratios.Creation.NAME_APP_REF_HEIGHT);
         nameAppHeight = Math.max(1, nameAppHeight);
         nameAppWidth = (nameAppImage != null && nameAppImage.getHeight() > 0)
                 ? nameAppHeight * nameAppImage.getWidth() / nameAppImage.getHeight()
@@ -85,16 +80,16 @@ public class Creation extends Etats implements MethodesEtats {
         nameAppX = cx - nameAppWidth / 2;
         nameAppY = logoY + logoSize + gapLogoName;
 
-        int gapNameTitle = (int) (Constants.Ratios.Creation.ESPACEMENT_NAME_TITLE_REF * scale);
-        titleFontSize = (int) (Constants.Ratios.Creation.TITLE_FONT_SIZE_REF * scale);
+        int gapNameTitle = layoutScale.scaleUniform(Constants.Ratios.Creation.ESPACEMENT_NAME_TITLE_REF);
+        titleFontSize = layoutScale.scaleUniform(Constants.Ratios.Creation.TITLE_FONT_SIZE_REF);
         titleY = nameAppY + nameAppHeight + gapNameTitle;
 
-        int gapTitleChamp = (int) (Constants.Ratios.Creation.ESPACEMENT_TITLE_CHAMP_REF * scale);
-        int gapChampBouton = (int) (Constants.Ratios.Creation.ESPACEMENT_CHAMP_BOUTON_REF * scale);
-        int cw = (int) (LARGEUR_CHAMP * scaleX);
-        int ch = (int) (HAUTEUR_CHAMP * scaleY);
-        int bw = (int) (LARGEUR_BOUTON * scaleX);
-        int bh = (int) (HAUTEUR_BOUTON * scaleY);
+        int gapTitleChamp = layoutScale.scaleUniform(Constants.Ratios.Creation.ESPACEMENT_TITLE_CHAMP_REF);
+        int gapChampBouton = layoutScale.scaleUniform(Constants.Ratios.Creation.ESPACEMENT_CHAMP_BOUTON_REF);
+        int cw = layoutScale.scaleX(LARGEUR_CHAMP);
+        int ch = layoutScale.scaleY(HAUTEUR_CHAMP);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
         int champY = titleY + titleFontSize + gapTitleChamp;
         int buttonY = champY + ch + gapChampBouton;
@@ -138,7 +133,7 @@ public class Creation extends Etats implements MethodesEtats {
         }
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, Math.max(12, titleFontSize)));
         g.setColor(java.awt.Color.BLACK);
-        int tw = g.getFontMetrics().stringWidth("Création");
+      int tw = g.getFontMetrics().stringWidth("Création");
         g.drawString("Création", centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
 
         textInput.draw(g);

@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
-import Groupe6.ui.BoutonConnexion;
-import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
-import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LayoutScale;
 
 /**
  * État « menu principal » : écran d’accueil avec boutons (jouer, paramètres, etc.).
@@ -21,43 +19,31 @@ public class Menu extends Etats implements MethodesEtats {
 
     private static final int LARGEUR_BOUTON = 400;
     private static final int HAUTEUR_BOUTON = 55;
-
+    private static final int ESPACEMENT_BOUTONS_REF = 64;
 
     private FondDegrade fond;
+    private LayoutScale layoutScale;
+
     public Menu(Game game) {
         super(game);
         initClasses();
     }
 
     private void initClasses() {
+        layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         this.fond = FondDegrade.getInstance();
-        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (Constants.game_height * Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
-        boutons.add(new BoutonChangeurEtat(
-                cx - LARGEUR_BOUTON / 2,
-                cy,
-                LARGEUR_BOUTON,
-                HAUTEUR_BOUTON,
-                EtatJeu.GRILLE,
-                "Jouer"));
 
-        boutons.add(new BoutonChangeurEtat(
-                cx - LARGEUR_BOUTON / 2,
-                cy + 64,
-                LARGEUR_BOUTON,
-                HAUTEUR_BOUTON,
-                EtatJeu.PARAMETRES,
-                "Paramètres"));
+        layoutScale.update(Constants.game_width, Constants.game_height);
+        int cx = layoutScale.centerX();
+        int cy = layoutScale.ratioY(Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
+        int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
 
-        boutons.add(new BoutonChangeurEtat(
-                cx - LARGEUR_BOUTON / 2,
-                cy + 128,
-                LARGEUR_BOUTON,
-                HAUTEUR_BOUTON,
-                EtatJeu.QUITTER,
-                "Quitter"));
-
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.GRILLE, "Jouer"));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap, bw, bh, EtatJeu.PARAMETRES, "Paramètres"));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap, bw, bh, EtatJeu.QUITTER, "Quitter"));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -66,22 +52,26 @@ public class Menu extends Etats implements MethodesEtats {
       fond.update();
     }
 
-    /** Recalcule les positions des boutons selon les nouvelles dimensions. */
-    @Override
-    public void updateLayout(int gameWidth, int gameHeight) {
-        applyLayout(gameWidth, gameHeight);
-    }
-
     @Override
     protected void applyLayout(int w, int h) {
-        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (h * Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
-        boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
+        int cx = layoutScale.centerX();
+        int cy = layoutScale.ratioY(Constants.Ratios.Menu.RATIO_MENU_BUTTONS_Y);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
+        int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
+
+        boutons.get(0).setX(cx - bw / 2);
         boutons.get(0).setY(cy);
-        boutons.get(1).setX(cx - LARGEUR_BOUTON / 2);
-        boutons.get(1).setY(cy + 64);
-        boutons.get(2).setX(cx - LARGEUR_BOUTON / 2);
-        boutons.get(2).setY(cy + 128);
+        boutons.get(0).setLargeur(bw);
+        boutons.get(0).setHauteur(bh);
+        boutons.get(1).setX(cx - bw / 2);
+        boutons.get(1).setY(cy + gap);
+        boutons.get(1).setLargeur(bw);
+        boutons.get(1).setHauteur(bh);
+        boutons.get(2).setX(cx - bw / 2);
+        boutons.get(2).setY(cy + 2 * gap);
+        boutons.get(2).setLargeur(bw);
+        boutons.get(2).setHauteur(bh);
     }
 
     /** Dessine le fond animé et tous les boutons du menu. */

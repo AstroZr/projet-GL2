@@ -12,6 +12,7 @@ import Groupe6.ui.BoutonChangeurEtat;
 
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LayoutScale;
 
 /**
  * État d'écran de démarrage : fond en dégradé, logo animé, titre, boutons Création / Connexion.
@@ -45,6 +46,7 @@ public class Start extends Etats implements MethodesEtats {
     private int nameAppHeight;
 
     private FondDegrade fondDegrade;
+    private LayoutScale layoutScale;
 
     public Start(Game game) {
         super(game);
@@ -52,16 +54,18 @@ public class Start extends Etats implements MethodesEtats {
     }
 
     private void initClasses() {
+        layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         fondDegrade = FondDegrade.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
-        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (Constants.game_height * Constants.Ratios.Start.RATIO_START_FORM_Y);
-        int gap = (int) (Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF * ((float) Constants.game_width / Constants.REF_WIDTH));
-        int bw = LARGEUR_BOUTON;
-        int bh = HAUTEUR_BOUTON;
+        layoutScale.update(Constants.game_width, Constants.game_height);
+        int cx = layoutScale.centerX();
+        int cy = layoutScale.ratioY(Constants.Ratios.Start.RATIO_START_FORM_Y);
+        int gap = layoutScale.scaleX(Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
         boutons.add(new BoutonChangeurEtat(cx - gap - bw, cy, bw, bh, EtatJeu.CREATION, "Creation"));
         boutons.add(new BoutonChangeurEtat(cx + gap, cy, bw, bh, EtatJeu.CONNEXION, "Connexion"));
@@ -80,36 +84,28 @@ public class Start extends Etats implements MethodesEtats {
         return 1f + LOGO_FLOAT_AMPLITUDE * ease;
     }
 
-    @Override
-    public void updateLayout(int gameWidth, int gameHeight) {
-        applyLayout(gameWidth, gameHeight);
-    }
-
     /** Bloc logo → titre → boutons, centré, espacements et scaling depuis Constants.Ratios.Start. */
     @Override
     protected void applyLayout(int w, int h) {
-        float scaleX = (float) w / Constants.REF_WIDTH;
-        float scaleY = (float) h / Constants.REF_HEIGHT;
-        float scale = Math.min(scaleX, scaleY);
-        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cx = layoutScale.centerX();
 
-        logoSize = (int) (LOGO_DEFAULT_SIZE * scale);
+        logoSize = layoutScale.scaleUniform(LOGO_DEFAULT_SIZE);
         logoX = cx - logoSize / 2;
-        logoY = (int) (h * Constants.Ratios.Start.RATIO_LOGO_Y);
+        logoY = layoutScale.ratioY(Constants.Ratios.Start.RATIO_LOGO_Y);
 
-        int gapLogoName = (int) (Constants.Ratios.Start.ESPACEMENT_LOGO_NAME_REF * scale);
-        nameAppHeight = (int) (Constants.Ratios.Start.NAME_APP_REF_HEIGHT * scale);
+        int gapLogoName = layoutScale.scaleUniform(Constants.Ratios.Start.ESPACEMENT_LOGO_NAME_REF);
+        nameAppHeight = layoutScale.scaleUniform(Constants.Ratios.Start.NAME_APP_REF_HEIGHT);
         nameAppWidth = (nameAppImage.getHeight() > 0)
                 ? nameAppHeight * nameAppImage.getWidth() / nameAppImage.getHeight()
                 : nameAppHeight;
         nameAppX = cx - nameAppWidth / 2;
         nameAppY = logoY + logoSize + gapLogoName;
 
-        int gapNameButtons = (int) (Constants.Ratios.Start.ESPACEMENT_NAME_BOUTONS_REF * scale);
+        int gapNameButtons = layoutScale.scaleUniform(Constants.Ratios.Start.ESPACEMENT_NAME_BOUTONS_REF);
         int buttonY = nameAppY + nameAppHeight + gapNameButtons;
-        int gap = (int) (Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF * scaleX);
-        int bw = (int) (LARGEUR_BOUTON * scaleX);
-        int bh = (int) (HAUTEUR_BOUTON * scaleY);
+        int gap = layoutScale.scaleX(Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
         boutons.get(0).setX(cx - gap - bw);
         boutons.get(0).setY(buttonY);
