@@ -9,6 +9,7 @@ import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LayoutScale;
 
 /**
  * État « paramètres » : écran de configuration du jeu.
@@ -19,6 +20,7 @@ public class Parametres extends Etats implements MethodesEtats {
     private static final int HAUTEUR_BOUTON = 44;
 
     private FondDegrade fond;
+    private LayoutScale layoutScale;
 
     public Parametres(Game game) {
         super(game);
@@ -26,17 +28,17 @@ public class Parametres extends Etats implements MethodesEtats {
     }
 
     private void initClasses() {
+        layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         this.fond = FondDegrade.getInstance();
-        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (Constants.game_height * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
-        boutons.add(new BoutonChangeurEtat(
-                cx - LARGEUR_BOUTON / 2,
-                cy,
-                LARGEUR_BOUTON,
-                HAUTEUR_BOUTON,
-                EtatJeu.MENU,
-                "Retour"));
+
+        layoutScale.update(Constants.game_width, Constants.game_height);
+        int cx = layoutScale.centerX();
+        int cy = layoutScale.ratioY(Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
+
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.MENU, "Retour"));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -45,18 +47,17 @@ public class Parametres extends Etats implements MethodesEtats {
         fond.update();
     }
 
-    /** Recalcule la position du bouton Retour selon les nouvelles dimensions. */
-    @Override
-    public void updateLayout(int gameWidth, int gameHeight) {
-        applyLayout(gameWidth, gameHeight);
-    }
-
     @Override
     protected void applyLayout(int w, int h) {
-        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (h * Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
-        boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
+        int cx = layoutScale.centerX();
+        int cy = layoutScale.ratioY(Constants.Ratios.Parametres.RATIO_PARAMETRES_BUTTON_Y);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
+
+        boutons.get(0).setX(cx - bw / 2);
         boutons.get(0).setY(cy);
+        boutons.get(0).setLargeur(bw);
+        boutons.get(0).setHauteur(bh);
     }
 
     /** Dessine le fond animé et le bouton Retour. */

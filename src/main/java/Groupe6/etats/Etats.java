@@ -8,6 +8,7 @@ import java.awt.Color;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LayoutScale;
 
 
 
@@ -19,7 +20,7 @@ import Groupe6.utilz.Constants;
  * @version 1.0
  * @since 2026-01-28
  */
-public abstract class Etats {
+public abstract class Etats implements MethodesEtats {
     protected Game game;
     protected ArrayList<Bouton> boutons;
 
@@ -52,10 +53,16 @@ public abstract class Etats {
     /** Compare les dimensions locales à Constants ; si différentes, applique le layout et met à jour les locales. */
     protected final void ensureLayoutUpToDate() {
         if (lastLayoutWidth != Constants.game_width || lastLayoutHeight != Constants.game_height) {
-            applyLayout(Constants.game_width, Constants.game_height);
+            updateLayout(Constants.game_width, Constants.game_height);
             lastLayoutWidth = Constants.game_width;
             lastLayoutHeight = Constants.game_height;
         }
+    }
+
+    @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        LayoutScale.getInstance().update(gameWidth, gameHeight);
+        applyLayout(gameWidth, gameHeight);
     }
     /** DEBUG: Affiche une grille de carrées de 20x20 pixels afin de rendre le design de l'UI plus simple*/
     protected final void drawGrid(Graphics g) {

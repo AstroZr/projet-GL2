@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import Groupe6.game.Game;
-import Groupe6.utilz.Constants;
 
 /**
  * État « connexion » : écran de connexion au jeu avec fond animé.
@@ -26,9 +25,6 @@ public class Connexion extends Etats implements MethodesEtats {
 
   private void initClasses() {
     this.fond = FondDegrade.getInstance();
-    // int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-    // int cy = (int) (Constants.game_height * Constants.Ratios.Start.RATIO_START_FORM_Y);
-    
   }
 
   /** Dessine le fond animé de l'écran de connexion. */
@@ -42,12 +38,6 @@ public class Connexion extends Etats implements MethodesEtats {
   @Override
   public void update() {
     fond.update();
-  }
-
-  /** Recalcule le layout selon les nouvelles dimensions (vide pour l'instant). */
-  @Override
-  public void updateLayout(int gameWidth, int gameHeight) {
-    applyLayout(gameWidth, gameHeight);
   }
 
   @Override
