@@ -2,72 +2,39 @@ package Groupe6.inputs;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.function.BiConsumer;
 
+import Groupe6.etats.MethodesEtats;
 import Groupe6.game.GamePanel;
 
 /**
- * Gestionnaire des entrées clavier - Capture et traite les événements clavier.
- * 
- * FONCTIONNALITÉS :
- * - Détecte et traite les touches pressées/relâchées
- * - Transmet les commandes au jeu via GamePanel
- * - Gère les raccourcis clavier et les contrôles du joueur
- * 
- * ARCHITECTURE :
- * - Implémente l'interface KeyListener de Java AWT
- * - Service d'entrée utilisé par GamePanel
- * - Découple les entrées système de la logique métier du jeu
+ * Écoute les événements clavier et les transmet à l’état actuel (Start, Menu, etc.).
  */
 public class KeyboardInputs implements KeyListener {
 
-    // === RÉFÉRENCE AU PANNEAU ===
-    private GamePanel gamePanel;  // Référence pour accéder au jeu et transmettre les événements
+    private final GamePanel gamePanel;
 
-    /**
-     * Constructeur du gestionnaire d'entrées clavier.
-     * 
-     * @param gamePanel Le panneau de jeu associé
-     */
     public KeyboardInputs(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
     }
 
-    /**
-     * Appelé lorsqu'une touche est pressée.
-     * Gère les actions continues (déplacement, attaque maintenue, etc.).
-     * 
-     * @param e Événement contenant les informations de la touche pressée
-     */
+    private void handleKeyEvent(KeyEvent e, BiConsumer<MethodesEtats, KeyEvent> action) {
+        MethodesEtats state = gamePanel.getGame().getCurrentState();
+        action.accept(state, e);
+    }
+
     @Override
     public void keyPressed(KeyEvent e) {
-        // TODO: Implémenter la gestion des touches pressées
-        // Exemple: déplacement du joueur, saut, attaque
-        throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
+        handleKeyEvent(e, (state, event) -> state.keyPressed(event));
     }
 
-    /**
-     * Appelé lorsqu'une touche est relâchée.
-     * Gère les actions de fin (arrêt du déplacement, etc.).
-     * 
-     * @param e Événement contenant les informations de la touche relâchée
-     */
     @Override
     public void keyReleased(KeyEvent e) {
-        // TODO: Implémenter la gestion des touches relâchées
-        // Exemple: arrêt du déplacement, fin d'attaque
-        throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
+        handleKeyEvent(e, (state, event) -> state.keyReleased(event));
     }
 
-    /**
-     * Appelé lorsqu'une touche génère un caractère Unicode.
-     * Généralement non utilisé pour les contrôles de jeu.
-     * Utile pour la saisie de texte (chat, nom de joueur, etc.).
-     * 
-     * @param e Événement contenant le caractère généré
-     */
     @Override
     public void keyTyped(KeyEvent e) {
-        // TODO: Implémenter si nécessaire pour la saisie de texte
-        throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
+        handleKeyEvent(e, (state, event) -> state.keyTyped(event));
     }
 }

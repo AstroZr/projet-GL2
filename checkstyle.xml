@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+    Configuration Checkstyle personnalisée pour le projet GL2
+    Basée sur les règles définies sur discord
+    
+    Règles vérifiées :
+    - Nommage : PascalCase (classes), camelCase (méthodes/variables), UPPER_SNAKE_CASE (constantes)
+    - Style : 4 espaces, accolades sur même ligne, espaces autour opérateurs
+    - Imports : ordre Java → statiques → projet, pas de wildcards, pas d'imports inutilisés
+    - Documentation : JavaDoc requise pour classes et méthodes publiques
+-->
+
+<module name="Checker">
+    <!-- Propriétés -->
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="warning"/>
+    <property name="fileExtensions" value="java, properties, xml"/>
+
+    <!-- Exclusions -->
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$"/>
+    </module>
+
+    <!-- Fichiers -->
+    <module name="FileLength">
+        <property name="max" value="2000"/>
+    </module>
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
+    <!-- Structure -->
+    <module name="TreeWalker">
+        <!-- Nommage -->
+        <module name="TypeName">
+            <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern" value="Le nom de type ''{0}'' doit être en PascalCase (ex: Player, GameState)"/>
+        </module>
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern" value="Le nom de méthode ''{0}'' doit être en camelCase (ex: update, keyPressed)"/>
+        </module>
+        <module name="ConstantName">
+            <property name="format" value="^[A-Z][A-Z0-9_]*$"/>
+            <message key="name.invalidPattern" value="Le nom de constante ''{0}'' doit être en UPPER_SNAKE_CASE (ex: MAX_SPEED_X, GAME_WIDTH)"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern" value="Le nom de variable locale ''{0}'' doit être en camelCase"/>
+        </module>
+        <module name="LocalFinalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$|^[A-Z][A-Z0-9_]*$"/>
+            <message key="name.invalidPattern" value="Le nom de variable locale finale ''{0}'' doit être en camelCase ou UPPER_SNAKE_CASE si c'est une constante"/>
+        </module>
+        <module name="ParameterName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern" value="Le nom de paramètre ''{0}'' doit être en camelCase"/>
+        </module>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$|^[A-Z][A-Z0-9_]*$"/>
+            <message key="name.invalidPattern" value="Le nom de membre ''{0}'' doit être en camelCase ou UPPER_SNAKE_CASE si c'est une constante static final"/>
+        </module>
+        <module name="StaticVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="PackageName">
+            <property name="format" value="^[a-zA-Z][a-zA-Z0-9]*(\.[a-z][a-z0-9]*)*$"/>
+            <message key="name.invalidPattern" value="Le nom de package ''{0}'' doit être en minuscules (sauf le premier segment comme Groupe6)"/>
+        </module>
+
+        <!-- Style et formatage -->
+        <module name="LeftCurly">
+            <property name="option" value="eol"/>
+            <message key="line.new" value="L'accolade ouvrante doit être sur la même ligne que la déclaration"/>
+        </module>
+        <module name="RightCurly">
+            <property name="option" value="same"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE"/>
+        </module>
+        <module name="RightCurly">
+            <property name="option" value="alone"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
+        </module>
+        <module name="WhitespaceAround">
+            <property name="allowEmptyConstructors" value="true"/>
+            <property name="allowEmptyMethods" value="true"/>
+            <property name="allowEmptyTypes" value="true"/>
+            <property name="allowEmptyLoops" value="true"/>
+            <message key="ws.notPreceded" value="''{0}'' doit être précédé d'un espace"/>
+            <message key="ws.notFollowed" value="''{0}'' doit être suivi d'un espace"/>
+        </module>
+        <module name="WhitespaceAfter">
+            <property name="tokens" value="COMMA, SEMI, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE"/>
+            <message key="ws.notFollowed" value="''{0}'' doit être suivi d'un espace"/>
+        </module>
+        <module name="NoWhitespaceAfter">
+            <property name="tokens" value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS"/>
+        </module>
+        <module name="NoWhitespaceBefore">
+            <property name="tokens" value="COMMA, SEMI, POST_INC, POST_DEC"/>
+        </module>
+        <module name="OperatorWrap">
+            <property name="option" value="NL"/>
+            <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR, TYPE_EXTENSION_AND"/>
+        </module>
+        <module name="ParenPad"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="4"/>
+            <property name="arrayInitIndent" value="4"/>
+        </module>
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+        </module>
+
+        <!-- Imports -->
+        <module name="AvoidStarImport">
+            <message key="import.avoidStar" value="Éviter les imports avec wildcard (*). Utiliser des imports explicites."/>
+        </module>
+        <module name="IllegalImport"/>
+        <module name="RedundantImport">
+            <message key="import.redundant" value="Import redondant : {0}"/>
+        </module>
+        <module name="UnusedImports">
+            <message key="import.unused" value="Import inutilisé : {0}"/>
+        </module>
+        <module name="CustomImportOrder">
+            <property name="customImportOrderRules" value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS"/>
+            <property name="standardPackageRegExp" value="^(java|javax)\."/>
+            <property name="thirdPartyPackageRegExp" value="^(org|com)\."/>
+            <property name="specialImportsRegExp" value="^Groupe6\."/>
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+            <property name="separateLineBetweenGroups" value="true"/>
+            <message key="import.ordering" value="Ordre des imports incorrect. Ordre attendu : statiques → java.*/javax.* → org.*/com.* → projet (Groupe6.*). Chaque groupe doit être séparé par une ligne vide."/>
+        </module>
+
+        <!-- Taille et complexité -->
+        <module name="MethodLength">
+            <property name="max" value="150"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
+        </module>
+
+        <!-- Modificateurs -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Blocs de code -->
+        <module name="EmptyBlock">
+            <property name="option" value="TEXT"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
+        </module>
+        <module name="NeedBraces"/>
+
+        <!-- Documentation -->
+        <module name="JavadocType">
+            <property name="allowMissingParamTags" value="true"/>
+            <property name="allowUnknownTags" value="true"/>
+            <message key="javadoc.missing" value="JavaDoc manquante pour la classe publique ''{0}''. La JavaDoc doit être en français selon Semantique.md"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="allowMissingParamTags" value="true"/>
+            <property name="allowMissingReturnTag" value="true"/>
+            <property name="allowedAnnotations" value="Override, Test"/>
+            <message key="javadoc.missing" value="JavaDoc manquante pour la méthode publique ''{0}''. La JavaDoc doit être en français selon Semantique.md"/>
+        </module>
+        <!-- JavadocVariable désactivé : selon Semantique.md, JavaDoc requise pour classes et méthodes publiques, pas pour variables -->
+        <module name="JavadocStyle">
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+
+        <!-- Divers -->
+        <module name="ArrayTypeStyle"/>
+        <module name="UpperEll"/>
+        <module name="FallThrough"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="OneStatementPerLine"/>
+        <module name="OverloadMethodsDeclarationOrder"/>
+        <module name="VariableDeclarationUsageDistance"/>
+        <module name="MethodParamPad"/>
+        <module name="TypecastParenPad"/>
+    </module>
+</module>
