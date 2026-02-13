@@ -29,7 +29,7 @@ public class KeyboardInputs implements KeyListener {
                 state = gamePanel.getGame().getMenu();
                 break;
             case GRILLE:
-                state = gamePanel.getGame().getMenu(); // TODO: getGrille()
+                state = gamePanel.getGame().getJeu();
                 break;
             case PARAMETRES:
                 state = gamePanel.getGame().getParametres();

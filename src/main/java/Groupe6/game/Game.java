@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
-// import Groupe6.etats.Grille;
+import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
@@ -34,7 +34,7 @@ public class Game implements Runnable {
     private Start start;
     private Menu menu;
     private Parametres parametres;
-    // private Grille grille;
+    private Jeu jeu;
 
     public Game() {
         initClasses();
@@ -50,7 +50,7 @@ public class Game implements Runnable {
         start = new Start(this);
         menu = new Menu(this);
         parametres = new Parametres(this);
-        // grille = new Grille(this);
+        jeu = new Jeu(this);
     }
 
     private void startGameLoop() {
@@ -65,7 +65,7 @@ public class Game implements Runnable {
             case MENU:
                 return menu;
             case GRILLE:
-                return menu; // TODO: return grille;
+                return jeu;
             case PARAMETRES:
                 return parametres;
             case QUITTER:
@@ -191,7 +191,7 @@ public class Game implements Runnable {
         return parametres;
     }
 
-    // public Grille getGrille() {
-    //     return grille;
-    // }
+    public Jeu getJeu() {
+        return jeu;
+    }
 }
