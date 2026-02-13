@@ -1,7 +1,3 @@
 *.class
 target/
 Semantique.md
-.settings/
-.classpath
-.project
-.bin/
