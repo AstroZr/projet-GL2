@@ -4,11 +4,17 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.EnumMap;
+import java.util.Map;
 
+import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
+import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
+import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
-
+import Groupe6.etats.Connexion;
+import Groupe6.etats.Creation;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
@@ -29,6 +35,13 @@ public class Game implements Runnable {
 
     private Start start;
     private Menu menu;
+    private Parametres parametres;
+    private Connexion connexion;
+    private Creation creation;
+    private Jeu jeu;
+
+    /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
+    private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
 
     public Game() {
         initClasses();
@@ -42,7 +55,17 @@ public class Game implements Runnable {
 
     private void initClasses() {
         start = new Start(this);
+        stateByEnum.put(EtatJeu.START, start);
         menu = new Menu(this);
+        stateByEnum.put(EtatJeu.MENU, menu);
+        parametres = new Parametres(this);
+        stateByEnum.put(EtatJeu.PARAMETRES, parametres);
+        connexion = new Connexion(this);
+        stateByEnum.put(EtatJeu.CONNEXION, connexion);
+        creation = new Creation(this);
+        stateByEnum.put(EtatJeu.CREATION, creation);
+        jeu = new Jeu(this);
+        stateByEnum.put(EtatJeu.GRILLE, jeu);
     }
 
     private void startGameLoop() {
@@ -50,38 +73,37 @@ public class Game implements Runnable {
         gameLoopThread.start();
     }
 
-    private void update() {
-        switch (EtatJeu.getEtatActuel()) {
-            case START:
-                start.update();
-                break;
-            case MENU:
-                menu.update();
-                break;
-            default:
-                break;
+    /** Retourne l'état courant (pour update, render et délégation clavier/souris). */
+    public MethodesEtats getCurrentState() {
+        EtatJeu e = EtatJeu.getEtatActuel();
+        if (e == EtatJeu.QUITTER) {
+            quitterJeu();
+            return stateByEnum.get(EtatJeu.MENU);
         }
-        
+        MethodesEtats state = stateByEnum.get(e);
+        if (state == null) {
+            throw new IllegalStateException("État de jeu non géré: " + e);
+        }
+        return state;
+    }
+
+    private void update() {
+        getCurrentState().update();
     }
 
     public void render(Graphics g) {
-        switch (EtatJeu.getEtatActuel()) {
-            case START:
-                start.draw(g);
-                break;
-            case MENU:
-                menu.draw(g);
-                break;
-            default:
-                break;
-        }
+        getCurrentState().draw(g);
+
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.PLAIN, 14));
             g2d.drawString("FPS: " + currentFPS + " | UPS: " + currentUPS, 10, 20);
         }
-        
+    }
+
+    private void quitterJeu() {
+        gameWindow.handleWindowClosing();
     }
 
     /** Boucle principale : UPS fixe (accumulateur), rendu découplé, limitation FPS. */
@@ -172,5 +194,13 @@ public class Game implements Runnable {
 
     public Menu getMenu() {
         return menu;
+    }
+
+    public Parametres getParametres() {
+        return parametres;
+    }
+
+    public Jeu getJeu() {
+        return jeu;
     }
 }

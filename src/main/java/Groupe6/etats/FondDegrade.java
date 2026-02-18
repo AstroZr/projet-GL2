@@ -11,7 +11,7 @@ import java.awt.AlphaComposite;
 import java.util.Random;
 
 import Groupe6.utilz.HelpMethods;
-import static Groupe6.utilz.Constants.animationBG;
+import Groupe6.utilz.Constants;
 
 /**
  * Fond d'écran en dégradé vertical (type aurore : ciel sombre en haut, clair en bas).
@@ -59,7 +59,10 @@ public class FondDegrade {
     private final int SMALL_NUAGE_1_HEIGHT_DEFAULT = 24;
     private final float scaling = 1.5f;
 
-    private final int BIG_NUAGE_Y = (int)(1920 / 4);
+    /** Position Y des gros nuages (dérivée de la largeur courante au resize). */
+    private static int getBigNuageY() {
+        return Constants.game_width / 4;
+    }
     private final int BIG_NUAGE_WIDTH = (int)(BIG_NUAGE_WIDTH_DEFAULT * scaling);
     private final int BIG_NUAGE_HEIGHT = (int)(BIG_NUAGE_HEIGHT_DEFAULT * scaling);
 
@@ -119,16 +122,15 @@ public class FondDegrade {
         }
     }
     /**
-     * Dessine le dégradé (et initialise width/height au premier appel si besoin).
+     * Dessine le dégradé. width/height viennent de Constants et sont mis à jour au resize.
      */
     public void draw(Graphics g) {
-        if (width <= 0 || height <= 0) {
-            Rectangle clip = g.getClipBounds();
-            width = (clip != null && clip.width > 0) ? clip.width : 1920;
-            height = (clip != null && clip.height > 0) ? clip.height : 1080;
+        if (width != Constants.game_width || height != Constants.game_height) {
+            width = Constants.game_width;
+            height = Constants.game_height;
             initNuagePos();
         }
-        
+
         Graphics2D g2d = (Graphics2D) g;
         drawFondGradient(g2d);
         drawNuages(g2d);
@@ -137,7 +139,7 @@ public class FondDegrade {
 
     /** Mise à jour logique du fond (nuages, etc.) ; à appeler chaque frame. */
     public void update() {
-      if (!animationBG) {
+      if (!Constants.animationBG) {
         return;
       }
       updateBigNuages();
@@ -154,9 +156,10 @@ public class FondDegrade {
         int bigNuagesNeeded = Math.max(3, (int) Math.ceil((width * 2.0f) / BIG_NUAGE_WIDTH) + 2);
         bigNuagesXPos = new float[bigNuagesNeeded];
         bigNuagesYPos = new int[bigNuagesNeeded];
+        int bigNuageY = getBigNuageY();
         for (int i = 0; i < bigNuagesXPos.length; i++) {
             bigNuagesXPos[i] = i * BIG_NUAGE_WIDTH;
-            bigNuagesYPos[i] = BIG_NUAGE_Y;
+            bigNuagesYPos[i] = bigNuageY;
         }
         
         // Calculer le nombre de petits nuages nécessaires pour couvrir GAME_WIDTH + marge généreuse

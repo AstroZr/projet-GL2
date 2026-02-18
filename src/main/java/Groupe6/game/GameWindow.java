@@ -20,7 +20,7 @@ public class GameWindow extends JFrame {
         add(gamePanel);
         setTitle("GL2 Projet");
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
         pack();
         setVisible(true);
 
@@ -44,7 +44,7 @@ public class GameWindow extends JFrame {
         });
     }
 
-    private void handleWindowClosing() {
+    public void handleWindowClosing() {
         int choice = JOptionPane.showConfirmDialog(
             this,
             "Voulez-vous sauvegarder avant de quitter ?",

@@ -19,7 +19,6 @@ public abstract class Bouton {
     protected int largeur;
     protected int hauteur;
     protected Rectangle delimitation;
-    protected int index;
     protected BufferedImage[] img;
     protected boolean sourisSurvol;
     protected boolean sourisEnfonce;
@@ -28,12 +27,11 @@ public abstract class Bouton {
     private RoundRectangle2D rect;
     private Color[] backgroundColor;
 
-    public Bouton(int x, int y, int largeur, int hauteur, int index) {
+    public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;
         this.y = y;
         this.largeur = largeur;
         this.hauteur = hauteur;
-        this.index = index;
         creationDelimitation();
         backgroundColor = new Color[3]; // 3 états : 0 normal, 1 hover, 2 clicked
         backgroundColor[0] = new Color(200, 200, 200, 180);
@@ -55,77 +53,82 @@ public abstract class Bouton {
     public abstract void appliquerAction();
 
     /** Dessine le bouton (image si disponible, sinon rectangle gris avec bordure). */
-    public void draw(Graphics g) {
-        if (img != null && index >= 0 && index < img.length && img[index] != null) {
-            g.drawImage(img[index], x, y, largeur, hauteur, null);
-        } else {
-          drawBackground(g);
-        }
+    public void draw(Graphics g) { 
+        drawBackground(g);
     }
 
+    /** Retourne la zone de délimitation du bouton. */
     public Rectangle getDelimitation() {
         return delimitation;
     }
 
+    /** Définit la zone de délimitation du bouton. */
     public void setDelimitation(Rectangle delimitation) {
         this.delimitation = delimitation;
     }
 
+    /** Retourne la position Y du bouton. */
     public int getY() {
         return y;
     }
 
+    /** Définit la position Y du bouton et met à jour la délimitation. */
     public void setY(int y) {
         this.y = y;
         creationDelimitation();
     }
 
+    /** Retourne la position X du bouton. */
     public int getX() {
         return x;
     }
 
+    /** Définit la position X du bouton et met à jour la délimitation. */
     public void setX(int x) {
         this.x = x;
         creationDelimitation();
     }
 
+    /** Retourne la largeur du bouton. */
     public int getLargeur() {
         return largeur;
     }
 
+    /** Définit la largeur du bouton et met à jour la délimitation. */
     public void setLargeur(int largeur) {
         this.largeur = largeur;
         creationDelimitation();
     }
 
+    /** Retourne la hauteur du bouton. */
     public int getHauteur() {
         return hauteur;
     }
 
+    /** Définit la hauteur du bouton et met à jour la délimitation. */
     public void setHauteur(int hauteur) {
         this.hauteur = hauteur;
         creationDelimitation();
     }
 
+    /** Indique si le bouton est actuellement enfoncé. */
     public boolean isSourisEnfonce() {
         return sourisEnfonce;
     }
 
+    /** Définit l'état d'enfoncement du bouton. */
     public void setSourisEnfonce(boolean sourisEnfonce) {
         this.sourisEnfonce = sourisEnfonce;
     }
 
+    /** Indique si la souris survole le bouton. */
     public boolean isSourisSurvol() {
         return sourisSurvol;
     }
 
+    /** Définit l'état de survol du bouton. */
     public void setSourisSurvol(boolean sourisSurvol) {
         this.sourisSurvol = sourisSurvol;
-    }
-
-    /** Charge les images du bouton (normal, survol, enfoncé) ; à surcharger par les sous-classes. */
-    protected void chargerImages() {
-      // TODO:Charger les images des boutons
     }
     private void drawBackground(Graphics g) {
       Graphics2D g2d = (Graphics2D) g;

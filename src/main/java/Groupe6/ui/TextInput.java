@@ -44,19 +44,19 @@ public class TextInput {
 
     /** Met à jour les valeurs affichées (couleurs, texte) ; à appeler par l’état avant draw. */
     public void update() {
-        borderColor = focused ? Color.BLUE : Color.GRAY;
+        borderColor = focused ? Color.BLUE : Color.WHITE;
         displayText = text.length() > 0 ? text.toString() : placeholder;
         textColor = text.length() == 0 ? Color.GRAY : Color.BLACK;
     }
 
     /** Dessine le champ à partir des valeurs précalculées par update(). */
     public void draw(Graphics g) {
-        g.setColor(Color.WHITE);
+        g.setColor(focused ? Color.WHITE : Color.GRAY);
         g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         g.setColor(borderColor);
         g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 18));
-        g.setColor(textColor);
+        g.setColor(focused ? textColor : Color.WHITE);
         int fy = bounds.y + (bounds.height + g.getFontMetrics().getAscent()) / 2 - 2;
         g.drawString(displayText, bounds.x + 8, fy);
     }
@@ -66,10 +66,12 @@ public class TextInput {
         return bounds.contains(x, y);
     }
 
+    /** Définit si le champ a le focus (affecte la couleur de la bordure). */
     public void setFocused(boolean focused) {
         this.focused = focused;
     }
 
+    /** Indique si le champ a actuellement le focus. */
     public boolean isFocused() {
         return focused;
     }
@@ -107,6 +109,7 @@ public class TextInput {
         text.setLength(0);
     }
 
+    /** Définit le texte du champ (tronqué à maxLength si nécessaire). */
     public void setText(String s) {
         text.setLength(0);
         if (s != null) {
@@ -115,7 +118,16 @@ public class TextInput {
         }
     }
 
+    /** Retourne la zone de délimitation du champ. */
     public Rectangle getBounds() {
         return bounds;
+    }
+
+    /** Met à jour la position et la taille du champ (pour repositionnement au resize). */
+    public void setBounds(int x, int y, int width, int height) {
+        bounds.x = x;
+        bounds.y = y;
+        bounds.width = width;
+        bounds.height = height;
     }
 }
