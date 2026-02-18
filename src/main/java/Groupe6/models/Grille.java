@@ -8,6 +8,8 @@ import java.util.List;
  * Gère l'état global, les règles et la validation.
  */
 public class Grille {
+    private List<GrilleObserver> observers = new ArrayList<>();
+
     private final int taille;
     private final Cellule[][] matriceCellules;
     private final List<ZoneCalcul> listeZones;
@@ -30,6 +32,33 @@ public class Grille {
         this.estComplete = false;
 
         initialiserCellules(nomFichier);
+    }
+
+    /**
+     * Ajoute un observateur à la liste des observateurs.
+     * 
+     * @param observer L'observateur à ajouter
+     */
+    public void ajouterObservateur(GrilleObserver observer) {
+        observers.add(observer);
+    }
+
+    /**
+     * Supprime un observateur de la liste.
+     * 
+     * @param observer L'observateur à supprimer
+     */
+    public void supprimerObservateur(GrilleObserver observer) {
+        observers.remove(observer);
+    }
+
+    /**
+     * Notifie tous les observateurs que la grille a changé.
+     */
+    public void notifierObservateurs() {
+        for (GrilleObserver obs : observers) {
+            obs.onGrilleChanged();
+        }
     }
 
     /**
@@ -78,6 +107,7 @@ public class Grille {
         // Sélectionner la nouvelle
         celluleSelectionnee = matriceCellules[ligne][colonne];
         celluleSelectionnee.setEstSelectionnee(true);
+        notifierObservateurs();
     }
 
     /**
@@ -98,6 +128,7 @@ public class Grille {
 
         cellule.setValeur(valeur);
         validerGrille();
+        notifierObservateurs();
     }
 
     /**
@@ -113,6 +144,7 @@ public class Grille {
 
         cellule.setValeur(0);
         validerGrille();
+        notifierObservateurs();
     }
 
     /**
@@ -269,6 +301,30 @@ public class Grille {
         if (estHorsLimites(ligne, colonne))
             return null;
         return matriceCellules[ligne][colonne];
+    }
+
+    /**
+     * Retourne la matrice complète des cellules.
+     * 
+     * @return la matrice des cellules
+     */
+    public Cellule[][] getMatriceCellules() {
+        return matriceCellules;
+    }
+
+    /**
+     * Retourne une liste plate de toutes les cellules de la grille.
+     * 
+     * @return la liste de toutes les cellules
+     */
+    public List<Cellule> getListeCellules() {
+        List<Cellule> liste = new ArrayList<>(taille * taille);
+        for (int i = 0; i < taille; i++) {
+            for (int j = 0; j < taille; j++) {
+                liste.add(matriceCellules[i][j]);
+            }
+        }
+        return liste;
     }
 
     /**
