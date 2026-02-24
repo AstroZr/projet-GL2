@@ -21,7 +21,7 @@ import Groupe6.utilz.LayoutScale;
  * @version 1.0
  * @since 2026-01-28
  */
-public class Start extends Etats implements MethodesEtats {
+public class Start extends Etats {
 
     private static final int LARGEUR_BOUTON = 250;
     private static final int HAUTEUR_BOUTON = 55;

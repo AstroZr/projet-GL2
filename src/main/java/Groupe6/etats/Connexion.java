@@ -10,7 +10,7 @@ import Groupe6.game.Game;
  * État « connexion » : écran de connexion au jeu avec fond animé.
  * Permet au joueur de se connecter avec son compte.
  */
-public class Connexion extends Etats implements MethodesEtats {
+public class Connexion extends Etats {
 
 
   private FondDegrade fond;

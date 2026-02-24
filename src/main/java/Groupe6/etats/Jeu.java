@@ -25,7 +25,9 @@ public class Jeu extends Etats implements MethodesEtats {
     private Grille grille;
     private VueGrille vueGrille;
     private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
-
+    
+    private FondDegrade fond;
+    
     public Jeu(Game game) {
         super(game);
         initClasses();
@@ -56,11 +58,14 @@ public class Jeu extends Etats implements MethodesEtats {
                 HAUTEUR_BOUTON,
                 EtatJeu.MENU,
                 "Retour"));
+
+        this.fond = FondDegrade.getInstance();
     }
 
     @Override
     public void update() {
         // Mettre à jour la logique du jeu si nécessaire
+        fond.update();
     }
 
     @Override
@@ -84,9 +89,7 @@ public class Jeu extends Etats implements MethodesEtats {
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
         
-        // Fond blanc ou couleur de fond
-        g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, Constants.game_width, Constants.game_height);
+        fond.draw(g);
         
         // Déléguer l'affichage à la vue grille
         vueGrille.draw(g);

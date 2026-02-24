@@ -17,12 +17,18 @@ import Groupe6.models.ZoneCalcul;
 public class VueGrille {
     
     private Grille grille;
-    private static final int TAILLE_CELLULE = 80;
-    private static final int OFFSET_X = 400;
-    private static final int OFFSET_Y = 150;
+    private static final int TAILLE_GRILLE = (int)(1080 / 1.5f);
+    private final int TAILLE_CELLULE ;
+    private static final int OFFSET_X = 40;
+    private static final int OFFSET_Y = (1080 - TAILLE_GRILLE) / 2;
     
     public VueGrille(Grille grille) {
         this.grille = grille;
+        TAILLE_CELLULE = TAILLE_GRILLE / grille.getTaille();
+        System.out.println("======================================");
+        System.out.println("Taille grille = " + TAILLE_GRILLE);
+        System.out.println("Taille cellule = " +TAILLE_CELLULE);
+        System.out.println("======================================");
     }
     
     /**
@@ -30,10 +36,6 @@ public class VueGrille {
      */
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        
-        // Fond
-        g2d.setColor(new Color(240, 240, 240));
-        g2d.fillRect(0, 0, 1920, 1080);
         
         // Dessiner la grille
         dessinerGrille(g2d);

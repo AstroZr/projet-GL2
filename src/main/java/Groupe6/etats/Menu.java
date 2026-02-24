@@ -15,7 +15,7 @@ import Groupe6.utilz.LayoutScale;
  * État « menu principal » : écran d’accueil avec boutons (jouer, paramètres, etc.).
  * Implémentation en cours ; les méthodes déléguent encore à UnsupportedOperationException.
  */
-public class Menu extends Etats implements MethodesEtats {
+public class Menu extends Etats {
 
     private static final int LARGEUR_BOUTON = 400;
     private static final int HAUTEUR_BOUTON = 55;

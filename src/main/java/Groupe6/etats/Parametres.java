@@ -14,7 +14,7 @@ import Groupe6.utilz.LayoutScale;
 /**
  * État « paramètres » : écran de configuration du jeu.
  */
-public class Parametres extends Etats implements MethodesEtats {
+public class Parametres extends Etats {
 
     private static final int LARGEUR_BOUTON = 200;
     private static final int HAUTEUR_BOUTON = 44;
