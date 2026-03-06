@@ -1,109 +1,206 @@
 package Groupe6.etats;
 
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
+import Groupe6.ui.BoutonConnexion;
+import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.HelpMethods;
+import Groupe6.models.SaveData;
+import Groupe6.utilz.SaveManager;
 
-/**
- * État « connexion » : écran de connexion au jeu avec fond animé.
- * Permet au joueur de se connecter avec son compte.
- */
 public class Connexion extends Etats implements MethodesEtats {
 
+    private static final int LOGO_DEFAULT_SIZE = 320;
+    private static final int LARGEUR_BOUTON = 400;
+    private static final int HAUTEUR_BOUTON = 55;
+    private static final int LARGEUR_CHAMP = 400;
+    private static final int HAUTEUR_CHAMP = 36;
+    private static final int MAX_PSEUDO = 20;
 
-  private FondDegrade fond;
+    private BufferedImage logo;
+    private BufferedImage nameAppImage;
+    private int logoX, logoY, logoSize;
+    private int nameAppX, nameAppY, nameAppWidth, nameAppHeight;
+    private int titleY;
+    private int titleFontSize;
+    private int centerX;
 
-  /**
-   * Constructeur de l'état de connexion.
-   */
-  public Connexion (Game game) {
-    super(game);
-    initClasses();
-  }
+    private TextInput textInput;
+    private FondDegrade fond;
+    private BoutonConnexion bouton;
 
-  private void initClasses() {
-    this.fond = FondDegrade.getInstance();
-    // int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-    // int cy = (int) (Constants.game_height * Constants.Ratios.Start.RATIO_START_FORM_Y);
-    
-  }
+    public Connexion(Game game) {
+        super(game);
+        initClasses();
+    }
 
-  /** Dessine le fond animé de l'écran de connexion. */
-  @Override
-  public void draw(Graphics g) {
-    ensureLayoutUpToDate();
-    fond.draw(g);
-  }
+    private void initClasses() {
+        fond = FondDegrade.getInstance();
+        logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
+        nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
-  /** Met à jour le fond animé (nuages). */
-  @Override
-  public void update() {
-    fond.update();
-  }
+        textInput = new TextInput(0, 0, LARGEUR_CHAMP, HAUTEUR_CHAMP, "Identifiant existant", MAX_PSEUDO);
+        bouton = new BoutonConnexion(0, 0, LARGEUR_BOUTON, HAUTEUR_BOUTON);
+    }
 
-  /** Recalcule le layout selon les nouvelles dimensions (vide pour l'instant). */
-  @Override
-  public void updateLayout(int gameWidth, int gameHeight) {
-    applyLayout(gameWidth, gameHeight);
-  }
+    @Override
+    public void update() {
+        fond.update();
+        textInput.update();
+    }
 
-  @Override
-  protected void applyLayout(int w, int h) {
-  }
+    @Override
+    public void updateLayout(int gameWidth, int gameHeight) {
+        applyLayout(gameWidth, gameHeight);
+    }
 
-  @Override
-  public void keyTyped(KeyEvent e) {
-  }
+    @Override
+    protected void applyLayout(int w, int h) {
+        float scaleX = (float) w / Constants.REF_WIDTH;
+        float scaleY = (float) h / Constants.REF_HEIGHT;
+        float scale = Math.min(scaleX, scaleY);
+        centerX = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        int cx = centerX;
 
-  @Override
-  public void keyReleased(KeyEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
-  }
+        logoSize = (int) (LOGO_DEFAULT_SIZE * scale);
+        logoX = cx - logoSize / 2;
+        logoY = (int) (h * Constants.Ratios.Creation.RATIO_LOGO_Y);
 
-  @Override
-  public void keyPressed(KeyEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
-  }
+        int gapLogoName = (int) (Constants.Ratios.Creation.ESPACEMENT_LOGO_NAME_REF * scale);
+        nameAppHeight = (int) (Constants.Ratios.Creation.NAME_APP_REF_HEIGHT * scale);
+        nameAppHeight = Math.max(1, nameAppHeight);
+        nameAppWidth = (nameAppImage != null && nameAppImage.getHeight() > 0)
+                ? nameAppHeight * nameAppImage.getWidth() / nameAppImage.getHeight()
+                : nameAppHeight;
+        nameAppWidth = Math.max(1, nameAppWidth);
+        nameAppX = cx - nameAppWidth / 2;
+        nameAppY = logoY + logoSize + gapLogoName;
 
-  @Override
-  public void mouseMoved(MouseEvent e) {
+        int gapNameTitle = (int) (Constants.Ratios.Creation.ESPACEMENT_NAME_TITLE_REF * scale);
+        titleFontSize = (int) (Constants.Ratios.Creation.TITLE_FONT_SIZE_REF * scale);
+        titleY = nameAppY + nameAppHeight + gapNameTitle;
 
-  }
+        int gapTitleChamp = (int) (Constants.Ratios.Creation.ESPACEMENT_TITLE_CHAMP_REF * scale);
+        int gapChampBouton = (int) (Constants.Ratios.Creation.ESPACEMENT_CHAMP_BOUTON_REF * scale);
 
-  @Override
-  public void mouseDragged(MouseEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'mouseDragged'");
-  }
+        int cw = (int) (LARGEUR_CHAMP * scaleX);
+        int ch = (int) (HAUTEUR_CHAMP * scaleY);
+        int bw = (int) (LARGEUR_BOUTON * scaleX);
+        int bh = (int) (HAUTEUR_BOUTON * scaleY);
 
-  @Override
-  public void mouseClicked(MouseEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'mouseClicked'");
-  }
+        int champY = titleY + titleFontSize + gapTitleChamp;
+        int buttonY = champY + ch + gapChampBouton;
 
-  @Override
-  public void mousePressed(MouseEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'mousePressed'");
-  }
+        textInput.setBounds(cx - cw / 2, champY, cw, ch);
+        bouton.setX(cx - bw / 2);
+        bouton.setY(buttonY);
+        bouton.setLargeur(bw);
+        bouton.setHauteur(bh);
+    }
 
-  @Override
-  public void mouseReleased(MouseEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
-  }
+    private void ensureImagesLoaded() {
+        boolean needLayout = false;
+        if (logo == null) {
+            logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
+            if (logo != null) needLayout = true;
+        }
+        if (nameAppImage == null) {
+            nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
+            if (nameAppImage != null) needLayout = true;
+        }
+        if (needLayout) {
+            lastLayoutWidth = -1;
+        }
+    }
 
-  @Override
-  public void updateTexts() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updateTexts'");
-  }
-  
+    @Override
+    public void draw(Graphics g) {
+        ensureImagesLoaded();
+        ensureLayoutUpToDate();
+        if (lastLayoutWidth == -1) {
+            ensureLayoutUpToDate();
+        }
+        fond.draw(g);
 
+        if (logo != null) {
+            g.drawImage(logo, logoX, logoY, logoSize, logoSize, null);
+        }
+        if (nameAppImage != null) {
+            g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
+        }
+        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, Math.max(12, titleFontSize)));
+        g.setColor(java.awt.Color.BLACK);
+        int tw = g.getFontMetrics().stringWidth("Connexion");
+        g.drawString("Connexion", centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
+
+        textInput.draw(g);
+        bouton.draw(g);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        textInput.handleKeyTyped(e);
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {}
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        bouton.setSourisSurvol(isIn(e, bouton));
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {}
+
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (isIn(e, bouton)) {
+            bouton.setSourisEnfonce(true);
+        }
+        if (textInput.contains(e.getX(), e.getY())) {
+            textInput.setFocused(true);
+            return;
+        }
+        textInput.setFocused(false);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (bouton.isSourisEnfonce() && isIn(e, bouton)) {
+            
+            // --- LA MAGIE DU CHARGEMENT SE PASSE ICI ---
+            String pseudo = getPseudoSaisi();
+            if (!pseudo.isEmpty()) {
+                // 1. On demande au manager de lire le fichier JSON
+                SaveData dataChargee = SaveManager.getInstance().chargementDonnees(pseudo);
+                
+                // 2. On prévient le jeu global que ce profil est maintenant actif
+                game.setCurrentSave(dataChargee);
+            }
+            // ----------------------------------------------
+            
+            bouton.appliquerAction(); // Transition vers le Menu
+        }
+        bouton.setSourisEnfonce(false);
+    }
+
+    @Override
+    public void updateTexts() {}
+
+    public String getPseudoSaisi() {
+        return textInput.getTextTrimmed();
+    }
 }

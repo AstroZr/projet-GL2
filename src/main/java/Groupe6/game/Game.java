@@ -9,22 +9,19 @@ import java.util.Map;
 
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
-// import Groupe6.etats.Grille;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
+import Groupe6.models.SaveData;
+import Groupe6.utilz.SaveManager;
 
-/**
- * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
- */
 public class Game implements Runnable {
 
     private final GamePanel gamePanel;
     private final GameWindow gameWindow;
     private Thread gameLoopThread;
-
     private static final int TARGET_UPS = 200;
     private static final int TARGET_FPS = 120;
 
@@ -38,9 +35,10 @@ public class Game implements Runnable {
     private Parametres parametres;
     private Connexion connexion;
     private Creation creation;
-    // private Grille grille;
+    
+    // Le profil actuellement chargé !
+    private SaveData currentSave;
 
-    /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
 
     public Game() {
@@ -49,7 +47,6 @@ public class Game implements Runnable {
         gameWindow = new GameWindow(gamePanel, this);
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
-
         startGameLoop();
     }
 
@@ -58,14 +55,13 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.START, start);
         menu = new Menu(this);
         stateByEnum.put(EtatJeu.MENU, menu);
-        stateByEnum.put(EtatJeu.GRILLE, menu); // TODO: grille
+        stateByEnum.put(EtatJeu.GRILLE, menu);
         parametres = new Parametres(this);
         stateByEnum.put(EtatJeu.PARAMETRES, parametres);
         connexion = new Connexion(this);
         stateByEnum.put(EtatJeu.CONNEXION, connexion);
         creation = new Creation(this);
         stateByEnum.put(EtatJeu.CREATION, creation);
-        // grille = new Grille(this); stateByEnum.put(EtatJeu.GRILLE, grille);
     }
 
     private void startGameLoop() {
@@ -73,7 +69,6 @@ public class Game implements Runnable {
         gameLoopThread.start();
     }
 
-    /** Retourne l'état courant (pour update, render et délégation clavier/souris). */
     public MethodesEtats getCurrentState() {
         EtatJeu e = EtatJeu.getEtatActuel();
         if (e == EtatJeu.QUITTER) {
@@ -93,12 +88,16 @@ public class Game implements Runnable {
 
     public void render(Graphics g) {
         getCurrentState().draw(g);
-
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.PLAIN, 14));
             g2d.drawString("FPS: " + currentFPS + " | UPS: " + currentUPS, 10, 20);
+            
+            // Petit debug pour voir qui joue
+            if (currentSave != null) {
+                g2d.drawString("Joueur: " + currentSave.pseudonyme, 10, 40);
+            }
         }
     }
 
@@ -106,7 +105,6 @@ public class Game implements Runnable {
         gameWindow.handleWindowClosing();
     }
 
-    /** Boucle principale : UPS fixe (accumulateur), rendu découplé, limitation FPS. */
     @Override
     public void run() {
         final double NANOS_PER_UPDATE = 1_000_000_000.0 / TARGET_UPS;
@@ -137,6 +135,7 @@ public class Game implements Runnable {
             long nanosPerFrame = 1_000_000_000L / TARGET_FPS;
             long frameTime = System.nanoTime() - currentTime;
             long sleepTime = (nanosPerFrame - frameTime) / 1_000_000;
+
             if (sleepTime > 0) {
                 try {
                     Thread.sleep(sleepTime);
@@ -157,21 +156,16 @@ public class Game implements Runnable {
         }
     }
     
-    /** Sauvegarde l’état du jeu ; appelée avant fermeture (ex. dialogue fenêtre). */
+    // ON UTILISE LE SAVEMANAGER ICI !
     public void saveGame() {
-        try {
-            System.out.println("Sauvegarde du jeu en cours...");
-            
-            // Simuler une sauvegarde
-            Thread.sleep(500);
-            System.out.println("Jeu sauvegardé avec succès !");
-        } catch (InterruptedException e) {
-            System.err.println("Erreur lors de la sauvegarde : " + e.getMessage());
-            Thread.currentThread().interrupt();
+        if (currentSave != null) {
+            System.out.println("Sauvegarde du jeu en cours pour " + currentSave.pseudonyme + "...");
+            SaveManager.getInstance().sauvegarderJeu(currentSave);
+        } else {
+            System.out.println("Aucun joueur connecté, rien à sauvegarder.");
         }
     }
     
-    /** Arrête le thread de jeu et libère les ressources. */
     public void cleanup() {
         if (gameLoopThread != null && gameLoopThread.isAlive()) {
             gameLoopThread.interrupt();
@@ -181,26 +175,15 @@ public class Game implements Runnable {
                 Thread.currentThread().interrupt();
             }
         }
-        System.out.println("Nettoyage des ressources terminé.");
+        System.out.println("Nettoyage terminé.");
     }
     
-    public GamePanel getGamePanel() {
-        return gamePanel;
-    }
-
-    public Start getStart() {
-        return start;
-    }
-
-    public Menu getMenu() {
-        return menu;
-    }
-
-    public Parametres getParametres() {
-        return parametres;
-    }
-
-    // public Grille getGrille() {
-    //     return grille;
-    // }
+    // GETTERS & SETTERS
+    public SaveData getCurrentSave() { return currentSave; }
+    public void setCurrentSave(SaveData save) { this.currentSave = save; }
+    
+    public GamePanel getGamePanel() { return gamePanel; }
+    public Start getStart() { return start; }
+    public Menu getMenu() { return menu; }
+    public Parametres getParametres() { return parametres; }
 }

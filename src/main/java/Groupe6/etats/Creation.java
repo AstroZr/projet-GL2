@@ -11,10 +11,9 @@ import Groupe6.ui.BoutonCreation;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.models.SaveData;
+import Groupe6.utilz.SaveManager;
 
-/**
- * État création de compte : logo, titre app, titre « Création », champ identifiant, bouton. Fond inchangé.
- */
 public class Creation extends Etats implements MethodesEtats {
 
     private static final int LOGO_DEFAULT_SIZE = 320;
@@ -30,7 +29,6 @@ public class Creation extends Etats implements MethodesEtats {
     private int nameAppX, nameAppY, nameAppWidth, nameAppHeight;
     private int titleY;
     private int titleFontSize;
-    /** Centre horizontal calculé dans applyLayout, cohérent avec logo/nom. */
     private int centerX;
 
     private TextInput textInput;
@@ -62,7 +60,6 @@ public class Creation extends Etats implements MethodesEtats {
         applyLayout(gameWidth, gameHeight);
     }
 
-    /** Bloc logo → nom app → titre « Création » → champ → bouton, centré, scaling depuis Constants. */
     @Override
     protected void applyLayout(int w, int h) {
         float scaleX = (float) w / Constants.REF_WIDTH;
@@ -91,6 +88,7 @@ public class Creation extends Etats implements MethodesEtats {
 
         int gapTitleChamp = (int) (Constants.Ratios.Creation.ESPACEMENT_TITLE_CHAMP_REF * scale);
         int gapChampBouton = (int) (Constants.Ratios.Creation.ESPACEMENT_CHAMP_BOUTON_REF * scale);
+
         int cw = (int) (LARGEUR_CHAMP * scaleX);
         int ch = (int) (HAUTEUR_CHAMP * scaleY);
         int bw = (int) (LARGEUR_BOUTON * scaleX);
@@ -151,12 +149,10 @@ public class Creation extends Etats implements MethodesEtats {
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
-    }
+    public void keyReleased(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
-    }
+    public void keyPressed(KeyEvent e) {}
 
     @Override
     public void mouseMoved(MouseEvent e) {
@@ -164,12 +160,10 @@ public class Creation extends Etats implements MethodesEtats {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-    }
+    public void mouseDragged(MouseEvent e) {}
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -186,14 +180,28 @@ public class Creation extends Etats implements MethodesEtats {
     @Override
     public void mouseReleased(MouseEvent e) {
         if (bouton.isSourisEnfonce() && isIn(e, bouton)) {
+            
+            // --- LA MAGIE DE LA SAUVEGARDE SE PASSE ICI ---
+            String pseudo = getPseudoSaisi();
+            if (!pseudo.isEmpty()) {
+                // 1. On crée les données pour ce joueur
+                SaveData nouvellePartie = new SaveData(pseudo);
+                
+                // 2. On sauvegarde en JSON
+                SaveManager.getInstance().sauvegarderJeu(nouvellePartie);
+                
+                // 3. On prévient le jeu global que c'est ce joueur qui joue
+                game.setCurrentSave(nouvellePartie);
+            }
+            // ----------------------------------------------
+            
             bouton.appliquerAction();
         }
         bouton.setSourisEnfonce(false);
     }
 
     @Override
-    public void updateTexts() {
-    }
+    public void updateTexts() {}
 
     public String getPseudoSaisi() {
         return textInput.getTextTrimmed();

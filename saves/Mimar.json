@@ -1,0 +1,10 @@
+{
+  "pseudonyme": "Mimar",
+  "parametresGlobaux": {
+    "langues": "fr",
+    "volumeEffetSonore": 50,
+    "langueMusique": 50,
+    "modeSombre": true
+  },
+  "historiqueNiveau": []
+}
