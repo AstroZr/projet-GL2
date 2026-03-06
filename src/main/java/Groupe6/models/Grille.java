@@ -14,6 +14,8 @@ public class Grille {
     private final Cellule[][] matriceCellules;
     private final List<ZoneCalcul> listeZones;
     private Cellule celluleSelectionnee;
+    private int indexActuel = -1;
+    private List<int[]> historique = new java.util.ArrayList<>();
 
     // Etat du jeu
     private boolean estComplete;
@@ -111,6 +113,24 @@ public class Grille {
     }
 
     /**
+     * enregistre un coup
+     * @param ligne ligne du coup
+     * @param colonne colonne du coup 
+     * @param nouvelleValeur valeur modifier
+     */
+    private void enregistrerCoup(int ligne, int colonne, int nouvelleValeur) {
+        int ancienneValeur = matriceCellules[ligne][colonne].getValeur();
+        
+        // Si on est au milieu de l'historique, on supprime le futur
+        if (indexActuel < historique.size() - 1) {
+            historique.subList(indexActuel + 1, historique.size()).clear();
+        }
+        
+        historique.add(new int[]{ligne, colonne, ancienneValeur, nouvelleValeur});
+        indexActuel++;
+    }
+
+    /**
      * Ajoute un chiffre dans la cellule sélectionnée (ou une cellule spécifique).
      * Vérifie immédiatement les contraintes de base (doublons).
      * 
@@ -126,6 +146,7 @@ public class Grille {
         if (!cellule.estModifiable())
             return; // Si on a des cases pré-remplies (exemple le tuto ?)
 
+        enregistrerCoup(ligne,colonne,valeur); //enregistre la modification
         cellule.setValeur(valeur);
         validerGrille();
         notifierObservateurs();
@@ -140,8 +161,9 @@ public class Grille {
 
         Cellule cellule = matriceCellules[ligne][colonne];
         if (!cellule.estModifiable())
-            return;
+            return; 
 
+        enregistrerCoup(ligne,colonne,0); //enregistre la modification
         cellule.setValeur(0);
         validerGrille();
         notifierObservateurs();
@@ -352,5 +374,67 @@ public class Grille {
      */
     public boolean estComplete() {
         return estComplete;
+    }
+
+    /**
+     * recul dans la pile de coup 
+     */
+    public void retourArriere() {
+        if (indexActuel < 0) return;
+        
+        int[] coup = historique.get(indexActuel);
+        matriceCellules[coup[0]][coup[1]].setValeur(coup[2]); // Restaure ancienneValeur
+        indexActuel--;
+        
+        validerGrille();
+        notifierObservateurs();
+    }
+
+    /**
+     * avance dans la pile de coup 
+     */
+    public void retourAvant() {
+        if (indexActuel >= historique.size() - 1) return;
+        
+        indexActuel++;
+        int[] coup = historique.get(indexActuel);
+        matriceCellules[coup[0]][coup[1]].setValeur(coup[3]); // Applique nouvelleValeur
+        
+        validerGrille();
+        notifierObservateurs();
+    }
+
+
+    /**
+     * ajoute un candidat dans une cellule donne
+     * @param ligne   ligne de la cellule
+     * @param colonne colonne de la cellule
+     * @param valeur  valeur du candidat à ajouter
+     */
+    public void ajouterCandidat(int ligne, int colonne, int valeur) {
+        if (estHorsLimites(ligne, colonne)) return;
+
+        Cellule cellule = matriceCellules[ligne][colonne];
+        // On n'ajoute que si la valeur n'est pas déjà présente
+        if (!cellule.getListeCandidat().contains(valeur)) {
+            cellule.getListeCandidat().add(valeur);
+            notifierObservateurs();
+        }
+    }
+
+    /**
+     * supprime un candidat d une cellule donnee
+     * @param ligne   ligne de la cellule
+     * @param colonne colonne de la cellule
+     * @param valeur  valeur du candidat à supprimer
+     */
+    public void supprimerCandidat(int ligne, int colonne, int valeur) {
+        if (estHorsLimites(ligne, colonne)) return;
+
+        Cellule cellule = matriceCellules[ligne][colonne];
+        if (cellule.getListeCandidat().contains(valeur)) {
+            cellule.getListeCandidat().remove(Integer.valueOf(valeur));
+            notifierObservateurs();
+        }
     }
 }
