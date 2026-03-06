@@ -36,7 +36,6 @@ public class Creation extends Etats implements MethodesEtats {
 
     private LayoutScale layoutScale;
     private TextInput textInput;
-    private FondDegrade fond;
     private BoutonCreation bouton;
 
     public Creation(Game game) {
@@ -46,7 +45,6 @@ public class Creation extends Etats implements MethodesEtats {
 
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
-        fond = FondDegrade.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
@@ -56,7 +54,7 @@ public class Creation extends Etats implements MethodesEtats {
 
     @Override
     public void update() {
-        fond.update();
+        getFond().update();
         textInput.update();
     }
 
@@ -123,7 +121,7 @@ public class Creation extends Etats implements MethodesEtats {
         if (lastLayoutWidth == -1) {
             ensureLayoutUpToDate();
         }
-        fond.draw(g);
+        getFond().draw(g);
 
         if (logo != null) {
             g.drawImage(logo, logoX, logoY, logoSize, logoSize, null);

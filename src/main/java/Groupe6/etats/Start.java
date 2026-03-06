@@ -21,7 +21,7 @@ import Groupe6.utilz.LayoutScale;
  * @version 1.0
  * @since 2026-01-28
  */
-public class Start extends Etats implements MethodesEtats {
+public class Start extends Etats {
 
     private static final int LARGEUR_BOUTON = 250;
     private static final int HAUTEUR_BOUTON = 55;
@@ -45,7 +45,6 @@ public class Start extends Etats implements MethodesEtats {
     private int nameAppWidth;
     private int nameAppHeight;
 
-    private FondDegrade fondDegrade;
     private LayoutScale layoutScale;
 
     public Start(Game game) {
@@ -56,7 +55,6 @@ public class Start extends Etats implements MethodesEtats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
-        fondDegrade = FondDegrade.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
@@ -73,7 +71,7 @@ public class Start extends Etats implements MethodesEtats {
 
     @Override
     public void update() {
-        fondDegrade.update();
+        getFond().update();
         logoFloatScale = computeLogoFloatScale();
     }
 
@@ -121,7 +119,7 @@ public class Start extends Etats implements MethodesEtats {
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
-        fondDegrade.draw(g);
+        getFond().draw(g);
 
         displayedLogoScale += (logoFloatScale - displayedLogoScale) * LOGO_DISPLAY_LERP;
         int drawSize = (int) (logoSize * displayedLogoScale);
