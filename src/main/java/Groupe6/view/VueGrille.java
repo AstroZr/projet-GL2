@@ -15,13 +15,13 @@ import Groupe6.models.ZoneCalcul;
  * Vue responsable de l'affichage de la grille de jeu.
  */
 public class VueGrille {
-    
+
     private Grille grille;
     private static final int TAILLE_GRILLE = (int)(1080 / 1.5f);
     private final int TAILLE_CELLULE ;
     private static final int OFFSET_X = 40;
     private static final int OFFSET_Y = (1080 - TAILLE_GRILLE) / 2;
-    
+
     public VueGrille(Grille grille) {
         this.grille = grille;
         TAILLE_CELLULE = TAILLE_GRILLE / grille.getTaille();
@@ -30,28 +30,28 @@ public class VueGrille {
         System.out.println("Taille cellule = " +TAILLE_CELLULE);
         System.out.println("======================================");
     }
-    
+
     /**
      * Dessine la grille à l'écran.
      */
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        
+
         // Dessiner la grille
         dessinerGrille(g2d);
         dessinerZones(g2d);
     }
-    
+
     private void dessinerGrille(Graphics2D g2d) {
         int taille = grille.getTaille();
-        
+
         for (int ligne = 0; ligne < taille; ligne++) {
             for (int col = 0; col < taille; col++) {
                 int x = OFFSET_X + col * TAILLE_CELLULE;
                 int y = OFFSET_Y + ligne * TAILLE_CELLULE;
-                
+
                 Cellule cellule = grille.getCellule(ligne, col);
-                
+
                 // Fond de la cellule
                 if (cellule.estSelectionnee()) {
                     g2d.setColor(new Color(100, 150, 255, 150));
@@ -59,7 +59,7 @@ public class VueGrille {
                     g2d.setColor(Color.WHITE);
                 }
                 g2d.fillRect(x, y, TAILLE_CELLULE, TAILLE_CELLULE);
-                
+
                 // Bordure
                 if (cellule.estErreurDuplique() || !cellule.estValide()) {
                     g2d.setColor(Color.RED);
@@ -69,7 +69,7 @@ public class VueGrille {
                     g2d.setStroke(new java.awt.BasicStroke(1));
                 }
                 g2d.drawRect(x, y, TAILLE_CELLULE, TAILLE_CELLULE);
-                
+
                 // Afficher la valeur si présente
                 int valeur = cellule.getValeur();
                 if (valeur != 0) {
@@ -87,7 +87,7 @@ public class VueGrille {
             }
         }
     }
-    
+
     private void dessinerZones(Graphics2D g2d) {
         g2d.setStroke(new java.awt.BasicStroke(3));
         g2d.setColor(new Color(0, 100, 200));
@@ -99,20 +99,20 @@ public class VueGrille {
             g2d.drawString(zone.getValeurCible() + zone.getTypeOperation().getSymbole(), x + 3, y + 15);
         }
     }
-    
+
     /**
      * Gère le clic de souris sur la grille.
      */
     public void mouseClicked(MouseEvent e) {
         int col = (e.getX() - OFFSET_X) / TAILLE_CELLULE;
         int ligne = (e.getY() - OFFSET_Y) / TAILLE_CELLULE;
-        
+
         int taille = grille.getTaille();
         if (ligne >= 0 && ligne < taille && col >= 0 && col < taille) {
             grille.selectionnerCellule(ligne, col);
         }
     }
-    
+
     /**
      * Gère la saisie de caractères (chiffres).
      */
@@ -128,7 +128,7 @@ public class VueGrille {
             }
         }
     }
-    
+
     /**
      * Gère les touches pressées (suppression).
      */
