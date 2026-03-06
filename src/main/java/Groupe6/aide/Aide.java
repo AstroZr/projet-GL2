@@ -1,17 +1,17 @@
 package Groupe6.aide;
 
 public abstract class Aide{
-    protected int numero;
-    protected int nbUtilisation;
+    protected int id;
+    protected int nbUtilisation = 0;
     protected AideTextuel aideTextuel;
     protected AideVisuel aideVisuel;
 
-    Aide(int numero){
-        this.numero = numero; // to continue
+    public Aide(int id){
+        this.id = id;
     }
 
-    public int getNumero(){
-        return numero;
+    public int getid(){
+        return id;
     }
 
     public int getNbUtilisation(){
