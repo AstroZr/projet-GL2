@@ -9,6 +9,7 @@ import java.util.Map;
 
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
+import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
@@ -17,11 +18,15 @@ import Groupe6.etats.Creation;
 import Groupe6.models.SaveData;
 import Groupe6.utilz.SaveManager;
 
+/**
+ * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
+ */
 public class Game implements Runnable {
 
     private final GamePanel gamePanel;
     private final GameWindow gameWindow;
     private Thread gameLoopThread;
+    
     private static final int TARGET_UPS = 200;
     private static final int TARGET_FPS = 120;
 
@@ -35,10 +40,12 @@ public class Game implements Runnable {
     private Parametres parametres;
     private Connexion connexion;
     private Creation creation;
+    private Jeu jeu;
     
     // Le profil actuellement chargé !
     private SaveData currentSave;
 
+    /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
 
     public Game() {
@@ -47,6 +54,7 @@ public class Game implements Runnable {
         gameWindow = new GameWindow(gamePanel, this);
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
+
         startGameLoop();
     }
 
@@ -55,13 +63,16 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.START, start);
         menu = new Menu(this);
         stateByEnum.put(EtatJeu.MENU, menu);
-        stateByEnum.put(EtatJeu.GRILLE, menu);
         parametres = new Parametres(this);
         stateByEnum.put(EtatJeu.PARAMETRES, parametres);
         connexion = new Connexion(this);
         stateByEnum.put(EtatJeu.CONNEXION, connexion);
         creation = new Creation(this);
         stateByEnum.put(EtatJeu.CREATION, creation);
+        
+        // La nouvelle grille ajoutée par tes camarades !
+        jeu = new Jeu(this);
+        stateByEnum.put(EtatJeu.GRILLE, jeu);
     }
 
     private void startGameLoop() {
@@ -69,6 +80,7 @@ public class Game implements Runnable {
         gameLoopThread.start();
     }
 
+    /** Retourne l'état courant (pour update, render et délégation clavier/souris). */
     public MethodesEtats getCurrentState() {
         EtatJeu e = EtatJeu.getEtatActuel();
         if (e == EtatJeu.QUITTER) {
@@ -88,6 +100,7 @@ public class Game implements Runnable {
 
     public void render(Graphics g) {
         getCurrentState().draw(g);
+
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);
@@ -105,6 +118,7 @@ public class Game implements Runnable {
         gameWindow.handleWindowClosing();
     }
 
+    /** Boucle principale : UPS fixe (accumulateur), rendu découplé, limitation FPS. */
     @Override
     public void run() {
         final double NANOS_PER_UPDATE = 1_000_000_000.0 / TARGET_UPS;
@@ -135,7 +149,6 @@ public class Game implements Runnable {
             long nanosPerFrame = 1_000_000_000L / TARGET_FPS;
             long frameTime = System.nanoTime() - currentTime;
             long sleepTime = (nanosPerFrame - frameTime) / 1_000_000;
-
             if (sleepTime > 0) {
                 try {
                     Thread.sleep(sleepTime);
@@ -156,7 +169,7 @@ public class Game implements Runnable {
         }
     }
     
-    // ON UTILISE LE SAVEMANAGER ICI !
+    /** Sauvegarde l’état du jeu ; appelée avant fermeture (ex. dialogue fenêtre). */
     public void saveGame() {
         if (currentSave != null) {
             System.out.println("Sauvegarde du jeu en cours pour " + currentSave.pseudonyme + "...");
@@ -166,6 +179,7 @@ public class Game implements Runnable {
         }
     }
     
+    /** Arrête le thread de jeu et libère les ressources. */
     public void cleanup() {
         if (gameLoopThread != null && gameLoopThread.isAlive()) {
             gameLoopThread.interrupt();
@@ -175,7 +189,7 @@ public class Game implements Runnable {
                 Thread.currentThread().interrupt();
             }
         }
-        System.out.println("Nettoyage terminé.");
+        System.out.println("Nettoyage des ressources terminé.");
     }
     
     // GETTERS & SETTERS
@@ -186,4 +200,5 @@ public class Game implements Runnable {
     public Start getStart() { return start; }
     public Menu getMenu() { return menu; }
     public Parametres getParametres() { return parametres; }
+    public Jeu getJeu() { return jeu; }
 }
