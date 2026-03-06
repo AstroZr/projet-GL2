@@ -82,6 +82,7 @@ public class Jeu extends Etats {
       boutons.get(0).setX(cx - LARGEUR_BOUTON / 2);
       boutons.get(0).setY(cy);
     }
+    vueGrille.applyLayout(w, h);
   }
 
   @Override
