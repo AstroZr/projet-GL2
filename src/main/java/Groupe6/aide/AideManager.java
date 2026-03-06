@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class AideManager{
     private List<Aide> aides;
 
-    public static void main(String args[]){
-
+    public AideManager(){
+        this.aides = new ArrayList<>();
     }
 }

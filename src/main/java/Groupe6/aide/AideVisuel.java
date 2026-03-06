@@ -15,7 +15,7 @@ public class AideVisuel implements Iterable<EffetVisuel>{
         this.effetsVisuels = new ArrayList<>(aideVisuel.getEffeftsVisuels());
     }
 
-    public void add(EffetVisuels effetVisuels){
+    public void add(EffetVisuel effetVisuels){
         this.effetsVisuels.add(effetVisuels);
     }
 
@@ -23,7 +23,7 @@ public class AideVisuel implements Iterable<EffetVisuel>{
         return new ArrayList<EffetVisuel>(this.effetsVisuels);
     }
 
-    public Iterator<Effetvisuel> iterator(){
-        return this.effetVisuels.iterator();
+    public Iterator<EffetVisuel> iterator(){
+        return this.effetsVisuels.iterator();
     }
 }
