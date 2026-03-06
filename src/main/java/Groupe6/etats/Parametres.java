@@ -19,7 +19,6 @@ public class Parametres extends Etats {
     private static final int LARGEUR_BOUTON = 200;
     private static final int HAUTEUR_BOUTON = 44;
 
-    private FondDegrade fond;
     private LayoutScale layoutScale;
 
     public Parametres(Game game) {
@@ -30,7 +29,6 @@ public class Parametres extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
-        this.fond = FondDegrade.getInstance();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         int cx = layoutScale.centerX();
@@ -44,7 +42,7 @@ public class Parametres extends Etats {
     /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
-        fond.update();
+        getFond().update();
     }
 
     @Override
@@ -64,7 +62,7 @@ public class Parametres extends Etats {
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
-        fond.draw(g);
+        getFond().draw(g);
         for (Bouton b : boutons) {
             b.draw(g);
         }

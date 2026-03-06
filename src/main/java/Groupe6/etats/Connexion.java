@@ -13,8 +13,6 @@ import Groupe6.game.Game;
 public class Connexion extends Etats {
 
 
-  private FondDegrade fond;
-
   /**
    * Constructeur de l'état de connexion.
    */
@@ -24,20 +22,19 @@ public class Connexion extends Etats {
   }
 
   private void initClasses() {
-    this.fond = FondDegrade.getInstance();
   }
 
   /** Dessine le fond animé de l'écran de connexion. */
   @Override
   public void draw(Graphics g) {
     ensureLayoutUpToDate();
-    fond.draw(g);
+    getFond().draw(g);
   }
 
   /** Met à jour le fond animé (nuages). */
   @Override
   public void update() {
-    fond.update();
+    getFond().update();
   }
 
   @Override

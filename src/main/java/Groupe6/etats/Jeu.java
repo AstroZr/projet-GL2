@@ -25,8 +25,6 @@ public class Jeu extends Etats {
   private VueGrille vueGrille;
   private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
 
-  private FondDegrade fond;
-
   public Jeu(Game game) {
     super(game);
     initClasses();
@@ -58,13 +56,12 @@ public class Jeu extends Etats {
         EtatJeu.MENU,
         "Retour"));
 
-    this.fond = FondDegrade.getInstance();
   }
 
   @Override
   public void update() {
     // Mettre à jour la logique du jeu si nécessaire
-    fond.update();
+    getFond().update();
   }
 
   @Override
@@ -89,7 +86,7 @@ public class Jeu extends Etats {
   public void draw(Graphics g) {
     ensureLayoutUpToDate();
 
-    fond.draw(g);
+    getFond().draw(g);
 
     // Déléguer l'affichage à la vue grille
     vueGrille.draw(g);

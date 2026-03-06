@@ -45,7 +45,6 @@ public class Start extends Etats {
     private int nameAppWidth;
     private int nameAppHeight;
 
-    private FondDegrade fondDegrade;
     private LayoutScale layoutScale;
 
     public Start(Game game) {
@@ -56,7 +55,6 @@ public class Start extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
-        fondDegrade = FondDegrade.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
@@ -73,7 +71,7 @@ public class Start extends Etats {
 
     @Override
     public void update() {
-        fondDegrade.update();
+        getFond().update();
         logoFloatScale = computeLogoFloatScale();
     }
 
@@ -121,7 +119,7 @@ public class Start extends Etats {
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
-        fondDegrade.draw(g);
+        getFond().draw(g);
 
         displayedLogoScale += (logoFloatScale - displayedLogoScale) * LOGO_DISPLAY_LERP;
         int drawSize = (int) (logoSize * displayedLogoScale);
