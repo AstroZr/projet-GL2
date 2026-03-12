@@ -115,11 +115,47 @@ public class SaveManager {
         return null;
     }
 
-    public static void sauvegarderPartie() {
+    public static void sauvegarderPartie(String nomJoueur, String nomSauvegarde, PartieSauvegardee partie) {
+        Map<String, String> annuaire = chargerAnnuaire();
         
+        if (!annuaire.containsKey(nomJoueur)) {
+            return;
+        }
+
+        String idDossier = annuaire.get(nomJoueur);
+        String dossierJoueur = SAVE_FOLDER + idDossier + "/";
+        String cheminFichier = dossierJoueur + nomSauvegarde + ".json";
+
+        try {
+            Files.createDirectories(Paths.get(dossierJoueur));
+            
+            try (FileWriter writer = new FileWriter(cheminFichier)) {
+                gson.toJson(partie, writer);
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
-    public static void chargerPartie() {
+    public static PartieSauvegardee chargerPartie(String nomJoueur, String nomSauvegarde) {
+        Map<String, String> annuaire = chargerAnnuaire();
         
+        if (!annuaire.containsKey(nomJoueur)) {
+            return null;
+        }
+
+        String idDossier = annuaire.get(nomJoueur);
+        String cheminFichier = SAVE_FOLDER + idDossier + "/" + nomSauvegarde + ".json";
+
+        if (Files.exists(Paths.get(cheminFichier))) {
+            try (FileReader reader = new FileReader(cheminFichier)) {
+                return gson.fromJson(reader, PartieSauvegardee.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return null;
     }
 }
