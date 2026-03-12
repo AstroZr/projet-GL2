@@ -9,14 +9,16 @@ public class PartieSauvegardee {
 
     private Cellule[][] matriceCellules;
     private List<int[]> historique;
+    private long tempsEcoule;
 
     public PartieSauvegardee() {
         this.historique = new ArrayList<>();
     }
 
-    public PartieSauvegardee(Cellule[][] matriceCellules, List<int[]> historique) {
+    public PartieSauvegardee(Cellule[][] matriceCellules, List<int[]> historique, long tempsEcoule) {
         this.matriceCellules = matriceCellules;
         this.historique = historique;
+        this.tempsEcoule = tempsEcoule;
     }
 
     public Cellule[][] getMatriceCellules() {
@@ -33,5 +35,13 @@ public class PartieSauvegardee {
 
     public void setHistorique(List<int[]> historique) {
         this.historique = historique;
+    }
+
+    public long getTempsEcoule() {
+        return tempsEcoule;
+    }
+
+    public void setTempsEcoule(long tempsEcoule) {
+        this.tempsEcoule = tempsEcoule;
     }
 }

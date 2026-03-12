@@ -18,6 +18,7 @@ public class SaveManager {
     private static final String SAVE_FOLDER = "saveGame/";
     private static final String SETTINGS_FILE = "settings.json";
     private static final String ANNUAIRE_FILE = "annuaire.json";
+    private static final String BEST_TIMES_FILE = "meilleurs_temps.json";
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -157,5 +158,62 @@ public class SaveManager {
         }
         
         return null;
+    }
+
+    public static Map<String, Long> chargerMeilleursTemps(String nomJoueur) {
+        Map<String, String> annuaire = chargerAnnuaire();
+        
+        if (!annuaire.containsKey(nomJoueur)) {
+            return new HashMap<>();
+        }
+
+        String idDossier = annuaire.get(nomJoueur);
+        String cheminFichier = SAVE_FOLDER + idDossier + "/" + BEST_TIMES_FILE;
+
+        if (Files.exists(Paths.get(cheminFichier))) {
+            try (FileReader reader = new FileReader(cheminFichier)) {
+                Type type = new TypeToken<Map<String, Long>>(){}.getType();
+                Map<String, Long> temps = gson.fromJson(reader, type);
+                if (temps != null) {
+                    return temps;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return new HashMap<>();
+    }
+
+    private static void sauvegarderMeilleursTemps(String nomJoueur, Map<String, Long> meilleursTemps) {
+        Map<String, String> annuaire = chargerAnnuaire();
+        
+        if (!annuaire.containsKey(nomJoueur)) {
+            return;
+        }
+
+        String idDossier = annuaire.get(nomJoueur);
+        String dossierJoueur = SAVE_FOLDER + idDossier + "/";
+        String cheminFichier = dossierJoueur + BEST_TIMES_FILE;
+
+        try {
+            Files.createDirectories(Paths.get(dossierJoueur));
+            
+            try (FileWriter writer = new FileWriter(cheminFichier)) {
+                gson.toJson(meilleursTemps, writer);
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void enregistrerMeilleurTemps(String nomJoueur, String idNiveau, long nouveauTemps) {
+        Map<String, Long> tempsActuels = chargerMeilleursTemps(nomJoueur);
+        
+        if (!tempsActuels.containsKey(idNiveau) || nouveauTemps < tempsActuels.get(idNiveau)) {
+            tempsActuels.put(idNiveau, nouveauTemps);
+            sauvegarderMeilleursTemps(nomJoueur, tempsActuels);
+        }
     }
 }
