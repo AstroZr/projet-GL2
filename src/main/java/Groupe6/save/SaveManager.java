@@ -8,10 +8,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import Groupe6.models.Cellule;
+import Groupe6.models.TypeOperation;
+import Groupe6.models.ZoneCalcul;
+
 
 public class SaveManager {
     
@@ -116,7 +127,7 @@ public class SaveManager {
         return null;
     }
 
-    public static void sauvegarderPartie(String nomJoueur, String nomSauvegarde, PartieSauvegardee partie) {
+    public static void sauvegarderPartie(String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
         Map<String, String> annuaire = chargerAnnuaire();
         
         if (!annuaire.containsKey(nomJoueur)) {
@@ -125,7 +136,7 @@ public class SaveManager {
 
         String idDossier = annuaire.get(nomJoueur);
         String dossierJoueur = SAVE_FOLDER + idDossier + "/";
-        String cheminFichier = dossierJoueur + nomSauvegarde + ".json";
+        String cheminFichier = dossierJoueur + idSauvegarde + ".json";
 
         try {
             Files.createDirectories(Paths.get(dossierJoueur));
@@ -139,7 +150,7 @@ public class SaveManager {
         }
     }
     
-    public static PartieSauvegardee chargerPartie(String nomJoueur, String nomSauvegarde) {
+    public static PartieSauvegardee chargerPartie(String nomJoueur, String idSauvegarde) {
         Map<String, String> annuaire = chargerAnnuaire();
         
         if (!annuaire.containsKey(nomJoueur)) {
@@ -147,7 +158,7 @@ public class SaveManager {
         }
 
         String idDossier = annuaire.get(nomJoueur);
-        String cheminFichier = SAVE_FOLDER + idDossier + "/" + nomSauvegarde + ".json";
+        String cheminFichier = SAVE_FOLDER + idDossier + "/" + idSauvegarde + ".json";
 
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
@@ -215,5 +226,56 @@ public class SaveManager {
             tempsActuels.put(idNiveau, nouveauTemps);
             sauvegarderMeilleursTemps(nomJoueur, tempsActuels);
         }
+    }
+
+    public static Niveau chargerNiveau(String idNiveau) {
+        String cheminRessource = "/niveaux/" + idNiveau + ".json";
+        java.io.InputStream is = SaveManager.class.getResourceAsStream(cheminRessource);
+
+        if (is != null) {
+            try (java.io.InputStreamReader reader = new java.io.InputStreamReader(is)) {
+                JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+
+                String id = jsonObject.get("id").getAsString();
+                int taille = jsonObject.get("taille").getAsInt();
+
+                Cellule[][] matrice = new Cellule[taille][taille];
+                for (int i = 0; i < taille; i++) {
+                    for (int j = 0; j < taille; j++) {
+                        matrice[i][j] = new Cellule(i, j);
+                    }
+                }
+
+                List<ZoneCalcul> listeZones = new ArrayList<>();
+                JsonArray jsonZones = jsonObject.getAsJsonArray("listeZones");
+
+                for (JsonElement element : jsonZones) {
+                    JsonObject zoneJson = element.getAsJsonObject();
+                    int cible = zoneJson.get("valeurCible").getAsInt();
+                    TypeOperation op = TypeOperation.valueOf(zoneJson.get("typeOperation").getAsString());
+
+                    ZoneCalcul zone = new ZoneCalcul(cible, op);
+
+                    JsonArray jsonCellules = zoneJson.getAsJsonArray("listeCellules");
+                    for (JsonElement cellElement : jsonCellules) {
+                        JsonObject cellJson = cellElement.getAsJsonObject();
+                        int l = cellJson.get("ligne").getAsInt();
+                        int c = cellJson.get("colonne").getAsInt();
+
+                        zone.ajouterCellule(matrice[l][c]);
+                    }
+                    listeZones.add(zone);
+                }
+
+                return new Niveau(id, taille, matrice, listeZones);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.err.println("Fichier de niveau introuvable : " + cheminRessource);
+        }
+        
+        return null;
     }
 }

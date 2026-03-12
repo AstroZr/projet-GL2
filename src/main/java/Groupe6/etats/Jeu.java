@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import Groupe6.game.Game;
 import Groupe6.models.Grille;
-import Groupe6.models.TypeOperation;
-import Groupe6.models.ZoneCalcul;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.view.VueGrille;
@@ -23,7 +21,6 @@ public class Jeu extends Etats {
 
   private Grille grille;
   private VueGrille vueGrille;
-  private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
 
   public Jeu(Game game) {
     super(game);
@@ -33,14 +30,8 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
 
-    // Créer la grille (modèle)
-    grille = new Grille(TAILLE_GRILLE, null);
-
-    // Exemple : ajouter des zones de calcul
-    ZoneCalcul zone1 = new ZoneCalcul(5, TypeOperation.ADDITION);
-    zone1.ajouterCellule(grille.getCellule(0, 0));
-    zone1.ajouterCellule(grille.getCellule(0, 1));
-    grille.ajouterZone(zone1);
+    
+    grille = new Grille("testUser", "test");
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -57,6 +48,10 @@ public class Jeu extends Etats {
         "Retour"));
 
   }
+  // getters pour la save
+  public Grille getGrille() {
+        return grille;
+    }
 
   @Override
   public void update() {
