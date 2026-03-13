@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.Color;
+import Groupe6.fond.Fond;
+import Groupe6.fond.FondDegrade;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.utilz.Constants;
@@ -23,6 +25,19 @@ import Groupe6.utilz.LayoutScale;
 public abstract class Etats implements MethodesEtats {
     protected Game game;
     protected ArrayList<Bouton> boutons;
+
+    /** Fond partagé par tous les états ; FondDegrade par défaut. */
+    private static Fond fondActuel = FondDegrade.getInstance();
+
+    /** Retourne le fond actif pour tous les états. */
+    protected static Fond getFond() {
+        return fondActuel;
+    }
+
+    /** Change le fond globalement pour tous les états. */
+    public static void setFondActuel(Fond nouveauFond) {
+        fondActuel = nouveauFond;
+    }
 
     /** Dernières dimensions pour lesquelles le layout a été appliqué ; -1 force un layout au premier draw. */
     protected int lastLayoutWidth = -1;

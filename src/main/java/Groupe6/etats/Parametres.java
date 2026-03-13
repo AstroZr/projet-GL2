@@ -27,7 +27,6 @@ public class Parametres extends Etats {
     private static final int LARGEUR_BOUTON = 200;
     private static final int HAUTEUR_BOUTON = 44;
 
-    private FondDegrade fond;
     private LayoutScale layoutScale;
     
     // Paramètres de position
@@ -62,7 +61,6 @@ public class Parametres extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
-        this.fond = FondDegrade.getInstance();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
@@ -114,7 +112,7 @@ public class Parametres extends Etats {
     /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
-        fond.update();
+        getFond().update();
     }
 
     @Override
@@ -126,18 +124,18 @@ public class Parametres extends Etats {
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
-        fond.draw(g);
-        
+        getFond().draw(g);
+
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         // Dessiner le titre "Paramètres"
         g.setColor(Color.BLACK);
         g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(36)));
         String titre = "Paramètres";
         int titreLargeur = g.getFontMetrics().stringWidth(titre);
         g.drawString(titre, layoutScale.centerX() - titreLargeur / 2, panelY - layoutScale.scaleY(30));
-        
+
         // Dessiner le panel principal
         g2d.setColor(new Color(200, 200, 200, 120));
         RoundRectangle2D panel = new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20);
@@ -145,13 +143,13 @@ public class Parametres extends Etats {
         g2d.setColor(Color.GRAY);
         g2d.setStroke(new BasicStroke(2));
         g2d.draw(panel);
-        
+
         // Dessiner les sliders et contrôles
         dessinerSlider(g, sliderEffetsX, sliderEffetsY, sliderWidth, "Effets sonores", "🔊", volumeEffets);
         dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, "Musique", "🎵", volumeMusique);
         dessinerDropdown(g);
         dessinerBoutonsModes(g);
-        
+
         // Dessiner les boutons du bas
         for (Bouton b : boutons) {
             b.draw(g);
