@@ -1,7 +1,6 @@
 package Groupe6.mathdoku;
 
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
 /**

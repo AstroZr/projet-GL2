@@ -15,6 +15,7 @@ public class HelpMethods {
     public static final String NUAGES = ASSETS + "nuages/";
     
     public static final String LOGO = ASSETS + "logo/";
+    public static final String WALLPAPER = ASSETS + "wallpaper/";
 
     /**
      * Charge une image depuis le classpath (ex. /assets/nuages/xxx.png).

@@ -78,7 +78,7 @@ public class Menu extends Etats {
         ensureLayoutUpToDate();
         getFond().draw(g);
         for (Bouton b : boutons) {
-            b.draw(g);
+            b.draw(g, getFond());
         }
     }
 

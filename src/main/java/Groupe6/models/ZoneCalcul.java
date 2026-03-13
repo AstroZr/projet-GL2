@@ -118,4 +118,72 @@ public class ZoneCalcul {
     public TypeOperation getTypeOperation() {
         return typeOperation;
     }
+
+
+    /**
+     * calcule toutes les combinaisons possibles de chiffres manquants pour completer la zone de calcul
+     * @return Une liste de listes chaque sous liste represente une combinaison valide de chiffres p our remplir les cellules vides
+     */
+    public List<List<Integer>> trouverCombinaisons(int max) {
+        List<Cellule> vides = new ArrayList<>();
+        List<Integer> remplis = new ArrayList<>();
+        
+        for (Cellule c : listeCellules) {
+            if (c.estVide()) vides.add(c);
+            else remplis.add(c.getValeur());
+        }
+
+        List<List<Integer>> resultats = new ArrayList<>();
+        rechercherRecursive(vides.size(), remplis, new ArrayList<>(), max, resultats);
+        return resultats;
+    }
+
+    /**
+     * explorer combinaisons de chiffre
+     * @param remplis Liste des valeurs deja presentes dans la zo ne
+     * @param courant Liste temporaire des chiffres testes lors de la recursion
+     * @param max Valeur maximale autorisee
+     * @param resultats Liste accumulant les combinaisons valides trouve
+     */
+    private void rechercherRecursive(int nbVides, List<Integer> remplis, List<Integer> courant, int max, List<List<Integer>> resultats) {
+        if (courant.size() == nbVides) {
+            List<Integer> test = new ArrayList<>(remplis);
+            test.addAll(courant);
+            if (estValideLogique(test)) {
+                resultats.add(new ArrayList<>(courant));
+            }
+            return;
+        }
+        for (int i = 1; i <= max; i++) {
+            courant.add(i);
+            rechercherRecursive(nbVides, remplis, courant, max, resultats);
+            courant.remove(courant.size() - 1);
+        }
+    }
+
+    /**
+     * valide si une liste de valeurs respecte la regle mathematique definie par le type d'operation de la zone
+     * @return true si le résultat correspond à la valeurCible ou false sinon
+     */
+    private boolean estValideLogique(List<Integer> valeurs) {
+        switch (typeOperation) {
+            case ADDITION:
+                return valeurs.stream().mapToInt(Integer::intValue).sum() == valeurCible;
+            case MULTIPLICATION:
+                return valeurs.stream().mapToInt(Integer::intValue).reduce(1, (a, b) -> a * b) == valeurCible;
+            case SOUSTRACTION:
+                Collections.sort(valeurs, Collections.reverseOrder());
+                int resS = valeurs.get(0);
+                for (int i = 1; i < valeurs.size(); i++) resS -= valeurs.get(i);
+                return resS == valeurCible;
+            case DIVISION:
+                Collections.sort(valeurs, Collections.reverseOrder());
+                int resD = valeurs.get(0);
+                for (int i = 1; i < valeurs.size(); i++) resD /= valeurs.get(i);
+                return resD == valeurCible;
+            case AUCUNE:
+                return valeurs.size() == 1 && valeurs.get(0) == valeurCible;
+            default: return false;
+        }
+    }
 }

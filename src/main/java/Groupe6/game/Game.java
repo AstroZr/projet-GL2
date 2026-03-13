@@ -162,7 +162,8 @@ public class Game implements Runnable {
         try {
             System.out.println("Sauvegarde du jeu en cours...");
             
-            // Simuler une sauvegarde
+            jeu.getGrille().saveGrille();
+
             Thread.sleep(500);
             System.out.println("Jeu sauvegardé avec succès !");
         } catch (InterruptedException e) {

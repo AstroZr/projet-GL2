@@ -1,5 +1,7 @@
 package Groupe6.models;
 
+import java.util.List;
+
 public class Cellule {
     private final int ligne; // ligne de la cellule
     private final int colonne; // colonne de la cellule
@@ -8,7 +10,8 @@ public class Cellule {
     private boolean estSelectionnee; // si la cellule est selectionnee
     private boolean estValide; // si la cellule est valide
     private boolean estErreur; // si la cellule est en erreur
-    private ZoneCalcul zoneCalcul; // zone de calcul de la cellule
+    private transient ZoneCalcul zoneCalcul; // zone de calcul de la cellule
+    private List<Integer> listeCandidat = new java.util.ArrayList<>();
 
     /**
      * Constructeur d'une cellule.
@@ -160,5 +163,14 @@ public class Cellule {
      */
     public void setZoneCalcul(ZoneCalcul zoneCalcul) {
         this.zoneCalcul = zoneCalcul;
+    }
+
+    /**
+     * guetteur pour une liste de candidat
+     * 
+     * @return la liste de candidat d une cellule 
+     */
+    public List<Integer> getListeCandidat() {
+        return listeCandidat;
     }
 }

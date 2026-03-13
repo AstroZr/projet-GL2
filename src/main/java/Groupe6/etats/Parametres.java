@@ -152,7 +152,7 @@ public class Parametres extends Etats {
 
         // Dessiner les boutons du bas
         for (Bouton b : boutons) {
-            b.draw(g);
+            b.draw(g, getFond());
         }
     }
     
