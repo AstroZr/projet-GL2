@@ -189,6 +189,7 @@ public class Creation extends Etats implements MethodesEtats {
           String pseudo = getPseudoSaisi();
           if (pseudo != null && !pseudo.trim().isEmpty()){
               // TODO paramètres/profil
+              game.setJoueurCourant(pseudo);
               bouton.appliquerAction();
           }
       }

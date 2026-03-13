@@ -39,6 +39,7 @@ public class Game implements Runnable {
     private boolean debug = true;
     private boolean repeindreFlag = false;
     private int langueSelectionnee = LANGUE_FRANCAIS;
+    private String joueurCourant = "Invité";
 
     private Start start;
     private Menu menu;
@@ -97,6 +98,14 @@ public class Game implements Runnable {
         }
         langueSelectionnee = nouvelleLangue;
         notifierChangementLangue();
+    }
+
+    public String getJoueurCourant() {
+        return joueurCourant;
+    }
+
+    public void setJoueurCourant(String pseudo) {
+        this.joueurCourant = pseudo;
     }
 
     private void notifierChangementLangue() {

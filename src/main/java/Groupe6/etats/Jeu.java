@@ -35,7 +35,10 @@ public class Jeu extends Etats {
     boutons = new ArrayList<>();
     updateTexts();
 
-    grille = new Grille("testUser", "test");
+    String joueurActuel = game.getJoueurCourant();
+    if (joueurActuel == null)
+      joueurActuel = "testUser";
+    grille = new Grille(joueurActuel, "test");
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -53,7 +56,11 @@ public class Jeu extends Etats {
   }
 
   public void chargerNiveau(String idNiveau) {
-    grille = new Grille("Invité", idNiveau);
+    System.out.println("Chargement du niveau : " + idNiveau);
+    String joueurActuel = game.getJoueurCourant();
+    if (joueurActuel == null)
+      joueurActuel = "testUser";
+    grille = new Grille(joueurActuel, idNiveau);
     vueGrille = new VueGrille(grille);
     lastLayoutWidth = -1;
     lastLayoutHeight = -1;
