@@ -30,7 +30,6 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
 
-    
     grille = new Grille("testUser", "test");
 
     // Créer la vue
@@ -48,10 +47,11 @@ public class Jeu extends Etats {
         "Retour"));
 
   }
+
   // getters pour la save
   public Grille getGrille() {
-        return grille;
-    }
+    return grille;
+  }
 
   @Override
   public void update() {
