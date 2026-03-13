@@ -10,5 +10,5 @@ public interface Aide {
     boolean check(Grille grille);
 
     // Must be called after check awnser true
-    boolean load(Grille grille);
+    int load(Grille grille, int nbAides);
 }

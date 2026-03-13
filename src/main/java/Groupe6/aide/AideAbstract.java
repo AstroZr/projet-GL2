@@ -1,18 +1,18 @@
 package Groupe6.aide;
 
 public abstract class AideAbstract implements Aide{
-    protected int id;
+    protected int numero;
     protected int nbUtilisation = 0;
     protected AideTextuel aideTextuel;
     protected AideVisuel aideVisuel;
 
-    public AideAbstract(int id){
-        this.id = id;
+    public AideAbstract(int numero){
+        this.numero = numero;
     }
 
     @Override
     public int getId(){
-        return id;
+        return numero;
     }
 
     @Override
@@ -28,5 +28,9 @@ public abstract class AideAbstract implements Aide{
     @Override
     public AideVisuel getAideVisuel(){
         return new AideVisuel(this.aideVisuel);
+    }
+
+    public int getCost(int nbAides){
+        return (nbAides - numero) * nbUtilisation;
     }
 }
