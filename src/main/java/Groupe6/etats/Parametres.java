@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import Groupe6.fond.Fond;
 import Groupe6.fond.FondCatppuccin;
 import Groupe6.fond.FondClair;
 import Groupe6.fond.FondDegrade;
@@ -71,6 +72,12 @@ public class Parametres extends Etats {
     private String boutonDefautLabel;
     private String boutonAppliquerLabel;
 
+    private int langueAppliquee = 0;
+    private int themeApplique = 0;
+    private float volumeEffetsApplique = 0.0f;
+    private float volumeMusiqueApplique = 0.0f;
+    private boolean synchroniseDepuisEntree = false;
+
     public Parametres(Game game) {
         super(game);
         initClasses();
@@ -80,8 +87,9 @@ public class Parametres extends Etats {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         updateTexts();
-        langueSelectionnee = game != null ? game.getLangueSelectionnee() : 0;
-        themeSelectionne = detecterThemeActuel();
+        langueAppliquee = game != null ? game.getLangueSelectionnee() : 0;
+        themeApplique = detecterThemeActuel();
+        synchroniserEditionAvecValeursAppliquees();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
@@ -132,6 +140,10 @@ public class Parametres extends Etats {
     /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
+        if (!synchroniseDepuisEntree) {
+            synchroniserEditionAvecValeursAppliquees();
+            synchroniseDepuisEntree = true;
+        }
         getFond().update();
     }
 
@@ -496,6 +508,7 @@ public class Parametres extends Etats {
                 int optY = optionY + layoutScale.scaleY(2);
                 if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
                 themeSelectionne = i;
+                    appliquerThemeSelectionne();
                     dropdownThemeOuvert = false;
                     themeChoisi = true;
                 break;
@@ -517,12 +530,16 @@ public class Parametres extends Etats {
                     volumeMusique = 0.0f;
                     langueSelectionnee = 0;
                     themeSelectionne = 0;
+                    appliquerThemeSelectionne();
                     dropdownLangueOuvert = false;
                     dropdownThemeOuvert = false;
                 } else if (boutons.indexOf(b) == 2) {
                     appliquerThemeSelectionne();
                     appliquerLangueSelectionnee();
+                    memoriserValeursAppliquees();
                 } else {
+                    synchroniseDepuisEntree = false;
+                    synchroniserEditionAvecValeursAppliquees();
                     b.appliquerAction();
                 }
             }
@@ -580,19 +597,37 @@ public class Parametres extends Etats {
     }
 
     private void appliquerThemeSelectionne() {
-        switch (themeSelectionne) {
+        Etats.setFondActuel(fondDepuisThemeSelectionne(themeSelectionne));
+    }
+
+    private Fond fondDepuisThemeSelectionne(int indexTheme) {
+        switch (indexTheme) {
             case 1:
-                Etats.setFondActuel(FondFonce.getInstance());
-                break;
+                return FondFonce.getInstance();
             case 2:
-                Etats.setFondActuel(FondClair.getInstance());
-                break;
+                return FondClair.getInstance();
             case 3:
-                Etats.setFondActuel(FondCatppuccin.getInstance());
-                break;
+                return FondCatppuccin.getInstance();
             default:
-                Etats.setFondActuel(FondDegrade.getInstance());
-                break;
+                return FondDegrade.getInstance();
         }
+    }
+
+    private void memoriserValeursAppliquees() {
+        langueAppliquee = langueSelectionnee;
+        themeApplique = themeSelectionne;
+        volumeEffetsApplique = volumeEffets;
+        volumeMusiqueApplique = volumeMusique;
+    }
+
+    private void synchroniserEditionAvecValeursAppliquees() {
+        langueSelectionnee = langueAppliquee;
+        themeSelectionne = themeApplique;
+        volumeEffets = volumeEffetsApplique;
+        volumeMusique = volumeMusiqueApplique;
+        appliquerThemeSelectionne();
+        dropdownLangueOuvert = false;
+        dropdownThemeOuvert = false;
+        indexSurvolTheme = -1;
     }
 }
