@@ -5,14 +5,14 @@ public class EffetVisuel{
     private String value; // value contient des numéro de la forme : "3" ou "-2"
     private int x, y; // Position sur la grille de jeu
 
-    EffetVisuel(TypeEffect type, int x, int y, String value){
+    public EffetVisuel(TypeEffect type, int x, int y, String value){
         this.type = type;
         this.x = x; this.y = y;
         this.value = value;
     }
 
     // constructeur de copie
-    EffetVisuel(EffetVisuel effetVisuel){
+    public EffetVisuel(EffetVisuel effetVisuel){
         this.type = effetVisuel.getType();
         this.x = effetVisuel.getX();
         this.y = effetVisuel.getY();

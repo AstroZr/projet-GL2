@@ -2,7 +2,6 @@ package Groupe6.save;
 
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,7 +21,6 @@ import com.google.gson.JsonParser;
 import Groupe6.models.Cellule;
 import Groupe6.models.TypeOperation;
 import Groupe6.models.ZoneCalcul;
-
 
 public class SaveManager {
     

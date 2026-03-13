@@ -6,12 +6,12 @@ public class ParametresJoueur {
     private String language;
     private int volumeEffet;
     private int volumeMusique;
-    private boolean modeSombre;
+    private int modeSombre;
 
     public ParametresJoueur() {
     }
 
-    public ParametresJoueur(String nomJoueur, String language, int volumeEffet, int volumeMusique, boolean modeSombre) {
+    public ParametresJoueur(String nomJoueur, String language, int volumeEffet, int volumeMusique, int modeSombre) {
         this.nomJoueur = nomJoueur;
         this.language = language;
         this.volumeEffet = volumeEffet;
@@ -51,11 +51,11 @@ public class ParametresJoueur {
         this.volumeMusique = volumeMusique;
     }
 
-    public boolean isModeSombre() {
+    public int getModeSombre() {
         return modeSombre;
     }
 
-    public void setModeSombre(boolean modeSombre) {
+    public void setModeSombre(int modeSombre) {
         this.modeSombre = modeSombre;
     }
 }
