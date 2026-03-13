@@ -7,11 +7,11 @@ import java.util.Iterator;
 public class AideVisuel implements Iterable<EffetVisuel>{
    private List<EffetVisuel> effetsVisuels;
 
-    AideVisuel(){
+    public AideVisuel(){
         this.effetsVisuels = new ArrayList<>();
     }
 
-    AideVisuel(AideVisuel aideVisuel){
+    public AideVisuel(AideVisuel aideVisuel){
         this.effetsVisuels = new ArrayList<>(aideVisuel.getEffeftsVisuels());
     }
 

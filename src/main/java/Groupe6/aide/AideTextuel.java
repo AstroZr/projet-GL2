@@ -4,12 +4,12 @@ public class AideTextuel{
     private String titre;
     private String texte;
 
-    AideTextuel(String titre, String texte){
+    public AideTextuel(String titre, String texte){
         this.titre = titre;
         this.texte = texte;
     }
 
-    AideTextuel(AideTextuel AideTextuel){
+    public AideTextuel(AideTextuel AideTextuel){
         this.titre = AideTextuel.getTitre();
         this.texte = AideTextuel.getTexte();
     }
