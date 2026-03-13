@@ -167,8 +167,4 @@ public class Jeu extends Etats {
     }
     ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelRetour);
   }
-
-  public Grille getGrille() {
-    return grille;
-  }
 }
