@@ -82,8 +82,16 @@ public class Connexion extends Etats {
 
   @Override
   public void mouseReleased(MouseEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
+    if(bouton.isSourisEnfonce() && isIn(e, bouton)){
+      String pseudo = getPseudoSaisi();
+
+      // Même chose que pour la méthode mouseReleased dans Creation.java
+      // On bloque la connexion avec un pseudo vide
+      if(!pseudo.trim().isEmpty()){
+        bouton.appliquerAction;
+      }
+    }
+    bouton.setSourisEnfonce(false);
   }
 
   @Override
