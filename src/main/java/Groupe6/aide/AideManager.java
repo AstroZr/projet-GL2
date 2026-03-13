@@ -14,8 +14,8 @@ public class AideManager{
 
     public AideManager(){
         this.aides = new ArrayList<>();
-        this.aides.add(new Singleton());
-        this.aides.add(new Reste());
+        this.aides.add(new SingletonTechnique());
+        this.aides.add(new ResteTechnique());
     }
 
     public boolean call(Grille grille){

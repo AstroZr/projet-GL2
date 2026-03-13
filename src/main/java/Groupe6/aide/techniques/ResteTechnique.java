@@ -7,11 +7,11 @@ import Groupe6.aide.EffetVisuel;
 import Groupe6.aide.TypeEffect;
 import Groupe6.models.Grille;
 
-public class Reste extends AideAbstract{
+public class ResteTechnique extends AideAbstract{
     private boolean isLigne; // if false, isLigne est une colonne
     private int index = -1; // indice de la ligne ou colonne
 
-    public Reste(){
+    public ResteTechnique(){
         super(1);
     }
 

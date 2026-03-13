@@ -11,11 +11,11 @@ import Groupe6.models.Cellule;
 import java.util.List;
 import java.util.Iterator;
 
-public class Singleton extends AideAbstract{
+public class SingletonTechnique extends AideAbstract{
     private int ligneCellule = -1;
     private int colonneCellule = -1;
 
-    public Singleton(){
+    public SingletonTechnique(){
         super(0); // 0 is the id of the UniqueBlock technique
     }
 
