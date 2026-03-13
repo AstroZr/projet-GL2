@@ -2,6 +2,7 @@ package Groupe6.fond;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -48,8 +49,8 @@ public abstract class AbstractFondDegrade implements Fond {
     private static int[] smallNuagesYPos;
     private static int indexBigNuagePlusADroite;
     private static int indexSmallNuagePlusADroite;
-    private static int currentWidth;
-    private static int currentHeight;
+    protected static int currentWidth;
+    protected static int currentHeight;
     private static boolean nuagesInitialises = false;
 
     private static final Random RDN = new Random();
@@ -88,6 +89,50 @@ public abstract class AbstractFondDegrade implements Fond {
     /** Chaque sous-classe definit sa palette ici. */
     protected abstract void chargerCouleurs();
 
+    // ======================= Couleurs par défaut (thème clair) =======================
+
+    private static final Color DEF_BORDURE_ZONE      = new Color(30, 30, 90);
+    private static final Color DEF_ETIQUETTE_ZONE    = new Color(0, 100, 200);
+    private static final Color DEF_FOND_BOUTON       = new Color(200, 200, 200, 180);
+    private static final Color DEF_FOND_BOUTON_SURVOL = new Color(220, 220, 220, 180);
+    private static final Color DEF_FOND_BOUTON_CLIC  = new Color(240, 240, 240, 180);
+
+    @Override
+    public Color getCouleurFondCellule() { return Color.WHITE; }
+
+    @Override
+    public Color getCouleurTexte() { return Color.BLACK; }
+
+    @Override
+    public Color getCouleurBordureZone() { return DEF_BORDURE_ZONE; }
+
+    @Override
+    public Color getCouleurEtiquetteZone() { return DEF_ETIQUETTE_ZONE; }
+
+    @Override
+    public Color getCouleurFondBouton() { return DEF_FOND_BOUTON; }
+
+    @Override
+    public Color getCouleurFondBoutonSurvol() { return DEF_FOND_BOUTON_SURVOL; }
+
+    @Override
+    public Color getCouleurFondBoutonClic() { return DEF_FOND_BOUTON_CLIC; }
+
+    @Override
+    public Color getCouleurBordreBouton() { return Color.GRAY; }
+
+    @Override
+    public Color getCouleurFondInput() { return Color.GRAY; }
+
+    @Override
+    public Color getCouleurFondInputFocus() { return Color.WHITE; }
+
+    @Override
+    public Color getCouleurAccent() { return Color.BLUE; }
+
+    @Override
+    public Color getCouleurPlaceholder() { return Color.GRAY; }
+
     /**
      * Couleur utilisee pour le bas du degradé.
      * Par defaut retourne cielBas.brighter(), surcharge possible (ex: Catppuccin).
@@ -107,7 +152,7 @@ public abstract class AbstractFondDegrade implements Fond {
         }
 
         Graphics2D g2d = (Graphics2D) g;
-        drawFondGradient(g2d);
+        dessinerFondBase(g2d);
         drawNuages(g2d);
         drawOverlay(g2d);
     }
@@ -244,6 +289,14 @@ public abstract class AbstractFondDegrade implements Fond {
         g2d.setColor(overlayColor);
         g2d.fillRect(0, 0, currentWidth, currentHeight);
         g2d.setComposite(prev);
+    }
+
+    /**
+     * Dessine le fond de base. Peut être surchargé par les sous-classes
+     * pour remplacer le dégradé (ex. image de fond).
+     */
+    protected void dessinerFondBase(Graphics2D g2d) {
+        drawFondGradient(g2d);
     }
 
     private void drawFondGradient(Graphics2D g2d) {

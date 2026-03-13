@@ -9,22 +9,48 @@ import java.util.Iterator;
 
 public class AideManager{
     private List<Aide> aides;
+    private Aide aide;
+    private int cost;
 
     public AideManager(){
         this.aides = new ArrayList<>();
-        this.aides.add(new UniqueBlock());
+        this.aides.add(new Singleton());
+        this.aides.add(new Reste());
     }
 
-    public Aide call(Grille grille){
+    public boolean call(Grille grille){
         Iterator<Aide> iteratorAide = this.aides.iterator();
         Aide aide = this.aides.get(0);
         while (iteratorAide.hasNext() && !aide.check(grille)){
             aide = iteratorAide.next();
         }
+
         if (aide.check(grille)){
-            aide.load(grille);
-            return aide;
+            this.cost = aide.load(grille, this.aides.size());
+            this.aide = aide;
+            return true;
         }
-        return null;
+
+        return false;
+    }
+
+    public Aide getAide(){
+        return this.aide;
+    }
+
+    public int getCost(){
+        return this.cost;
+    }
+
+    public int getNbAides(){
+        return this.aides.size();
+    }
+
+    public int[] saveVector(){
+        int[] vector = new int[this.aides.size()];
+        for (int i = 0; i < this.aides.size(); i++){
+            vector[i] = this.aides.get(i).getNbUtilisation();
+        }
+        return vector;
     }
 }

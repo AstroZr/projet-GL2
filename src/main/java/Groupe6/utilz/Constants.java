@@ -49,6 +49,10 @@ public class Constants {
             /** Ratio vertical pour le bouton Retour des paramètres (≈ 74 %). */
             public static final float RATIO_PARAMETRES_BUTTON_Y = 800f / 1080f;
         }
+        public static class Selection {
+            public static final float RATIO_SELECTION_BUTTONS_Y = 400f / 1080f;
+            public static final float RATIO_SELECTION_RETOUR_Y  = 900f / 1080f;
+        }
     }
 
 }

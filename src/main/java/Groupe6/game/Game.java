@@ -17,11 +17,15 @@ import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
 import Groupe6.save.ParametresJoueur;
 import Groupe6.save.SaveManager;
+import Groupe6.etats.Selection;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
  */
 public class Game implements Runnable {
+
+    public static final int LANGUE_FRANCAIS = 0;
+    public static final int LANGUE_ENGLISH = 1;
 
     private final GamePanel gamePanel;
     private final GameWindow gameWindow;
@@ -34,6 +38,7 @@ public class Game implements Runnable {
     private int currentUPS = 0;
     private boolean debug = true;
     private boolean repeindreFlag = false;
+    private int langueSelectionnee = LANGUE_FRANCAIS;
 
     private Start start;
     private Menu menu;
@@ -41,6 +46,7 @@ public class Game implements Runnable {
     private Connexion connexion;
     private Creation creation;
     private Jeu jeu;
+    private Selection selection;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
@@ -68,6 +74,38 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.CREATION, creation);
         jeu = new Jeu(this);
         stateByEnum.put(EtatJeu.GRILLE, jeu);
+        selection = new Selection(this);
+        stateByEnum.put(EtatJeu.SELECTION, selection);
+
+        notifierChangementLangue();
+    }
+
+    public boolean isEnglish() {
+        return langueSelectionnee == LANGUE_ENGLISH;
+    }
+
+    public int getLangueSelectionnee() {
+        return langueSelectionnee;
+    }
+
+    public void setLangueSelectionnee(int nouvelleLangue) {
+        if (nouvelleLangue != LANGUE_FRANCAIS && nouvelleLangue != LANGUE_ENGLISH) {
+            return;
+        }
+        if (langueSelectionnee == nouvelleLangue) {
+            return;
+        }
+        langueSelectionnee = nouvelleLangue;
+        notifierChangementLangue();
+    }
+
+    private void notifierChangementLangue() {
+        if (start != null) start.updateTexts();
+        if (menu != null) menu.updateTexts();
+        if (parametres != null) parametres.updateTexts();
+        if (creation != null) creation.updateTexts();
+        if (jeu != null) jeu.updateTexts();
+        if (selection != null) selection.updateTexts();
     }
 
     private void startGameLoop() {

@@ -46,6 +46,8 @@ public class Start extends Etats {
     private int nameAppHeight;
 
     private LayoutScale layoutScale;
+    private String labelCreation;
+    private String labelConnexion;
 
     public Start(Game game) {
         super(game);
@@ -55,6 +57,7 @@ public class Start extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
+        updateTexts();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
 
@@ -65,8 +68,8 @@ public class Start extends Etats {
         int bw = layoutScale.scaleX(LARGEUR_BOUTON);
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
-        boutons.add(new BoutonChangeurEtat(cx - gap - bw, cy, bw, bh, EtatJeu.CREATION, "Creation"));
-        boutons.add(new BoutonChangeurEtat(cx + gap, cy, bw, bh, EtatJeu.CONNEXION, "Connexion"));
+        boutons.add(new BoutonChangeurEtat(cx - gap - bw, cy, bw, bh, EtatJeu.CREATION, labelCreation));
+        boutons.add(new BoutonChangeurEtat(cx + gap, cy, bw, bh, EtatJeu.CONNEXION, labelConnexion));
     }
 
     @Override
@@ -127,7 +130,7 @@ public class Start extends Etats {
         g.drawImage(logo, logoX + offset, logoY + offset, drawSize, drawSize, null);
         g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
         for (Bouton b : boutons) {
-            b.draw(g);
+            b.draw(g, getFond());
         }
         // super.drawGrid(g);
     }
@@ -195,7 +198,15 @@ public class Start extends Etats {
     /** Aucune mise à jour de texte dynamique pour cet écran. */
     @Override
     public void updateTexts() {
-        // Optionnel : mise à jour de libellés dynamiques
+        boolean en = game != null && game.isEnglish();
+        labelCreation = en ? "Create" : "Création";
+        labelConnexion = en ? "Login" : "Connexion";
+
+        if (boutons == null || boutons.size() < 2) {
+            return;
+        }
+        ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelCreation);
+        ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelConnexion);
     }
 
 

@@ -6,15 +6,18 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
+import Groupe6.fond.Fond;
+
 /**
  * Champ de saisie texte : zone rectangulaire, focus, placeholder, limite de caractères.
  * update() prépare les couleurs/texte ; draw() affiche ; handleKeyTyped() gère la saisie.
  */
 public class TextInput {
 
+    private static final Font FONT_INPUT = new Font("Berlin Sans FB Demi", Font.PLAIN, 18);
     private final Rectangle bounds;
     private final StringBuilder text;
-    private final String placeholder;
+    private String placeholder;
     private final int maxLength;
     private boolean focused;
    
@@ -42,21 +45,21 @@ public class TextInput {
         this.displayText = this.placeholder;
     }
 
-    /** Met à jour les valeurs affichées (couleurs, texte) ; à appeler par l’état avant draw. */
-    public void update() {
-        borderColor = focused ? Color.BLUE : Color.WHITE;
+    /** Met à jour les valeurs affichées (couleurs, texte) selon le thème actif. */
+    public void update(Fond fond) {
+        borderColor = focused ? fond.getCouleurAccent() : fond.getCouleurBordreBouton();
         displayText = text.length() > 0 ? text.toString() : placeholder;
-        textColor = text.length() == 0 ? Color.GRAY : Color.BLACK;
+        textColor = text.length() == 0 ? fond.getCouleurPlaceholder() : fond.getCouleurTexte();
     }
 
-    /** Dessine le champ à partir des valeurs précalculées par update(). */
-    public void draw(Graphics g) {
-        g.setColor(focused ? Color.WHITE : Color.GRAY);
+    /** Dessine le champ à partir des valeurs précalculées par update(Fond). */
+    public void draw(Graphics g, Fond fond) {
+        g.setColor(focused ? fond.getCouleurFondInputFocus() : fond.getCouleurFondInput());
         g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         g.setColor(borderColor);
         g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 18));
-        g.setColor(focused ? textColor : Color.WHITE);
+        g.setFont(FONT_INPUT);
+        g.setColor(textColor);
         int fy = bounds.y + (bounds.height + g.getFontMetrics().getAscent()) / 2 - 2;
         g.drawString(displayText, bounds.x + 8, fy);
     }
@@ -116,6 +119,10 @@ public class TextInput {
             int len = Math.min(s.length(), maxLength);
             text.append(s, 0, len);
         }
+    }
+
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder != null ? placeholder : "";
     }
 
     /** Retourne la zone de délimitation du champ. */
