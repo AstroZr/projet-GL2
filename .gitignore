@@ -1,5 +1,6 @@
 *.class
 target/
+saveGame/
 Semantique.md
 .settings/
 .classpath

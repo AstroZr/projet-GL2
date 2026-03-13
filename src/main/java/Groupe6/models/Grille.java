@@ -3,6 +3,10 @@ package Groupe6.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import Groupe6.save.Niveau;
+import Groupe6.save.PartieSauvegardee;
+import Groupe6.save.SaveManager;
+
 /**
  * Modèle logique de la grille de jeu.
  * Gère l'état global, les règles et la validation.
@@ -16,24 +20,58 @@ public class Grille {
     private Cellule celluleSelectionnee;
     private int indexActuel = -1;
     private List<int[]> historique = new java.util.ArrayList<>();
+    private String nomJoueur;
+    private String idNiveau;
 
     // Etat du jeu
     private boolean estComplete;
 
     /**
-     * Constructeur de la grille.
+     * Constructeur de la grille a partir d'un niveau ou d'une sauvegarde de partie.
      * 
-     * @param taille     La taille de la grille (ex: 4 pour une grille 4x4)
-     * @param nomFichier Le nom du fichier de la grille (ou null pour une grille
-     *                   vide)
+     * @param nomJoueur Le nom du joueur 
+     * @param idNiveau  L'identifiant du niveau à charger
      */
-    public Grille(int taille, String nomFichier) {
-        this.taille = taille;
-        this.matriceCellules = new Cellule[taille][taille];
-        this.listeZones = new ArrayList<>();
-        this.estComplete = false;
+    public Grille(String nomJoueur, String idNiveau) {
+        this.nomJoueur = nomJoueur;
+        this.idNiveau = idNiveau;
+        // chargement de la base du niveau  pour les zones de calcul
+        Niveau niveauBase = SaveManager.chargerNiveau(idNiveau);
+        
+        // defaut si le niveau existe pas
+        if (niveauBase == null) {
+            this.taille = 4;
+            this.matriceCellules = new Cellule[4][4];
+            this.listeZones = new ArrayList<>();
+            this.estComplete = false;
+            return;
+        }
 
-        initialiserCellules(nomFichier);
+        PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
+        
+        this.taille = niveauBase.getTaille();
+        if (sauvegarde != null) {
+            // charge la sauvegarde
+            
+            this.matriceCellules = sauvegarde.getMatriceCellules();
+            this.historique = sauvegarde.getHistorique();
+            this.listeZones = niveauBase.getListeZones();
+            
+            // relie les zones de niveauBase aux cellules de la sauvegarde
+            for (ZoneCalcul zone : listeZones) {
+                for (Cellule c : zone.getListeCellules()) {
+                    Cellule celluleSauvegardee = matriceCellules[c.getLigne()][c.getColonne()];
+                    celluleSauvegardee.setZoneCalcul(zone);
+                }
+            }
+        } else {
+            // Pas de sauvegarde 
+            this.matriceCellules = niveauBase.getMatriceCellules();
+            this.listeZones = niveauBase.getListeZones();
+            this.historique = new ArrayList<>();
+        }
+        
+        this.estComplete = false;
     }
 
     /**
@@ -65,18 +103,12 @@ public class Grille {
 
     /**
      * Initialise la matrice de cellules vides.
-     * 
-     * @param nomFichier Le nom du fichier de la grille
      */
-    private void initialiserCellules(String nomFichier) {
-        if (nomFichier == null) {
-            for (int i = 0; i < taille; i++) {
-                for (int j = 0; j < taille; j++) {
-                    matriceCellules[i][j] = new Cellule(i, j);
-                }
+    private void initialiserCellulesVides() {
+        for (int i = 0; i < taille; i++) {
+            for (int j = 0; j < taille; j++) {
+                matriceCellules[i][j] = new Cellule(i, j);
             }
-        } else {
-            // TODO: Initialiser la grille à partir d'un fichier
         }
     }
 
@@ -368,6 +400,26 @@ public class Grille {
     }
 
     /**
+     * Retourne le nom du joueur
+     * 
+     * @return le nom du joueur
+     */
+    public String getNomJoueur() {
+        return nomJoueur;
+    }
+
+    /**
+     * Retourne l'identifiant du niveau
+     * 
+     * @return l'identifiant du niveau
+     */
+    public String getIdNiveau() {
+        return idNiveau;
+    }
+
+
+
+    /**
      * Vérifie si la grille est complète
      * 
      * @return true si la grille est complète, false sinon
@@ -436,5 +488,15 @@ public class Grille {
             cellule.getListeCandidat().remove(Integer.valueOf(valeur));
             notifierObservateurs();
         }
+    }
+
+    public void saveGrille(){
+        PartieSauvegardee ps = new PartieSauvegardee(
+                    this.matriceCellules,
+                    this.historique,
+                    0 // temps ecouler a faire
+                );
+        
+        SaveManager.sauvegarderPartie(nomJoueur, idNiveau, ps);
     }
 }
