@@ -178,18 +178,19 @@ public class Creation extends Etats implements MethodesEtats {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (bouton.isSourisEnfonce() && isIn(e, bouton)) {
-            String pseudo = getPseudoSaisi();
-
-            // On empêche le changement d'écran (et donc la création d'une sauvegarde)
-            // -> si le pseudo est vide, en revanche si il est valide on autorise
-
-            if(!pseudo.trim().isEmpty()){
-                bouton.appliquerAction();
-            }
-        }
-        bouton.setSourisEnfonce(false);
+        // On empêche le changement d'écran (et donc la création d'une sauvegarde)
+        // -> si le pseudo est vide, en revanche si il est valide on autorise
+        if (bouton.isSourisEnfonce() && isIn(e, bouton)){
+          String pseudo = getPseudoSaisi();
+          if (pseudo != null && !pseudo.trim().isEmpty()){
+              // TODO paramètres/profil
+              bouton.appliquerAction();
+          }
+      }
+      bouton.setSourisEnfonce(false);
     }
+
+    
 
     @Override
     public void updateTexts() {
