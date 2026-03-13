@@ -13,7 +13,7 @@ public class GrilleTest {
     @Test
     public void testGetTaille() {
         System.out.println("DEBUG: Test getTaille");
-        Grille grille = new Grille(4, null);
+        Grille grille = new Grille("testUser", "test");
         assertEquals(4, grille.getTaille());
     }
 
@@ -21,7 +21,7 @@ public class GrilleTest {
     public void testGetMatriceCellules() {
         System.out.println("DEBUG: Test getMatriceCellules");
         int taille = 4;
-        Grille grille = new Grille(taille, null);
+        Grille grille = new Grille("testUser", "test");
         Cellule[][] matrice = grille.getMatriceCellules();
         assertNotNull(matrice);
         assertEquals(taille, matrice.length);
@@ -30,7 +30,7 @@ public class GrilleTest {
     @Test
     public void testGestionCandidats() {
         System.out.println("DEBUG: Test gestion candidats");
-        Grille grille = new Grille(4, null);
+        Grille grille = new Grille("testUser", "test");
         grille.ajouterCandidat(0, 0, 1);
         grille.ajouterCandidat(0, 0, 2);
         
@@ -46,7 +46,7 @@ public class GrilleTest {
     @Test
     public void testHistoriqueCoups() {
         System.out.println("DEBUG: Test historique coups");
-        Grille grille = new Grille(4, null);
+        Grille grille = new Grille("testUser", "test");
         
         grille.ajouterChiffre(0, 0, 4); 
         System.out.println("DEBUG: Coup 1 joué (4 en 0,0)");
@@ -73,7 +73,7 @@ public class GrilleTest {
     @Test
     public void testTrouverCombinaisonsZone() {
         System.out.println("DEBUG: Test trouver combinaisons");
-        Grille grille = new Grille(4, null);
+        Grille grille = new Grille("testUser", "test");
         ZoneCalcul zone = new ZoneCalcul(5, TypeOperation.ADDITION);
         
         zone.ajouterCellule(grille.getCellule(0, 0));
@@ -93,7 +93,7 @@ public class GrilleTest {
     @Test
     public void testHistoriqueVide() {
         System.out.println("DEBUG: Test historique vide");
-        Grille grille = new Grille(4, null);
+        Grille grille = new Grille("testUser", "test");
         try {
             grille.retourArriere();
             grille.retourAvant();
