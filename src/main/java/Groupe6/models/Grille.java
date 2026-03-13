@@ -29,15 +29,16 @@ public class Grille {
     /**
      * Constructeur de la grille a partir d'un niveau ou d'une sauvegarde de partie.
      * 
-     * @param nomJoueur Le nom du joueur 
+     * @param nomJoueur Le nom du joueur
      * @param idNiveau  L'identifiant du niveau à charger
      */
     public Grille(String nomJoueur, String idNiveau) {
         this.nomJoueur = nomJoueur;
         this.idNiveau = idNiveau;
-        // chargement de la base du niveau  pour les zones de calcul
+
+        // chargement de la base du niveau pour les zones de calcul
         Niveau niveauBase = SaveManager.chargerNiveau(idNiveau);
-        
+
         // defaut si le niveau existe pas
         if (niveauBase == null) {
             this.taille = 4;
@@ -48,15 +49,15 @@ public class Grille {
         }
 
         PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
-        
+
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
             // charge la sauvegarde
-            
+
             this.matriceCellules = sauvegarde.getMatriceCellules();
             this.historique = sauvegarde.getHistorique();
             this.listeZones = niveauBase.getListeZones();
-            
+
             // relie les zones de niveauBase aux cellules de la sauvegarde
             for (ZoneCalcul zone : listeZones) {
                 for (Cellule c : zone.getListeCellules()) {
@@ -65,12 +66,12 @@ public class Grille {
                 }
             }
         } else {
-            // Pas de sauvegarde 
+            // Pas de sauvegarde
             this.matriceCellules = niveauBase.getMatriceCellules();
             this.listeZones = niveauBase.getListeZones();
             this.historique = new ArrayList<>();
         }
-        
+
         this.estComplete = false;
     }
 
@@ -146,19 +147,21 @@ public class Grille {
 
     /**
      * enregistre un coup
-     * @param ligne ligne du coup
-     * @param colonne colonne du coup 
+     * 
+     * @param ligne          ligne du coup
+     * @param colonne        colonne du coup
      * @param nouvelleValeur valeur modifier
+     * @param estCandidat    si c'est un candidat
      */
-    private void enregistrerCoup(int ligne, int colonne, int nouvelleValeur) {
+    private void enregistrerCoup(int ligne, int colonne, int nouvelleValeur, boolean estCandidat) {
         int ancienneValeur = matriceCellules[ligne][colonne].getValeur();
-        
+
         // Si on est au milieu de l'historique, on supprime le futur
         if (indexActuel < historique.size() - 1) {
             historique.subList(indexActuel + 1, historique.size()).clear();
         }
-        
-        historique.add(new int[]{ligne, colonne, ancienneValeur, nouvelleValeur});
+
+        historique.add(new int[] { ligne, colonne, ancienneValeur, nouvelleValeur, estCandidat ? 1 : 0 });
         indexActuel++;
     }
 
@@ -178,7 +181,7 @@ public class Grille {
         if (!cellule.estModifiable())
             return; // Si on a des cases pré-remplies (exemple le tuto ?)
 
-        enregistrerCoup(ligne,colonne,valeur); //enregistre la modification
+        enregistrerCoup(ligne, colonne, valeur, false); // enregistre la modification
         cellule.setValeur(valeur);
         validerGrille();
         notifierObservateurs();
@@ -193,9 +196,9 @@ public class Grille {
 
         Cellule cellule = matriceCellules[ligne][colonne];
         if (!cellule.estModifiable())
-            return; 
+            return;
 
-        enregistrerCoup(ligne,colonne,0); //enregistre la modification
+        enregistrerCoup(ligne, colonne, 0, false); // enregistre la modification
         cellule.setValeur(0);
         validerGrille();
         notifierObservateurs();
@@ -417,8 +420,6 @@ public class Grille {
         return idNiveau;
     }
 
-
-
     /**
      * Vérifie si la grille est complète
      * 
@@ -429,74 +430,83 @@ public class Grille {
     }
 
     /**
-     * recul dans la pile de coup 
+     * recul dans la pile de coup
      */
     public void retourArriere() {
-        if (indexActuel < 0) return;
-        
+        if (indexActuel < 0)
+            return;
+
         int[] coup = historique.get(indexActuel);
         matriceCellules[coup[0]][coup[1]].setValeur(coup[2]); // Restaure ancienneValeur
         indexActuel--;
-        
+
         validerGrille();
         notifierObservateurs();
     }
 
     /**
-     * avance dans la pile de coup 
+     * avance dans la pile de coup
      */
     public void retourAvant() {
-        if (indexActuel >= historique.size() - 1) return;
-        
+        if (indexActuel >= historique.size() - 1)
+            return;
+
         indexActuel++;
         int[] coup = historique.get(indexActuel);
         matriceCellules[coup[0]][coup[1]].setValeur(coup[3]); // Applique nouvelleValeur
-        
+
         validerGrille();
         notifierObservateurs();
     }
 
-
     /**
      * ajoute un candidat dans une cellule donne
+     * 
      * @param ligne   ligne de la cellule
      * @param colonne colonne de la cellule
      * @param valeur  valeur du candidat à ajouter
      */
     public void ajouterCandidat(int ligne, int colonne, int valeur) {
-        if (estHorsLimites(ligne, colonne)) return;
+        if (estHorsLimites(ligne, colonne))
+            return;
 
         Cellule cellule = matriceCellules[ligne][colonne];
         // On n'ajoute que si la valeur n'est pas déjà présente
         if (!cellule.getListeCandidat().contains(valeur)) {
             cellule.getListeCandidat().add(valeur);
+
+            enregistrerCoup(ligne, colonne, valeur, true); // enregistre la modification
             notifierObservateurs();
         }
     }
 
     /**
      * supprime un candidat d une cellule donnee
+     * 
      * @param ligne   ligne de la cellule
      * @param colonne colonne de la cellule
      * @param valeur  valeur du candidat à supprimer
      */
     public void supprimerCandidat(int ligne, int colonne, int valeur) {
-        if (estHorsLimites(ligne, colonne)) return;
+        if (estHorsLimites(ligne, colonne))
+            return;
 
         Cellule cellule = matriceCellules[ligne][colonne];
         if (cellule.getListeCandidat().contains(valeur)) {
             cellule.getListeCandidat().remove(Integer.valueOf(valeur));
+
+            enregistrerCoup(ligne, colonne, valeur, true); // enregistre la modification
             notifierObservateurs();
         }
     }
 
-    public void saveGrille(){
+    public void saveGrille() {
         PartieSauvegardee ps = new PartieSauvegardee(
-                    this.matriceCellules,
-                    this.historique,
-                    0 // temps ecouler a faire
-                );
-        
+                this.matriceCellules,
+                this.historique,
+                0 // temps ecouler a faire
+        );
+
         SaveManager.sauvegarderPartie(nomJoueur, idNiveau, ps);
     }
 }

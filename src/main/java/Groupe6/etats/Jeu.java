@@ -35,14 +35,7 @@ public class Jeu extends Etats {
     boutons = new ArrayList<>();
     updateTexts();
 
-    // Créer la grille (modèle)
-    grille = new Grille("Invité", "test");
-
-    // Exemple : ajouter des zones de calcul
-    ZoneCalcul zone1 = new ZoneCalcul(5, TypeOperation.ADDITION);
-    zone1.ajouterCellule(grille.getCellule(0, 0));
-    zone1.ajouterCellule(grille.getCellule(0, 1));
-    grille.ajouterZone(zone1);
+    grille = new Grille("testUser", "test");
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -64,6 +57,11 @@ public class Jeu extends Etats {
     vueGrille = new VueGrille(grille);
     lastLayoutWidth = -1;
     lastLayoutHeight = -1;
+  }
+
+  // getters pour la save
+  public Grille getGrille() {
+    return grille;
   }
 
   @Override

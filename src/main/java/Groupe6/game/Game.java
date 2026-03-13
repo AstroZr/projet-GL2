@@ -15,6 +15,8 @@ import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
+import Groupe6.save.ParametresJoueur;
+import Groupe6.save.SaveManager;
 import Groupe6.etats.Selection;
 
 /**
@@ -199,7 +201,10 @@ public class Game implements Runnable {
     public void saveGame() {
         try {
             System.out.println("Sauvegarde du jeu en cours...");
-            
+
+            ParametresJoueur pj = new ParametresJoueur(jeu.getGrille().getNomJoueur(), "Fr", 100, 100, 0);
+            SaveManager.sauvegarderParametres(pj);
+
             jeu.getGrille().saveGrille();
 
             Thread.sleep(500);
