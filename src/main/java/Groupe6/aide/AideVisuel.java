@@ -12,14 +12,14 @@ public class AideVisuel implements Iterable<EffetVisuel>{
     }
 
     public AideVisuel(AideVisuel aideVisuel){
-        this.effetsVisuels = new ArrayList<>(aideVisuel.getEffeftsVisuels());
+        this.effetsVisuels = new ArrayList<>(aideVisuel.getEffetsVisuels());
     }
 
     public void add(EffetVisuel effetVisuels){
         this.effetsVisuels.add(effetVisuels);
     }
 
-    public List<EffetVisuel> getEffeftsVisuels(){
+    public List<EffetVisuel> getEffetsVisuels(){
         return new ArrayList<EffetVisuel>(this.effetsVisuels);
     }
 
