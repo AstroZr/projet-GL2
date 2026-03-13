@@ -55,7 +55,7 @@ public class Creation extends Etats implements MethodesEtats {
     @Override
     public void update() {
         getFond().update();
-        textInput.update();
+        textInput.update(getFond());
     }
 
     /** Bloc logo → nom app → titre « Création » → champ → bouton, centré, scaling depuis Constants. */
@@ -130,12 +130,12 @@ public class Creation extends Etats implements MethodesEtats {
             g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
         }
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, Math.max(12, titleFontSize)));
-        g.setColor(java.awt.Color.BLACK);
-      int tw = g.getFontMetrics().stringWidth("Création");
+        g.setColor(getFond().getCouleurTexte());
+        int tw = g.getFontMetrics().stringWidth("Création");
         g.drawString("Création", centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
 
-        textInput.draw(g);
-        bouton.draw(g);
+        textInput.draw(g, getFond());
+        bouton.draw(g, getFond());
     }
 
     @Override

@@ -1,15 +1,17 @@
 package Groupe6.ui;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
 import Groupe6.etats.EtatJeu;
+import Groupe6.fond.Fond;
+
 
 /**
  * Bouton permettant de changer l'état du jeu.
  */
 public class BoutonChangeurEtat extends Bouton {
+    private static final Font FONT_LABEL = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
     private EtatJeu action;
     protected String label;
 
@@ -31,10 +33,10 @@ public class BoutonChangeurEtat extends Bouton {
 
     /** Dessine le bouton avec son libellé centré. */
     @Override
-    public void draw(Graphics g) {
-        super.draw(g);
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, 16));
+    public void draw(Graphics g, Fond fond) {
+        super.draw(g, fond);
+        g.setColor(fond.getCouleurTexte());
+        g.setFont(FONT_LABEL);
         // Recalculer la position du texte à chaque draw pour suivre setX/setY (resize)
         int lw = g.getFontMetrics().stringWidth(label);
         int lx = x + (largeur - lw) / 2;
