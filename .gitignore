@@ -8,3 +8,5 @@ Semantique.md
 .bin/
 .settings/
 .classpath
+.claude/
+CLAUDE.md

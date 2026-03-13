@@ -48,6 +48,13 @@ public class Jeu extends Etats {
         "Retour"));
 
   }
+  public void chargerNiveau(String idNiveau) {
+    grille = new Grille("testUser", idNiveau);
+    vueGrille = new VueGrille(grille);
+    lastLayoutWidth = -1;
+    lastLayoutHeight = -1;
+  }
+
   // getters pour la save
   public Grille getGrille() {
         return grille;
