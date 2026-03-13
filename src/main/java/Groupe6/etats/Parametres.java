@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import Groupe6.fond.Fond;
 import Groupe6.fond.FondCatppuccin;
 import Groupe6.fond.FondClair;
 import Groupe6.fond.FondDegrade;
@@ -87,9 +86,8 @@ public class Parametres extends Etats {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         updateTexts();
-        langueAppliquee = game != null ? game.getLangueSelectionnee() : 0;
-        themeApplique = detecterThemeActuel();
-        synchroniserEditionAvecValeursAppliquees();
+        langueSelectionnee = game != null ? game.getLangueSelectionnee() : 0;
+        themeSelectionne = detecterThemeActuel();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
@@ -508,7 +506,6 @@ public class Parametres extends Etats {
                 int optY = optionY + layoutScale.scaleY(2);
                 if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
                 themeSelectionne = i;
-                    appliquerThemeSelectionne();
                     dropdownThemeOuvert = false;
                     themeChoisi = true;
                 break;
@@ -530,16 +527,12 @@ public class Parametres extends Etats {
                     volumeMusique = 0.0f;
                     langueSelectionnee = 0;
                     themeSelectionne = 0;
-                    appliquerThemeSelectionne();
                     dropdownLangueOuvert = false;
                     dropdownThemeOuvert = false;
                 } else if (boutons.indexOf(b) == 2) {
                     appliquerThemeSelectionne();
                     appliquerLangueSelectionnee();
-                    memoriserValeursAppliquees();
                 } else {
-                    synchroniseDepuisEntree = false;
-                    synchroniserEditionAvecValeursAppliquees();
                     b.appliquerAction();
                 }
             }
@@ -597,37 +590,19 @@ public class Parametres extends Etats {
     }
 
     private void appliquerThemeSelectionne() {
-        Etats.setFondActuel(fondDepuisThemeSelectionne(themeSelectionne));
-    }
-
-    private Fond fondDepuisThemeSelectionne(int indexTheme) {
-        switch (indexTheme) {
+        switch (themeSelectionne) {
             case 1:
-                return FondFonce.getInstance();
+                Etats.setFondActuel(FondFonce.getInstance());
+                break;
             case 2:
-                return FondClair.getInstance();
+                Etats.setFondActuel(FondClair.getInstance());
+                break;
             case 3:
-                return FondCatppuccin.getInstance();
+                Etats.setFondActuel(FondCatppuccin.getInstance());
+                break;
             default:
-                return FondDegrade.getInstance();
+                Etats.setFondActuel(FondDegrade.getInstance());
+                break;
         }
-    }
-
-    private void memoriserValeursAppliquees() {
-        langueAppliquee = langueSelectionnee;
-        themeApplique = themeSelectionne;
-        volumeEffetsApplique = volumeEffets;
-        volumeMusiqueApplique = volumeMusique;
-    }
-
-    private void synchroniserEditionAvecValeursAppliquees() {
-        langueSelectionnee = langueAppliquee;
-        themeSelectionne = themeApplique;
-        volumeEffets = volumeEffetsApplique;
-        volumeMusique = volumeMusiqueApplique;
-        appliquerThemeSelectionne();
-        dropdownLangueOuvert = false;
-        dropdownThemeOuvert = false;
-        indexSurvolTheme = -1;
     }
 }

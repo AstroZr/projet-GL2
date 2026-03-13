@@ -57,7 +57,13 @@ public class Jeu extends Etats {
         HAUTEUR_BOUTON,
         EtatJeu.MENU,
         labelRetour));
+  }
 
+  public void chargerNiveau(String idNiveau) {
+    grille = new Grille("Invité", idNiveau);
+    vueGrille = new VueGrille(grille);
+    lastLayoutWidth = -1;
+    lastLayoutHeight = -1;
   }
 
   @Override
