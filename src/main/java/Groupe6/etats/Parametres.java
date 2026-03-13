@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import Groupe6.fond.FondCatppuccin;
+import Groupe6.fond.FondClair;
+import Groupe6.fond.FondDegrade;
+import Groupe6.fond.FondFonce;
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
@@ -34,15 +38,20 @@ public class Parametres extends Etats {
     private int sliderEffetsX, sliderEffetsY, sliderWidth;
     private int sliderMusiqueX, sliderMusiqueY;
     private int dropdownX, dropdownY, dropdownWidth;
-    private int boutonModeX, boutonModeY, boutonModeWidth, boutonModeHeight;
+    private int themeDropdownX, themeDropdownY, themeDropdownWidth;
     
     // Valeurs des paramètres
-    private float volumeEffets = 0.5f;
-    private float volumeMusique = 0.5f;
-    private List<String> langues = Arrays.asList("Français", "English");
+    private float volumeEffets = 0.0f;
+    private float volumeMusique = 0.0f;
+    private final List<String> codesLangues = Arrays.asList("fr", "en");
+    private List<String> languesAffichees = Arrays.asList("Français", "English");
     private int langueSelectionnee = 0;
-    private boolean dropdownOuvert = false;
-    private boolean modeSombre = false;
+    private boolean dropdownLangueOuvert = false;
+    private final List<String> themes = Arrays.asList("Dégradé", "Mode Sombre", "Mode Clair", "Catppuccin");
+    private List<String> themesAffiches = new ArrayList<>(themes);
+    private int themeSelectionne = 0;
+    private boolean dropdownThemeOuvert = false;
+    private int indexSurvolTheme = -1;
     
     // État de drag des sliders
     private boolean draggingEffets = false;
@@ -50,8 +59,17 @@ public class Parametres extends Etats {
     
     // Hover états
     private boolean hoverDropdown = false;
-    private boolean hoverModeSombre = false;
-    private boolean hoverModeClaire = false;
+    private boolean hoverThemeDropdown = false;
+
+    private String titreParametres;
+    private String labelEffetsSonores;
+    private String labelMusique;
+    private String labelLangue;
+    private String labelTheme;
+    private String suffixeMute;
+    private String boutonRetourLabel;
+    private String boutonDefautLabel;
+    private String boutonAppliquerLabel;
 
     public Parametres(Game game) {
         super(game);
@@ -61,6 +79,9 @@ public class Parametres extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
+        updateTexts();
+        langueSelectionnee = game != null ? game.getLangueSelectionnee() : 0;
+        themeSelectionne = detecterThemeActuel();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
@@ -88,11 +109,10 @@ public class Parametres extends Etats {
         dropdownY = sliderMusiqueY + layoutScale.scaleY(70);
         dropdownWidth = layoutScale.scaleX(350);
         
-        // Boutons mode
-        boutonModeX = panelX + panelWidth / 2 + layoutScale.scaleX(50);
-        boutonModeY = panelY + layoutScale.scaleY(150);
-        boutonModeWidth = layoutScale.scaleX(200);
-        boutonModeHeight = layoutScale.scaleY(50);
+        // Dropdown thème
+        themeDropdownX = panelX + panelWidth / 2 + layoutScale.scaleX(50);
+        themeDropdownY = panelY + layoutScale.scaleY(170);
+        themeDropdownWidth = layoutScale.scaleX(260);
         
         // Boutons de validation, de réinitialisation ou de retour 
         boutons.clear();
@@ -104,9 +124,9 @@ public class Parametres extends Etats {
         int totalWidth = bw * 3 + gap * 2;
         int startX = cx - totalWidth / 2;
         
-        boutons.add(new BoutonChangeurEtat(startX, by, bw, bh, EtatJeu.MENU, "Retour"));
-        boutons.add(new BoutonChangeurEtat(startX + bw + gap, by, bw, bh, EtatJeu.PARAMETRES, "Défaut"));
-        boutons.add(new BoutonChangeurEtat(startX + 2 * (bw + gap), by, bw, bh, EtatJeu.PARAMETRES, "Appliquer"));
+        boutons.add(new BoutonChangeurEtat(startX, by, bw, bh, EtatJeu.MENU, boutonRetourLabel));
+        boutons.add(new BoutonChangeurEtat(startX + bw + gap, by, bw, bh, EtatJeu.PARAMETRES, boutonDefautLabel));
+        boutons.add(new BoutonChangeurEtat(startX + 2 * (bw + gap), by, bw, bh, EtatJeu.PARAMETRES, boutonAppliquerLabel));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -132,7 +152,7 @@ public class Parametres extends Etats {
         // Dessiner le titre "Paramètres"
         g.setColor(Color.BLACK);
         g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(36)));
-        String titre = "Paramètres";
+        String titre = titreParametres;
         int titreLargeur = g.getFontMetrics().stringWidth(titre);
         g.drawString(titre, layoutScale.centerX() - titreLargeur / 2, panelY - layoutScale.scaleY(30));
 
@@ -145,10 +165,10 @@ public class Parametres extends Etats {
         g2d.draw(panel);
 
         // Dessiner les sliders et contrôles
-        dessinerSlider(g, sliderEffetsX, sliderEffetsY, sliderWidth, "Effets sonores", "🔊", volumeEffets);
-        dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, "Musique", "🎵", volumeMusique);
+        dessinerSlider(g, sliderEffetsX, sliderEffetsY, sliderWidth, labelEffetsSonores, "🔊", "🔇", volumeEffets);
+        dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, labelMusique, "🎵", "🔇", volumeMusique);
         dessinerDropdown(g);
-        dessinerBoutonsModes(g);
+        dessinerDropdownThemes(g);
 
         // Dessiner les boutons du bas
         for (Bouton b : boutons) {
@@ -156,16 +176,19 @@ public class Parametres extends Etats {
         }
     }
     
-    private void dessinerSlider(Graphics g, int x, int y, int largeur, String label, String icon, float valeur) {
+    private void dessinerSlider(Graphics g, int x, int y, int largeur, String label, String icon, String muteIcon, float valeur) {
         Graphics2D g2d = (Graphics2D) g;
+        boolean mute = valeur <= 0.0f;
+        String iconAffiche = mute ? muteIcon : icon;
+        String labelAffiche = mute ? label + suffixeMute : label;
         
         // Label et icône
         g.setColor(Color.BLACK);
         g.setFont(new Font("Segoe UI Emoji", Font.PLAIN, layoutScale.scaleUniform(20)));
-        g.drawString(icon, x, y + layoutScale.scaleY(20));
+        g.drawString(iconAffiche, x, y + layoutScale.scaleY(20));
         
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-        g.drawString(label, x + layoutScale.scaleX(40), y + layoutScale.scaleY(18));
+        g.drawString(labelAffiche, x + layoutScale.scaleX(40), y + layoutScale.scaleY(18));
         
         // Piste du slider
         int sliderY = y + layoutScale.scaleY(30);
@@ -206,7 +229,7 @@ public class Parametres extends Etats {
         g.drawString("🌐", dropdownX, dropdownY + layoutScale.scaleY(20));
         
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-        g.drawString("Langue", dropdownX + layoutScale.scaleX(40), dropdownY + layoutScale.scaleY(18));
+        g.drawString(labelLangue, dropdownX + layoutScale.scaleX(40), dropdownY + layoutScale.scaleY(18));
         
         // Boîte du dropdown
         int dropY = dropdownY + layoutScale.scaleY(28);
@@ -224,17 +247,17 @@ public class Parametres extends Etats {
         // Texte sélectionné
         g.setColor(Color.BLACK);
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-        g.drawString(langues.get(langueSelectionnee), dropX + layoutScale.scaleX(10), dropY + layoutScale.scaleY(22));
+        g.drawString(languesAffichees.get(langueSelectionnee), dropX + layoutScale.scaleX(10), dropY + layoutScale.scaleY(22));
         
         // Flèche
         int arrowX = dropX + dropW - layoutScale.scaleX(20);
         int arrowY = dropY + dropH / 2;
-        dessinerFleche(g2d, arrowX, arrowY, dropdownOuvert);
+        dessinerFleche(g2d, arrowX, arrowY, dropdownLangueOuvert);
         
         // Options si ouvert
-        if (dropdownOuvert) {
+        if (dropdownLangueOuvert) {
             int optionY = dropY + dropH;
-            for (int i = 0; i < langues.size(); i++) {
+            for (int i = 0; i < languesAffichees.size(); i++) {
                 if (i != langueSelectionnee) {
                     g2d.setColor(new Color(240, 240, 240, 200));
                     RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + layoutScale.scaleY(2), dropW, dropH, 10, 10);
@@ -243,7 +266,7 @@ public class Parametres extends Etats {
                     g2d.draw(optionBox);
                     
                     g.setColor(Color.BLACK);
-                    g.drawString(langues.get(i), dropX + layoutScale.scaleX(10), optionY + layoutScale.scaleY(24));
+                    g.drawString(languesAffichees.get(i), dropX + layoutScale.scaleX(10), optionY + layoutScale.scaleY(24));
                     optionY += dropH + layoutScale.scaleY(2);
                 }
             }
@@ -263,35 +286,60 @@ public class Parametres extends Etats {
         g2d.fillPolygon(xPoints, yPoints, 3);
     }
     
-    private void dessinerBoutonsModes(Graphics g) {
+    private void dessinerDropdownThemes(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        
-        // Bouton Mode Sombre
-        g2d.setColor(hoverModeSombre ? new Color(100, 100, 100, 180) : new Color(80, 80, 80, 180));
-        RoundRectangle2D btnSombre = new RoundRectangle2D.Float(boutonModeX, boutonModeY, boutonModeWidth, boutonModeHeight, 10, 10);
-        g2d.fill(btnSombre);
+
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Segoe UI Emoji", Font.PLAIN, layoutScale.scaleUniform(20)));
+        g.drawString("🎨", themeDropdownX, themeDropdownY + layoutScale.scaleY(20));
+
+        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
+        g.drawString(labelTheme, themeDropdownX + layoutScale.scaleX(40), themeDropdownY + layoutScale.scaleY(18));
+
+        int dropY = themeDropdownY + layoutScale.scaleY(28);
+        int dropX = themeDropdownX + layoutScale.scaleX(40);
+        int dropW = themeDropdownWidth - layoutScale.scaleX(40);
+        int dropH = layoutScale.scaleY(35);
+
+        g2d.setColor(hoverThemeDropdown ? new Color(220, 220, 220, 180) : new Color(200, 200, 200, 180));
+        RoundRectangle2D box = new RoundRectangle2D.Float(dropX, dropY, dropW, dropH, 10, 10);
+        g2d.fill(box);
         g2d.setColor(Color.GRAY);
         g2d.setStroke(new BasicStroke(2));
-        g2d.draw(btnSombre);
-        
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-        String texteSombre = "Mode Sombre";
-        int tsLargeur = g.getFontMetrics().stringWidth(texteSombre);
-        g.drawString(texteSombre, boutonModeX + (boutonModeWidth - tsLargeur) / 2, boutonModeY + boutonModeHeight / 2 + layoutScale.scaleY(5));
-        
-        // Bouton Mode Claire
-        int btnClaireY = boutonModeY + boutonModeHeight + layoutScale.scaleY(15);
-        g2d.setColor(hoverModeClaire ? new Color(250, 250, 250, 200) : new Color(230, 230, 230, 180));
-        RoundRectangle2D btnClaire = new RoundRectangle2D.Float(boutonModeX, btnClaireY, boutonModeWidth, boutonModeHeight, 10, 10);
-        g2d.fill(btnClaire);
-        g2d.setColor(Color.GRAY);
-        g2d.draw(btnClaire);
-        
+        g2d.draw(box);
+
         g.setColor(Color.BLACK);
-        String texteClaire = "Mode Claire";
-        int tcLargeur = g.getFontMetrics().stringWidth(texteClaire);
-        g.drawString(texteClaire, boutonModeX + (boutonModeWidth - tcLargeur) / 2, btnClaireY + boutonModeHeight / 2 + layoutScale.scaleY(5));
+        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
+        g.drawString(themesAffiches.get(themeSelectionne), dropX + layoutScale.scaleX(10), dropY + layoutScale.scaleY(22));
+
+        int arrowX = dropX + dropW - layoutScale.scaleX(20);
+        int arrowY = dropY + dropH / 2;
+        dessinerFleche(g2d, arrowX, arrowY, dropdownThemeOuvert);
+
+        if (dropdownThemeOuvert) {
+            int optionY = dropY + dropH;
+            for (int i = 0; i < themes.size(); i++) {
+                Color fond;
+                if (i == themeSelectionne) {
+                    fond = new Color(120, 170, 230, 210);
+                } else if (i == indexSurvolTheme) {
+                    fond = new Color(240, 240, 240, 210);
+                } else {
+                    fond = new Color(225, 225, 225, 200);
+                }
+
+                RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + layoutScale.scaleY(2), dropW,
+                        dropH, 10, 10);
+                g2d.setColor(fond);
+                g2d.fill(optionBox);
+                g2d.setColor(Color.GRAY);
+                g2d.draw(optionBox);
+
+                g.setColor(Color.BLACK);
+                g.drawString(themesAffiches.get(i), dropX + layoutScale.scaleX(10), optionY + layoutScale.scaleY(24));
+                optionY += dropH + layoutScale.scaleY(2);
+            }
+        }
     }
 
     @Override
@@ -325,14 +373,27 @@ public class Parametres extends Etats {
         int dropW = dropdownWidth - layoutScale.scaleX(40);
         int dropH = layoutScale.scaleY(35);
         hoverDropdown = mx >= dropX && mx <= dropX + dropW && my >= dropY && my <= dropY + dropH;
-        
-        // Vérifier hover boutons modes
-        hoverModeSombre = mx >= boutonModeX && mx <= boutonModeX + boutonModeWidth && 
-                         my >= boutonModeY && my <= boutonModeY + boutonModeHeight;
-        
-        int btnClaireY = boutonModeY + boutonModeHeight + layoutScale.scaleY(15);
-        hoverModeClaire = mx >= boutonModeX && mx <= boutonModeX + boutonModeWidth && 
-                         my >= btnClaireY && my <= btnClaireY + boutonModeHeight;
+
+        // Vérifier hover dropdown thème
+        int themeDropY = themeDropdownY + layoutScale.scaleY(28);
+        int themeDropX = themeDropdownX + layoutScale.scaleX(40);
+        int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
+        int themeDropH = layoutScale.scaleY(35);
+        hoverThemeDropdown = mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY
+                && my <= themeDropY + themeDropH;
+
+        indexSurvolTheme = -1;
+        if (dropdownThemeOuvert) {
+            int optionY = themeDropY + themeDropH;
+            for (int i = 0; i < themes.size(); i++) {
+                int optY = optionY + layoutScale.scaleY(2);
+                if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
+                    indexSurvolTheme = i;
+                    break;
+                }
+                optionY += themeDropH + layoutScale.scaleY(2);
+            }
+        }
     }
 
     @Override
@@ -361,7 +422,6 @@ public class Parametres extends Etats {
         // Non implémenté
     }
 
-    /** Marque les boutons comme enfoncés et gère les clics sur les contrôles. */
     @Override
     public void mousePressed(MouseEvent e) {
         for (Bouton b : boutons) {
@@ -373,7 +433,6 @@ public class Parametres extends Etats {
         int mx = e.getX();
         int my = e.getY();
         
-        // Vérifier clic sur slider effets
         int sliderY = sliderEffetsY + layoutScale.scaleY(20);
         int sliderX = sliderEffetsX + layoutScale.scaleX(40);
         int sliderW = sliderWidth - layoutScale.scaleX(40);
@@ -383,7 +442,6 @@ public class Parametres extends Etats {
             volumeEffets = Math.max(0, Math.min(1, newVal));
         }
         
-        // Vérifier clic sur slider musique
         sliderY = sliderMusiqueY + layoutScale.scaleY(20);
         sliderX = sliderMusiqueX + layoutScale.scaleX(40);
         if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
@@ -392,51 +450,78 @@ public class Parametres extends Etats {
             volumeMusique = Math.max(0, Math.min(1, newVal));
         }
         
-        // Vérifier clic sur dropdown
         int dropY = dropdownY + layoutScale.scaleY(28);
         int dropX = dropdownX + layoutScale.scaleX(40);
         int dropW = dropdownWidth - layoutScale.scaleX(40);
         int dropH = layoutScale.scaleY(35);
         if (mx >= dropX && mx <= dropX + dropW && my >= dropY && my <= dropY + dropH) {
-            dropdownOuvert = !dropdownOuvert;
-        } else if (dropdownOuvert) {
-            // Vérifier clic sur option
+            dropdownLangueOuvert = !dropdownLangueOuvert;
+            if (dropdownLangueOuvert) {
+                dropdownThemeOuvert = false;
+            }
+        } else if (dropdownLangueOuvert) {
             int optionY = dropY + dropH;
-            for (int i = 0; i < langues.size(); i++) {
+            boolean langueChoisie = false;
+            for (int i = 0; i < languesAffichees.size(); i++) {
                 if (i != langueSelectionnee) {
                     int optY = optionY + layoutScale.scaleY(2);
                     if (mx >= dropX && mx <= dropX + dropW && my >= optY && my <= optY + dropH) {
                         langueSelectionnee = i;
-                        dropdownOuvert = false;
+                        dropdownLangueOuvert = false;
+                        langueChoisie = true;
                         break;
                     }
                     optionY += dropH + layoutScale.scaleY(2);
                 }
             }
+            if (!langueChoisie) {
+                dropdownLangueOuvert = false;
+            }
         }
-        
-        // Vérifier clic sur boutons modes
-        if (hoverModeSombre) {
-            modeSombre = true;
-        }
-        
-        if (hoverModeClaire) {
-            modeSombre = false;
+
+        int themeDropY = themeDropdownY + layoutScale.scaleY(28);
+        int themeDropX = themeDropdownX + layoutScale.scaleX(40);
+        int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
+        int themeDropH = layoutScale.scaleY(35);
+
+        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY && my <= themeDropY + themeDropH) {
+            dropdownThemeOuvert = !dropdownThemeOuvert;
+            if (dropdownThemeOuvert) {
+                dropdownLangueOuvert = false;
+            }
+        } else if (dropdownThemeOuvert) {
+            int optionY = themeDropY + themeDropH;
+            boolean themeChoisi = false;
+            for (int i = 0; i < themes.size(); i++) {
+                int optY = optionY + layoutScale.scaleY(2);
+                if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
+                themeSelectionne = i;
+                    dropdownThemeOuvert = false;
+                    themeChoisi = true;
+                break;
+            }
+                optionY += themeDropH + layoutScale.scaleY(2);
+            }
+            if (!themeChoisi) {
+                dropdownThemeOuvert = false;
+            }
         }
     }
 
-    /** Déclenche l'action des boutons si le clic est valide. */
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
             if (b.isSourisEnfonce() && isIn(e, b)) {
-                // Gérer le bouton Défaut
                 if (boutons.indexOf(b) == 1) {
-                    // Réinitialiser aux valeurs par défaut
-                    volumeEffets = 0.5f;
-                    volumeMusique = 0.5f;
+                    volumeEffets = 0.0f;
+                    volumeMusique = 0.0f;
                     langueSelectionnee = 0;
-                    modeSombre = false;
+                    themeSelectionne = 0;
+                    dropdownLangueOuvert = false;
+                    dropdownThemeOuvert = false;
+                } else if (boutons.indexOf(b) == 2) {
+                    appliquerThemeSelectionne();
+                    appliquerLangueSelectionnee();
                 } else {
                     b.appliquerAction();
                 }
@@ -444,13 +529,70 @@ public class Parametres extends Etats {
             b.setSourisEnfonce(false);
         }
         
-        // Arrêter le drag des sliders
         draggingEffets = false;
         draggingMusique = false;
     }
 
     @Override
     public void updateTexts() {
-        // Non implémenté
+        boolean en = game != null && game.isEnglish();
+
+        languesAffichees = en ? Arrays.asList("French", "English") : Arrays.asList("Français", "English");
+        themesAffiches = en ? Arrays.asList("Gradient", "Dark mode", "Light mode", "Catppuccin")
+            : new ArrayList<>(themes);
+
+        titreParametres = en ? "Settings" : "Paramètres";
+        labelEffetsSonores = en ? "Sound effects" : "Effets sonores";
+        labelMusique = en ? "Music" : "Musique";
+        labelLangue = en ? "Language" : "Langue";
+        labelTheme = en ? "Theme" : "Thème";
+        suffixeMute = en ? " (Muted)" : " (Muet)";
+        boutonRetourLabel = en ? "Back" : "Retour";
+        boutonDefautLabel = en ? "Default" : "Défaut";
+        boutonAppliquerLabel = en ? "Apply" : "Appliquer";
+
+        if (boutons == null || boutons.size() < 3) {
+            return;
+        }
+
+        ((BoutonChangeurEtat) boutons.get(0)).setLabel(boutonRetourLabel);
+        ((BoutonChangeurEtat) boutons.get(1)).setLabel(boutonDefautLabel);
+        ((BoutonChangeurEtat) boutons.get(2)).setLabel(boutonAppliquerLabel);
+    }
+
+    private void appliquerLangueSelectionnee() {
+        if (game != null) {
+            game.setLangueSelectionnee(langueSelectionnee);
+        }
+    }
+
+    private int detecterThemeActuel() {
+        if (getFond() == FondFonce.getInstance()) {
+            return 1;
+        }
+        if (getFond() == FondClair.getInstance()) {
+            return 2;
+        }
+        if (getFond() == FondCatppuccin.getInstance()) {
+            return 3;
+        }
+        return 0;
+    }
+
+    private void appliquerThemeSelectionne() {
+        switch (themeSelectionne) {
+            case 1:
+                Etats.setFondActuel(FondFonce.getInstance());
+                break;
+            case 2:
+                Etats.setFondActuel(FondClair.getInstance());
+                break;
+            case 3:
+                Etats.setFondActuel(FondCatppuccin.getInstance());
+                break;
+            default:
+                Etats.setFondActuel(FondDegrade.getInstance());
+                break;
+        }
     }
 }

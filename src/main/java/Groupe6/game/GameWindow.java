@@ -45,10 +45,14 @@ public class GameWindow extends JFrame {
     }
 
     public void handleWindowClosing() {
+        boolean en = game != null && game.isEnglish();
+        String message = en ? "Do you want to save before quitting?" : "Voulez-vous sauvegarder avant de quitter ?";
+        String title = en ? "Exit confirmation" : "Confirmation de fermeture";
+
         int choice = JOptionPane.showConfirmDialog(
             this,
-            "Voulez-vous sauvegarder avant de quitter ?",
-            "Confirmation de fermeture",
+            message,
+            title,
             JOptionPane.YES_NO_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );

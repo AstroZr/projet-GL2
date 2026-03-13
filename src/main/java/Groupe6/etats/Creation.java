@@ -37,6 +37,9 @@ public class Creation extends Etats implements MethodesEtats {
     private LayoutScale layoutScale;
     private TextInput textInput;
     private BoutonCreation bouton;
+    private String titreCreation;
+    private String placeholderIdentifiant;
+    private String labelBoutonCreationProfil;
 
     public Creation(Game game) {
         super(game);
@@ -47,9 +50,11 @@ public class Creation extends Etats implements MethodesEtats {
         layoutScale = LayoutScale.getInstance();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
+        updateTexts();
 
-        textInput = new TextInput(0, 0, LARGEUR_CHAMP, HAUTEUR_CHAMP, "Identifiant", MAX_PSEUDO);
+        textInput = new TextInput(0, 0, LARGEUR_CHAMP, HAUTEUR_CHAMP, placeholderIdentifiant, MAX_PSEUDO);
         bouton = new BoutonCreation(0, 0, LARGEUR_BOUTON, HAUTEUR_BOUTON);
+        bouton.setLabel(labelBoutonCreationProfil);
     }
 
     @Override
@@ -130,9 +135,9 @@ public class Creation extends Etats implements MethodesEtats {
             g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
         }
         g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, Math.max(12, titleFontSize)));
-        g.setColor(getFond().getCouleurTexte());
-        int tw = g.getFontMetrics().stringWidth("Création");
-        g.drawString("Création", centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
+        g.setColor(java.awt.Color.BLACK);
+            int tw = g.getFontMetrics().stringWidth(titreCreation);
+                g.drawString(titreCreation, centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
 
         textInput.draw(g, getFond());
         bouton.draw(g, getFond());
@@ -186,6 +191,17 @@ public class Creation extends Etats implements MethodesEtats {
 
     @Override
     public void updateTexts() {
+        boolean en = game != null && game.isEnglish();
+        titreCreation = en ? "Create" : "Création";
+        placeholderIdentifiant = en ? "Username" : "Identifiant";
+        labelBoutonCreationProfil = en ? "Create profile" : "Création du profil";
+
+        if (textInput != null) {
+            textInput.setPlaceholder(placeholderIdentifiant);
+        }
+        if (bouton != null) {
+            bouton.setLabel(labelBoutonCreationProfil);
+        }
     }
 
     public String getPseudoSaisi() {

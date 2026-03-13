@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import Groupe6.game.Game;
 import Groupe6.models.Grille;
+import Groupe6.models.TypeOperation;
+import Groupe6.models.ZoneCalcul;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.view.VueGrille;
@@ -21,6 +23,8 @@ public class Jeu extends Etats {
 
   private Grille grille;
   private VueGrille vueGrille;
+  private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
+  private String labelRetour;
 
   public Jeu(Game game) {
     super(game);
@@ -29,9 +33,16 @@ public class Jeu extends Etats {
 
   private void initClasses() {
     boutons = new ArrayList<>();
+    updateTexts();
 
-    
-    grille = new Grille("testUser", "test");
+    // Créer la grille (modèle)
+    grille = new Grille("Invité", "test");
+
+    // Exemple : ajouter des zones de calcul
+    ZoneCalcul zone1 = new ZoneCalcul(5, TypeOperation.ADDITION);
+    zone1.ajouterCellule(grille.getCellule(0, 0));
+    zone1.ajouterCellule(grille.getCellule(0, 1));
+    grille.ajouterZone(zone1);
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -45,13 +56,9 @@ public class Jeu extends Etats {
         LARGEUR_BOUTON,
         HAUTEUR_BOUTON,
         EtatJeu.MENU,
-        "Retour"));
+        labelRetour));
 
   }
-  // getters pour la save
-  public Grille getGrille() {
-        return grille;
-    }
 
   @Override
   public void update() {
@@ -148,6 +155,16 @@ public class Jeu extends Etats {
 
   @Override
   public void updateTexts() {
-    // Pas de texte dynamique pour le moment
+    boolean en = game != null && game.isEnglish();
+    labelRetour = en ? "Back" : "Retour";
+
+    if (boutons == null || boutons.isEmpty()) {
+      return;
+    }
+    ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelRetour);
+  }
+
+  public Grille getGrille() {
+    return grille;
   }
 }

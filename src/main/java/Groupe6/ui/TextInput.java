@@ -17,7 +17,7 @@ public class TextInput {
     private static final Font FONT_INPUT = new Font("Berlin Sans FB Demi", Font.PLAIN, 18);
     private final Rectangle bounds;
     private final StringBuilder text;
-    private final String placeholder;
+    private String placeholder;
     private final int maxLength;
     private boolean focused;
    
@@ -119,6 +119,10 @@ public class TextInput {
             int len = Math.min(s.length(), maxLength);
             text.append(s, 0, len);
         }
+    }
+
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder != null ? placeholder : "";
     }
 
     /** Retourne la zone de délimitation du champ. */
