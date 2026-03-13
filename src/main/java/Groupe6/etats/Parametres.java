@@ -1,14 +1,5 @@
 package Groupe6.etats;
 
-import Groupe6.fond.FondCatppuccin;
-import Groupe6.fond.FondClair;
-import Groupe6.fond.FondDegrade;
-import Groupe6.fond.FondFonce;
-import Groupe6.game.Game;
-import Groupe6.ui.Bouton;
-import Groupe6.ui.BoutonChangeurEtat;
-import Groupe6.utilz.Constants;
-import Groupe6.utilz.LayoutScale;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -22,7 +13,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** État « paramètres » : écran de configuration du jeu. */
+import Groupe6.fond.Fond;
+import Groupe6.fond.FondCatppuccin;
+import Groupe6.fond.FondClair;
+import Groupe6.fond.FondDegrade;
+import Groupe6.fond.FondFonce;
+import Groupe6.game.Game;
+import Groupe6.ui.Bouton;
+import Groupe6.ui.BoutonChangeurEtat;
+import Groupe6.utilz.Constants;
+import Groupe6.utilz.LayoutScale;
+
+/**
+ * État « paramètres » : écran de configuration du jeu.
+ */
 public class Parametres extends Etats {
 
   private static final int LARGEUR_BOUTON = 200;
@@ -44,8 +48,7 @@ public class Parametres extends Etats {
   private List<String> languesAffichees = Arrays.asList("Français", "English");
   private int langueSelectionnee = 0;
   private boolean dropdownLangueOuvert = false;
-  private final List<String> themes =
-      Arrays.asList("Dégradé", "Mode Sombre", "Mode Clair", "Catppuccin");
+  private final List<String> themes = Arrays.asList("Dégradé", "Mode Sombre", "Mode Clair", "Catppuccin");
   private List<String> themesAffiches = new ArrayList<>(themes);
   private int themeSelectionne = 0;
   private boolean dropdownThemeOuvert = false;
@@ -84,8 +87,10 @@ public class Parametres extends Etats {
     layoutScale = LayoutScale.getInstance();
     boutons = new ArrayList<>();
     updateTexts();
-    langueSelectionnee = game != null ? game.getLangueSelectionnee() : 0;
-    themeSelectionne = detecterThemeActuel();
+    langueAppliquee = game != null ? game.getLangueSelectionnee() : 0; // utiliser constante pour reucpere la langue
+                                                                       // pour pas a regarder toute les fenetre
+    themeApplique = detecterThemeActuel();
+    synchroniserEditionAvecValeursAppliquees();
 
     layoutScale.update(Constants.game_width, Constants.game_height);
     calculerPositions();
@@ -129,12 +134,8 @@ public class Parametres extends Etats {
     int startX = cx - totalWidth / 2;
 
     boutons.add(new BoutonChangeurEtat(startX, by, bw, bh, EtatJeu.MENU, boutonRetourLabel));
-    boutons.add(
-        new BoutonChangeurEtat(
-            startX + bw + gap, by, bw, bh, EtatJeu.PARAMETRES, boutonDefautLabel));
-    boutons.add(
-        new BoutonChangeurEtat(
-            startX + 2 * (bw + gap), by, bw, bh, EtatJeu.PARAMETRES, boutonAppliquerLabel));
+    boutons.add(new BoutonChangeurEtat(startX + bw + gap, by, bw, bh, EtatJeu.PARAMETRES, boutonDefautLabel));
+    boutons.add(new BoutonChangeurEtat(startX + 2 * (bw + gap), by, bw, bh, EtatJeu.PARAMETRES, boutonAppliquerLabel));
   }
 
   /** Met à jour le fond animé (nuages). */
@@ -170,18 +171,15 @@ public class Parametres extends Etats {
 
     // Dessiner le panel principal
     g2d.setColor(new Color(200, 200, 200, 120));
-    RoundRectangle2D panel =
-        new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20);
+    RoundRectangle2D panel = new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20);
     g2d.fill(panel);
     g2d.setColor(Color.GRAY);
     g2d.setStroke(new BasicStroke(2));
     g2d.draw(panel);
 
     // Dessiner les sliders et contrôles
-    dessinerSlider(
-        g, sliderEffetsX, sliderEffetsY, sliderWidth, labelEffetsSonores, "🔊", "🔇", volumeEffets);
-    dessinerSlider(
-        g, sliderMusiqueX, sliderMusiqueY, sliderWidth, labelMusique, "🎵", "🔇", volumeMusique);
+    dessinerSlider(g, sliderEffetsX, sliderEffetsY, sliderWidth, labelEffetsSonores, "🔊", "🔇", volumeEffets);
+    dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, labelMusique, "🎵", "🔇", volumeMusique);
     dessinerDropdown(g);
     dessinerDropdownThemes(g);
 
@@ -191,14 +189,7 @@ public class Parametres extends Etats {
     }
   }
 
-  private void dessinerSlider(
-      Graphics g,
-      int x,
-      int y,
-      int largeur,
-      String label,
-      String icon,
-      String muteIcon,
+  private void dessinerSlider(Graphics g, int x, int y, int largeur, String label, String icon, String muteIcon,
       float valeur) {
     Graphics2D g2d = (Graphics2D) g;
     boolean mute = valeur <= 0.0f;
@@ -220,17 +211,15 @@ public class Parametres extends Etats {
 
     // Fond de la piste
     g2d.setColor(new Color(200, 200, 200));
-    RoundRectangle2D piste =
-        new RoundRectangle2D.Float(
-            sliderX, sliderY, largeur - layoutScale.scaleX(40), sliderH, sliderH, sliderH);
+    RoundRectangle2D piste = new RoundRectangle2D.Float(sliderX, sliderY, largeur - layoutScale.scaleX(40), sliderH,
+        sliderH, sliderH);
     g2d.fill(piste);
 
     // Partie remplie
     int filledWidth = (int) ((largeur - layoutScale.scaleX(40)) * valeur);
     if (filledWidth > 0) {
       g2d.setColor(new Color(70, 130, 180));
-      RoundRectangle2D filled =
-          new RoundRectangle2D.Float(sliderX, sliderY, filledWidth, sliderH, sliderH, sliderH);
+      RoundRectangle2D filled = new RoundRectangle2D.Float(sliderX, sliderY, filledWidth, sliderH, sliderH, sliderH);
       g2d.fill(filled);
     }
 
@@ -255,8 +244,7 @@ public class Parametres extends Etats {
     g.drawString("🌐", dropdownX, dropdownY + layoutScale.scaleY(20));
 
     g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-    g.drawString(
-        labelLangue, dropdownX + layoutScale.scaleX(40), dropdownY + layoutScale.scaleY(18));
+    g.drawString(labelLangue, dropdownX + layoutScale.scaleX(40), dropdownY + layoutScale.scaleY(18));
 
     // Boîte du dropdown
     int dropY = dropdownY + layoutScale.scaleY(28);
@@ -274,9 +262,7 @@ public class Parametres extends Etats {
     // Texte sélectionné
     g.setColor(Color.BLACK);
     g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-    g.drawString(
-        languesAffichees.get(langueSelectionnee),
-        dropX + layoutScale.scaleX(10),
+    g.drawString(languesAffichees.get(langueSelectionnee), dropX + layoutScale.scaleX(10),
         dropY + layoutScale.scaleY(22));
 
     // Flèche
@@ -290,18 +276,14 @@ public class Parametres extends Etats {
       for (int i = 0; i < languesAffichees.size(); i++) {
         if (i != langueSelectionnee) {
           g2d.setColor(new Color(240, 240, 240, 200));
-          RoundRectangle2D optionBox =
-              new RoundRectangle2D.Float(
-                  dropX, optionY + layoutScale.scaleY(2), dropW, dropH, 10, 10);
+          RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + layoutScale.scaleY(2), dropW, dropH,
+              10, 10);
           g2d.fill(optionBox);
           g2d.setColor(Color.GRAY);
           g2d.draw(optionBox);
 
           g.setColor(Color.BLACK);
-          g.drawString(
-              languesAffichees.get(i),
-              dropX + layoutScale.scaleX(10),
-              optionY + layoutScale.scaleY(24));
+          g.drawString(languesAffichees.get(i), dropX + layoutScale.scaleX(10), optionY + layoutScale.scaleY(24));
           optionY += dropH + layoutScale.scaleY(2);
         }
       }
@@ -310,12 +292,12 @@ public class Parametres extends Etats {
 
   private void dessinerFleche(Graphics2D g2d, int x, int y, boolean up) {
     int size = layoutScale.scaleUniform(5);
-    int[] xPoints = {x - size, x + size, x};
+    int[] xPoints = { x - size, x + size, x };
     int[] yPoints;
     if (up) {
-      yPoints = new int[] {y + size / 2, y + size / 2, y - size / 2};
+      yPoints = new int[] { y + size / 2, y + size / 2, y - size / 2 };
     } else {
-      yPoints = new int[] {y - size / 2, y - size / 2, y + size / 2};
+      yPoints = new int[] { y - size / 2, y - size / 2, y + size / 2 };
     }
     g2d.setColor(Color.BLACK);
     g2d.fillPolygon(xPoints, yPoints, 3);
@@ -329,18 +311,14 @@ public class Parametres extends Etats {
     g.drawString("🎨", themeDropdownX, themeDropdownY + layoutScale.scaleY(20));
 
     g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-    g.drawString(
-        labelTheme,
-        themeDropdownX + layoutScale.scaleX(40),
-        themeDropdownY + layoutScale.scaleY(18));
+    g.drawString(labelTheme, themeDropdownX + layoutScale.scaleX(40), themeDropdownY + layoutScale.scaleY(18));
 
     int dropY = themeDropdownY + layoutScale.scaleY(28);
     int dropX = themeDropdownX + layoutScale.scaleX(40);
     int dropW = themeDropdownWidth - layoutScale.scaleX(40);
     int dropH = layoutScale.scaleY(35);
 
-    g2d.setColor(
-        hoverThemeDropdown ? new Color(220, 220, 220, 180) : new Color(200, 200, 200, 180));
+    g2d.setColor(hoverThemeDropdown ? new Color(220, 220, 220, 180) : new Color(200, 200, 200, 180));
     RoundRectangle2D box = new RoundRectangle2D.Float(dropX, dropY, dropW, dropH, 10, 10);
     g2d.fill(box);
     g2d.setColor(Color.GRAY);
@@ -349,10 +327,7 @@ public class Parametres extends Etats {
 
     g.setColor(Color.BLACK);
     g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14)));
-    g.drawString(
-        themesAffiches.get(themeSelectionne),
-        dropX + layoutScale.scaleX(10),
-        dropY + layoutScale.scaleY(22));
+    g.drawString(themesAffiches.get(themeSelectionne), dropX + layoutScale.scaleX(10), dropY + layoutScale.scaleY(22));
 
     int arrowX = dropX + dropW - layoutScale.scaleX(20);
     int arrowY = dropY + dropH / 2;
@@ -370,19 +345,15 @@ public class Parametres extends Etats {
           fond = new Color(225, 225, 225, 200);
         }
 
-        RoundRectangle2D optionBox =
-            new RoundRectangle2D.Float(
-                dropX, optionY + layoutScale.scaleY(2), dropW, dropH, 10, 10);
+        RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + layoutScale.scaleY(2), dropW,
+            dropH, 10, 10);
         g2d.setColor(fond);
         g2d.fill(optionBox);
         g2d.setColor(Color.GRAY);
         g2d.draw(optionBox);
 
         g.setColor(Color.BLACK);
-        g.drawString(
-            themesAffiches.get(i),
-            dropX + layoutScale.scaleX(10),
-            optionY + layoutScale.scaleY(24));
+        g.drawString(themesAffiches.get(i), dropX + layoutScale.scaleX(10), optionY + layoutScale.scaleY(24));
         optionY += dropH + layoutScale.scaleY(2);
       }
     }
@@ -425,21 +396,15 @@ public class Parametres extends Etats {
     int themeDropX = themeDropdownX + layoutScale.scaleX(40);
     int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
     int themeDropH = layoutScale.scaleY(35);
-    hoverThemeDropdown =
-        mx >= themeDropX
-            && mx <= themeDropX + themeDropW
-            && my >= themeDropY
-            && my <= themeDropY + themeDropH;
+    hoverThemeDropdown = mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY
+        && my <= themeDropY + themeDropH;
 
     indexSurvolTheme = -1;
     if (dropdownThemeOuvert) {
       int optionY = themeDropY + themeDropH;
       for (int i = 0; i < themes.size(); i++) {
         int optY = optionY + layoutScale.scaleY(2);
-        if (mx >= themeDropX
-            && mx <= themeDropX + themeDropW
-            && my >= optY
-            && my <= optY + themeDropH) {
+        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
           indexSurvolTheme = i;
           break;
         }
@@ -488,10 +453,7 @@ public class Parametres extends Etats {
     int sliderY = sliderEffetsY + layoutScale.scaleY(20);
     int sliderX = sliderEffetsX + layoutScale.scaleX(40);
     int sliderW = sliderWidth - layoutScale.scaleX(40);
-    if (mx >= sliderX
-        && mx <= sliderX + sliderW
-        && my >= sliderY
-        && my <= sliderY + layoutScale.scaleY(30)) {
+    if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
       draggingEffets = true;
       float newVal = (float) (mx - sliderX) / sliderW;
       volumeEffets = Math.max(0, Math.min(1, newVal));
@@ -499,10 +461,7 @@ public class Parametres extends Etats {
 
     sliderY = sliderMusiqueY + layoutScale.scaleY(20);
     sliderX = sliderMusiqueX + layoutScale.scaleX(40);
-    if (mx >= sliderX
-        && mx <= sliderX + sliderW
-        && my >= sliderY
-        && my <= sliderY + layoutScale.scaleY(30)) {
+    if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
       draggingMusique = true;
       float newVal = (float) (mx - sliderX) / sliderW;
       volumeMusique = Math.max(0, Math.min(1, newVal));
@@ -542,10 +501,7 @@ public class Parametres extends Etats {
     int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
     int themeDropH = layoutScale.scaleY(35);
 
-    if (mx >= themeDropX
-        && mx <= themeDropX + themeDropW
-        && my >= themeDropY
-        && my <= themeDropY + themeDropH) {
+    if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY && my <= themeDropY + themeDropH) {
       dropdownThemeOuvert = !dropdownThemeOuvert;
       if (dropdownThemeOuvert) {
         dropdownLangueOuvert = false;
@@ -555,11 +511,9 @@ public class Parametres extends Etats {
       boolean themeChoisi = false;
       for (int i = 0; i < themes.size(); i++) {
         int optY = optionY + layoutScale.scaleY(2);
-        if (mx >= themeDropX
-            && mx <= themeDropX + themeDropW
-            && my >= optY
-            && my <= optY + themeDropH) {
+        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
           themeSelectionne = i;
+          appliquerThemeSelectionne();
           dropdownThemeOuvert = false;
           themeChoisi = true;
           break;
@@ -581,12 +535,16 @@ public class Parametres extends Etats {
           volumeMusique = 0.0f;
           langueSelectionnee = 0;
           themeSelectionne = 0;
+          appliquerThemeSelectionne();
           dropdownLangueOuvert = false;
           dropdownThemeOuvert = false;
         } else if (boutons.indexOf(b) == 2) {
           appliquerThemeSelectionne();
           appliquerLangueSelectionnee();
+          memoriserValeursAppliquees();
         } else {
+          synchroniseDepuisEntree = false;
+          synchroniserEditionAvecValeursAppliquees();
           b.appliquerAction();
         }
       }
@@ -601,12 +559,9 @@ public class Parametres extends Etats {
   public void updateTexts() {
     boolean en = game != null && game.isEnglish();
 
-    languesAffichees =
-        en ? Arrays.asList("French", "English") : Arrays.asList("Français", "English");
-    themesAffiches =
-        en
-            ? Arrays.asList("Gradient", "Dark mode", "Light mode", "Catppuccin")
-            : new ArrayList<>(themes);
+    languesAffichees = en ? Arrays.asList("French", "English") : Arrays.asList("Français", "English");
+    themesAffiches = en ? Arrays.asList("Gradient", "Dark mode", "Light mode", "Catppuccin")
+        : new ArrayList<>(themes);
 
     titreParametres = en ? "Settings" : "Paramètres";
     labelEffetsSonores = en ? "Sound effects" : "Effets sonores";
@@ -647,20 +602,27 @@ public class Parametres extends Etats {
   }
 
   private void appliquerThemeSelectionne() {
-    switch (themeSelectionne) {
+    Etats.setFondActuel(fondDepuisThemeSelectionne(themeSelectionne));
+  }
+
+  private Fond fondDepuisThemeSelectionne(int indexTheme) {
+    switch (indexTheme) {
       case 1:
-        Etats.setFondActuel(FondFonce.getInstance());
-        break;
+        return FondFonce.getInstance();
       case 2:
-        Etats.setFondActuel(FondClair.getInstance());
-        break;
+        return FondClair.getInstance();
       case 3:
-        Etats.setFondActuel(FondCatppuccin.getInstance());
-        break;
+        return FondCatppuccin.getInstance();
       default:
-        Etats.setFondActuel(FondDegrade.getInstance());
-        break;
+        return FondDegrade.getInstance();
     }
+  }
+
+  private void memoriserValeursAppliquees() {
+    langueAppliquee = langueSelectionnee;
+    themeApplique = themeSelectionne;
+    volumeEffetsApplique = volumeEffets;
+    volumeMusiqueApplique = volumeMusique;
   }
 
   private void synchroniserEditionAvecValeursAppliquees() {
