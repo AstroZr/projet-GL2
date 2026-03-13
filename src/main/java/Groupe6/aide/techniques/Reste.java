@@ -1,0 +1,95 @@
+package Groupe6.aide.techniques;
+
+import Groupe6.aide.AideAbstract;
+import Groupe6.aide.AideTextuel;
+import Groupe6.aide.AideVisuel;
+import Groupe6.aide.EffetVisuel;
+import Groupe6.aide.TypeEffect;
+import Groupe6.models.Grille;
+
+public class Reste extends AideAbstract{
+    private boolean isLigne; // if false, isLigne est une colonne
+    private int index = -1; // indice de la ligne ou colonne
+
+    public Reste(){
+        super(1);
+    }
+
+    @Override
+    public boolean check(Grille grille){
+        int taille = grille.getTaille();        
+
+        int ligne = 0;
+        int colonne = 0;
+        while (ligne < taille && this.index == -1){
+            int count = 0;
+            for (colonne = 0; colonne < taille; colonne++){
+                if (!grille.getCellule(ligne, colonne).estVide()){
+                    count++;
+                }
+            }
+            if (count == taille - 1){
+                this.isLigne = true;
+                this.index = ligne;
+            }
+
+            ligne++;
+        }
+
+        if (this.index != -1){
+            return true;
+        }
+
+        ligne = 0;
+        colonne = 0;
+        while (colonne < taille && this.index == -1){
+            int count = 0;
+            for (ligne = 0; ligne < taille; ligne++){
+                if (!grille.getCellule(ligne, colonne).estVide()){
+                    count++;
+                }
+            }
+            if (count == taille - 1){
+                this.isLigne = false;
+                this.index = colonne;
+            }
+
+            colonne++;
+        }
+        
+        return (this.index != -1) ? true : false;
+    }
+
+    @Override
+    public int load(Grille grille, int nbAides){
+        int taille = grille.getTaille(); // par sécurité
+
+        this.aideVisuel = new AideVisuel();
+
+        switch (this.nbUtilisation){
+            case 0:
+                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !");
+                this.nbUtilisation++;
+                return this.getCost(nbAides);
+            
+            case 1:
+                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé ! Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index) + " !");
+                this.nbUtilisation++;
+                return this.getCost(nbAides);
+            
+            default:
+                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !" + "!");
+                if (this.isLigne){
+                    for (int colonne = 0; colonne < taille; colonne++){
+                        this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.index, colonne, new String()));
+                    }
+                }
+                else{
+                    for (int ligne = 0; ligne < taille; ligne++){
+                        this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligne, this.index, new String()));
+                    }
+                }
+                return this.getCost(nbAides);
+        }
+    }
+}

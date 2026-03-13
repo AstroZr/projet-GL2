@@ -71,6 +71,12 @@ public class Parametres extends Etats {
     private String boutonDefautLabel;
     private String boutonAppliquerLabel;
 
+    private int langueAppliquee = 0;
+    private int themeApplique = 0;
+    private float volumeEffetsApplique = 0.0f;
+    private float volumeMusiqueApplique = 0.0f;
+    private boolean synchroniseDepuisEntree = false;
+
     public Parametres(Game game) {
         super(game);
         initClasses();
@@ -132,6 +138,10 @@ public class Parametres extends Etats {
     /** Met à jour le fond animé (nuages). */
     @Override
     public void update() {
+        if (!synchroniseDepuisEntree) {
+            synchroniserEditionAvecValeursAppliquees();
+            synchroniseDepuisEntree = true;
+        }
         getFond().update();
     }
 

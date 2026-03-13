@@ -121,69 +121,53 @@ public class ZoneCalcul {
 
 
     /**
-     * calcule toutes les combinaisons possibles de chiffres manquants pour completer la zone de calcul
-     * @return Une liste de listes chaque sous liste represente une combinaison valide de chiffres p our remplir les cellules vides
+     * Explore les combinaisons .
+     * @param index     L index de la cellule vide que l on traite actuellement
+     * @param max       Valeur maximale 
+     * @param resultats Liste accumulant le combinaison valides trouve
      */
-    public List<List<Integer>> trouverCombinaisons(int max) {
-        List<Cellule> vides = new ArrayList<>();
-        List<Integer> remplis = new ArrayList<>();
-        
-        for (Cellule c : listeCellules) {
-            if (c.estVide()) vides.add(c);
-            else remplis.add(c.getValeur());
-        }
-
-        List<List<Integer>> resultats = new ArrayList<>();
-        rechercherRecursive(vides.size(), remplis, new ArrayList<>(), max, resultats);
-        return resultats;
-    }
-
-    /**
-     * explorer combinaisons de chiffre
-     * @param remplis Liste des valeurs deja presentes dans la zo ne
-     * @param courant Liste temporaire des chiffres testes lors de la recursion
-     * @param max Valeur maximale autorisee
-     * @param resultats Liste accumulant les combinaisons valides trouve
-     */
-    private void rechercherRecursive(int nbVides, List<Integer> remplis, List<Integer> courant, int max, List<List<Integer>> resultats) {
-        if (courant.size() == nbVides) {
-            List<Integer> test = new ArrayList<>(remplis);
-            test.addAll(courant);
-            if (estValideLogique(test)) {
-                resultats.add(new ArrayList<>(courant));
+    private void rechercherRecursive(List<Cellule> vides, int index, int max, List<List<Integer>> resultats) {
+        // Cas de base : toutes les cellules vides ont une valeur de test
+        if (index == vides.size()) {
+            if (verifierMaths()) {
+                List<Integer> combinaison = new ArrayList<>();
+                for (Cellule c : vides) {
+                    combinaison.add(c.getValeur());
+                }
+                resultats.add(combinaison);
             }
             return;
         }
+
+        Cellule celluleCourante = vides.get(index);
+
         for (int i = 1; i <= max; i++) {
-            courant.add(i);
-            rechercherRecursive(nbVides, remplis, courant, max, resultats);
-            courant.remove(courant.size() - 1);
+            // On simule le remplissage
+            celluleCourante.setValeur(i);
+            
+            // appel recursif pour la cellule suivante
+            rechercherRecursive(vides, index + 1, max, resultats);
+            
+            // On vide la cellule
+            celluleCourante.setValeur(0); 
         }
     }
 
     /**
-     * valide si une liste de valeurs respecte la regle mathematique definie par le type d'operation de la zone
-     * @return true si le résultat correspond à la valeurCible ou false sinon
+     * trouver les Combinaisons de touche
+     * @param max  Valeur maximale  
      */
-    private boolean estValideLogique(List<Integer> valeurs) {
-        switch (typeOperation) {
-            case ADDITION:
-                return valeurs.stream().mapToInt(Integer::intValue).sum() == valeurCible;
-            case MULTIPLICATION:
-                return valeurs.stream().mapToInt(Integer::intValue).reduce(1, (a, b) -> a * b) == valeurCible;
-            case SOUSTRACTION:
-                Collections.sort(valeurs, Collections.reverseOrder());
-                int resS = valeurs.get(0);
-                for (int i = 1; i < valeurs.size(); i++) resS -= valeurs.get(i);
-                return resS == valeurCible;
-            case DIVISION:
-                Collections.sort(valeurs, Collections.reverseOrder());
-                int resD = valeurs.get(0);
-                for (int i = 1; i < valeurs.size(); i++) resD /= valeurs.get(i);
-                return resD == valeurCible;
-            case AUCUNE:
-                return valeurs.size() == 1 && valeurs.get(0) == valeurCible;
-            default: return false;
+    public List<List<Integer>> trouverCombinaisons(int max) {
+        List<Cellule> vides = new ArrayList<>();
+        for (Cellule c : listeCellules) {
+            if (c.estVide()) {
+                vides.add(c);
+            }
         }
+
+        List<List<Integer>> resultats = new ArrayList<>();
+        rechercherRecursive(vides, 0, max, resultats);
+        return resultats;
     }
+
 }

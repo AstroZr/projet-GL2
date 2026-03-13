@@ -11,11 +11,11 @@ import Groupe6.models.Cellule;
 import java.util.List;
 import java.util.Iterator;
 
-public class UniqueBlock extends AideAbstract{
+public class Singleton extends AideAbstract{
     private int ligneCellule = -1;
     private int colonneCellule = -1;
 
-    public UniqueBlock(){
+    public Singleton(){
         super(0); // 0 is the id of the UniqueBlock technique
     }
 
@@ -44,10 +44,10 @@ public class UniqueBlock extends AideAbstract{
     }
 
     @Override
-    public boolean load(Grille grille) {
+    public int load(Grille grille, int nbAides) {
         if (ligneCellule == -1 || ligneCellule == -1){
             if (!this.check(grille)){
-                return false;
+                return 0;
             }
         }
 
@@ -55,21 +55,19 @@ public class UniqueBlock extends AideAbstract{
 
         switch (this.nbUtilisation){
             case 0:
-                this.aideTextuel = new AideTextuel("Technique de la zone unique", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !");
-                return true;
+                this.aideTextuel = new AideTextuel("Technique du singleton", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !");
+                this.nbUtilisation++;
+                return this.getCost(nbAides);
             
             case 1:
-                this.aideTextuel = new AideTextuel("Technique de la zone unique", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !\n Le chiffre à inscrire est : " + grille.getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible() + "!");
-                this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.ligneCellule, this.colonneCellule, new String()));
-                return true;
-            
-            case 2:
-                this.aideTextuel = new AideTextuel("Technique de la zone unique", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !\n Le chiffre à inscrire est : " + grille.getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible() + "!");
-                this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.ligneCellule, this.colonneCellule, String.valueOf(grille.getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible())));
-                return true;
+                this.aideTextuel = new AideTextuel("Technique du singleton", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !\n Le chiffre à inscrire est : " + grille.getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible() + "!");
+                this.nbUtilisation++;
+                return this.getCost(nbAides);
             
             default:
-                return false;
+                this.aideTextuel = new AideTextuel("Technique du singleton", "Lorsqu'il y a une zone de calcul qui ne possède qu'une seule case, il n'y a qu'une seule possibilité !\n Le chiffre à inscrire est : " + grille.getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible() + "!");
+                this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.ligneCellule, this.colonneCellule, new String()));
+                return this.getCost(nbAides);
         }
     }
 }
