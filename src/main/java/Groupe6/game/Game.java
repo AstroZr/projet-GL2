@@ -22,6 +22,9 @@ import Groupe6.etats.Selection;
  */
 public class Game implements Runnable {
 
+    public static final int LANGUE_FRANCAIS = 0;
+    public static final int LANGUE_ENGLISH = 1;
+
     private final GamePanel gamePanel;
     private final GameWindow gameWindow;
     private Thread gameLoopThread;
@@ -33,6 +36,7 @@ public class Game implements Runnable {
     private int currentUPS = 0;
     private boolean debug = true;
     private boolean repeindreFlag = false;
+    private int langueSelectionnee = LANGUE_FRANCAIS;
 
     private Start start;
     private Menu menu;
@@ -70,6 +74,36 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.GRILLE, jeu);
         selection = new Selection(this);
         stateByEnum.put(EtatJeu.SELECTION, selection);
+
+        notifierChangementLangue();
+    }
+
+    public boolean isEnglish() {
+        return langueSelectionnee == LANGUE_ENGLISH;
+    }
+
+    public int getLangueSelectionnee() {
+        return langueSelectionnee;
+    }
+
+    public void setLangueSelectionnee(int nouvelleLangue) {
+        if (nouvelleLangue != LANGUE_FRANCAIS && nouvelleLangue != LANGUE_ENGLISH) {
+            return;
+        }
+        if (langueSelectionnee == nouvelleLangue) {
+            return;
+        }
+        langueSelectionnee = nouvelleLangue;
+        notifierChangementLangue();
+    }
+
+    private void notifierChangementLangue() {
+        if (start != null) start.updateTexts();
+        if (menu != null) menu.updateTexts();
+        if (parametres != null) parametres.updateTexts();
+        if (creation != null) creation.updateTexts();
+        if (jeu != null) jeu.updateTexts();
+        if (selection != null) selection.updateTexts();
     }
 
     private void startGameLoop() {

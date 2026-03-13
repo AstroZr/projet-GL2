@@ -24,6 +24,8 @@ public class Selection extends Etats {
     private LayoutScale layoutScale;
     private int nombreNiveaux;
     private int titreTy;
+    private String labelTitre;
+    private String labelRetour;
 
     private static class BoutonNiveau extends BoutonChangeurEtat {
         private final Jeu jeu;
@@ -48,6 +50,7 @@ public class Selection extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
+        updateTexts();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         int cx = layoutScale.centerX();
@@ -66,7 +69,7 @@ public class Selection extends Etats {
         }
 
         int retourY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_RETOUR_Y);
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, retourY, bw, bh, EtatJeu.MENU, "Retour"));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, retourY, bw, bh, EtatJeu.MENU, labelRetour));
 
         titreTy = startY - 40;
     }
@@ -109,10 +112,9 @@ public class Selection extends Etats {
 
         g.setColor(getFond().getCouleurTexte());
         g.setFont(FONT_TITRE);
-        String titre = "Sélection du niveau";
-        int tw = g.getFontMetrics().stringWidth(titre);
+        int tw = g.getFontMetrics().stringWidth(labelTitre);
         int tx = (Constants.game_width - tw) / 2;
-        g.drawString(titre, tx, titreTy);
+        g.drawString(labelTitre, tx, titreTy);
 
         for (Bouton b : boutons) {
             b.draw(g, getFond());
@@ -161,5 +163,14 @@ public class Selection extends Etats {
     public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void updateTexts() {}
+    public void updateTexts() {
+        boolean en = game != null && game.isEnglish();
+        labelTitre = en ? "Level selection" : "Sélection du niveau";
+        labelRetour = en ? "Back" : "Retour";
+
+        if (boutons == null || boutons.size() <= nombreNiveaux) {
+            return;
+        }
+        ((BoutonChangeurEtat) boutons.get(nombreNiveaux)).setLabel(labelRetour);
+    }
 }

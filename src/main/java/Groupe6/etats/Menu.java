@@ -22,6 +22,9 @@ public class Menu extends Etats {
     private static final int ESPACEMENT_BOUTONS_REF = 64;
 
     private LayoutScale layoutScale;
+    private String labelJouer;
+    private String labelParametres;
+    private String labelQuitter;
 
     public Menu(Game game) {
         super(game);
@@ -31,6 +34,7 @@ public class Menu extends Etats {
     private void initClasses() {
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
+        updateTexts();
 
         layoutScale.update(Constants.game_width, Constants.game_height);
         int cx = layoutScale.centerX();
@@ -39,9 +43,9 @@ public class Menu extends Etats {
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
 
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.SELECTION, "Jouer"));
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap, bw, bh, EtatJeu.PARAMETRES, "Paramètres"));
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap, bw, bh, EtatJeu.QUITTER, "Quitter"));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.SELECTION, labelJouer));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap, bw, bh, EtatJeu.PARAMETRES, labelParametres));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap, bw, bh, EtatJeu.QUITTER, labelQuitter));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -143,7 +147,17 @@ public class Menu extends Etats {
 
     @Override
     public void updateTexts() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateTexts'");
+        boolean en = game != null && game.isEnglish();
+        labelJouer = en ? "Play" : "Jouer";
+        labelParametres = en ? "Settings" : "Paramètres";
+        labelQuitter = en ? "Quit" : "Quitter";
+
+        if (boutons == null || boutons.size() < 3) {
+            return;
+        }
+
+        ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelJouer);
+        ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelParametres);
+        ((BoutonChangeurEtat) boutons.get(2)).setLabel(labelQuitter);
     }
 }

@@ -48,4 +48,8 @@ public class BoutonChangeurEtat extends Bouton {
     public void appliquerAction() {
         EtatJeu.setEtatActuel(action);
     }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 }
