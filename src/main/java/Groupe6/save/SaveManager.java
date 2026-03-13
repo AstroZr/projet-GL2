@@ -43,7 +43,7 @@ public class SaveManager {
                 if (annuaire != null) {
                     return annuaire;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -59,7 +59,7 @@ public class SaveManager {
                 gson.toJson(annuaire, writer);
             }
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -101,7 +101,7 @@ public class SaveManager {
                 gson.toJson(parametres, writer);
             }
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -119,7 +119,7 @@ public class SaveManager {
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, ParametresJoueur.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -145,7 +145,7 @@ public class SaveManager {
                 gson.toJson(partie, writer);
             }
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -163,7 +163,7 @@ public class SaveManager {
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, PartieSauvegardee.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -188,7 +188,7 @@ public class SaveManager {
                 if (temps != null) {
                     return temps;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -214,7 +214,7 @@ public class SaveManager {
                 gson.toJson(meilleursTemps, writer);
             }
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
