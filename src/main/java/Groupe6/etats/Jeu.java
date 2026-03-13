@@ -84,11 +84,11 @@ public class Jeu extends Etats {
     getFond().draw(g);
 
     // Déléguer l'affichage à la vue grille
-    vueGrille.draw(g);
+    vueGrille.draw(g, getFond());
 
     // Dessiner les boutons
     for (Bouton b : boutons) {
-      b.draw(g);
+      b.draw(g, getFond());
     }
   }
 

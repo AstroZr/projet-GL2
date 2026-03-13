@@ -1,5 +1,6 @@
 package Groupe6.fond;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 /**
@@ -26,4 +27,44 @@ public interface Fond {
 
     /** Retourne le singleton du thème Catppuccin. */
     Fond catppuccin();
+
+    /** Couleur de fond des cellules de la grille. */
+    Color getCouleurFondCellule();
+
+    /** Couleur du texte (valeurs et étiquettes de zone). */
+    Color getCouleurTexte();
+
+    /** Couleur des bordures épaisses délimitant les zones. */
+    Color getCouleurBordureZone();
+
+    /** Couleur des étiquettes de zone (valeur cible + opérateur). */
+    Color getCouleurEtiquetteZone();
+
+    // --- Boutons ---
+
+    /** Couleur de fond du bouton à l'état normal. */
+    Color getCouleurFondBouton();
+
+    /** Couleur de fond du bouton au survol. */
+    Color getCouleurFondBoutonSurvol();
+
+    /** Couleur de fond du bouton au clic. */
+    Color getCouleurFondBoutonClic();
+
+    /** Couleur de la bordure du bouton. */
+    Color getCouleurBordreBouton();
+
+    // --- TextInput ---
+
+    /** Couleur de fond du champ texte non focalisé. */
+    Color getCouleurFondInput();
+
+    /** Couleur de fond du champ texte focalisé. */
+    Color getCouleurFondInputFocus();
+
+    /** Couleur d'accent (bordure focus, éléments d'accentuation). */
+    Color getCouleurAccent();
+
+    /** Couleur du texte placeholder. */
+    Color getCouleurPlaceholder();
 }

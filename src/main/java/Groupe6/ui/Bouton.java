@@ -8,6 +8,8 @@ import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+import Groupe6.fond.Fond;
+
 /**
  * Base abstraite pour les boutons UI : position, zone de clic, image(s), survol/enfoncement.
  * Les sous-classes implémentent appliquerAction() et peuvent surcharger draw() et chargerImages().
@@ -24,7 +26,7 @@ public abstract class Bouton {
 
     int arc = 15; // 15px de rayon
     private RoundRectangle2D rect;
-    private Color[] backgroundColor;
+    private static final BasicStroke STROKE_BORDURE = new BasicStroke(2);
 
     public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;
@@ -32,10 +34,6 @@ public abstract class Bouton {
         this.largeur = largeur;
         this.hauteur = hauteur;
         creationDelimitation();
-        backgroundColor = new Color[3]; // 3 états : 0 normal, 1 hover, 2 clicked
-        backgroundColor[0] = new Color(200, 200, 200, 180);
-        backgroundColor[1] = new Color(220,220,220, 180);
-        backgroundColor[2] = new Color(240,240,240,180);
     }
 
     private void creationDelimitation() {
@@ -51,9 +49,9 @@ public abstract class Bouton {
     /** Action exécutée au clic ; à implémenter par les sous-classes. */
     public abstract void appliquerAction();
 
-    /** Dessine le bouton (image si disponible, sinon rectangle gris avec bordure). */
-    public void draw(Graphics g) { 
-        drawBackground(g);
+    /** Dessine le bouton (rectangle arrondi coloré selon le thème). */
+    public void draw(Graphics g, Fond fond) {
+        drawBackground(g, fond);
     }
 
     /** Retourne la zone de délimitation du bouton. */
@@ -129,13 +127,19 @@ public abstract class Bouton {
     public void setSourisSurvol(boolean sourisSurvol) {
         this.sourisSurvol = sourisSurvol;
     }
-    private void drawBackground(Graphics g) {
-      Graphics2D g2d = (Graphics2D) g;
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g2d.setColor(backgroundColor[sourisSurvol ? (sourisEnfonce ? 2 : 1) : 0]);
-      g2d.fill(rect);
-      g2d.setColor(Color.GRAY);
-      g2d.setStroke(new BasicStroke(2));
-      g2d.draw(rect);
+    private void drawBackground(Graphics g, Fond fond) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Color bg;
+        if (sourisSurvol) {
+            bg = sourisEnfonce ? fond.getCouleurFondBoutonClic() : fond.getCouleurFondBoutonSurvol();
+        } else {
+            bg = fond.getCouleurFondBouton();
+        }
+        g2d.setColor(bg);
+        g2d.fill(rect);
+        g2d.setColor(fond.getCouleurBordreBouton());
+        g2d.setStroke(STROKE_BORDURE);
+        g2d.draw(rect);
     }
 }
