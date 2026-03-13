@@ -5,7 +5,7 @@ package Groupe6.aide;
    Le positif correspond au fait qu'un numero correspond à une aide propose, qu'une case correspond à la solution, qu'un cadidat est plausible etc.
 */
 
-enum TypeEffect{
+public enum TypeEffect{
     CASE_NEGATIVE, CASE_POSITIVE,
     NUMERO_NEGATIF, NUMERO_POSITIF,
     CANDIDAT_NEGATIF, CANDIDAT_POSITIF
