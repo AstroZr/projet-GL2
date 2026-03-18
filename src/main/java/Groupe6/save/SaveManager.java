@@ -295,7 +295,16 @@ public class SaveManager {
                     listeZones.add(zone);
                 }
 
-                return new Niveau(id, taille, matrice, listeZones);
+                int[][] matriceCorrection = new int[taille][taille];
+                JsonArray jsonCorrection = jsonObject.getAsJsonArray("matriceCorrection");
+                for (int i = 0; i < taille; i++) {
+                    JsonArray ligneJson = jsonCorrection.get(i).getAsJsonArray();
+                    for (int j = 0; j < taille; j++) {
+                        matriceCorrection[i][j] = ligneJson.get(j).getAsInt();
+                    }
+                }
+
+                return new Niveau(id, taille, matrice, listeZones, matriceCorrection);
 
             } catch (Exception e) {
                 e.printStackTrace();
