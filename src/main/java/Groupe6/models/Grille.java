@@ -12,6 +12,11 @@ import Groupe6.save.SaveManager;
  * Gère l'état global, les règles et la validation.
  */
 public class Grille {
+    public static final int ACTION_MOVE = 0;
+    public static final int ACTION_CANDIDAT = 1;
+    public static final int ACTION_AIDE = 2;
+    public static final int ACTION_AUCUNE = -1;
+
     private List<GrilleObserver> observers = new ArrayList<>();
 
     private final int taille;
@@ -22,6 +27,7 @@ public class Grille {
     private List<int[]> historique = new java.util.ArrayList<>();
     private String nomJoueur;
     private String idNiveau;
+    private long tempsEcoule;
 
     // Etat du jeu
     private boolean estComplete;
@@ -56,7 +62,12 @@ public class Grille {
 
             this.matriceCellules = sauvegarde.getMatriceCellules();
             this.historique = sauvegarde.getHistorique();
+            if (this.historique == null) {
+                this.historique = new ArrayList<>();
+            }
             this.listeZones = niveauBase.getListeZones();
+            this.tempsEcoule = sauvegarde.getTempsEcoule();
+            this.indexActuel = this.historique.size() - 1;
 
             // relie les zones de niveauBase aux cellules de la sauvegarde
             for (ZoneCalcul zone : listeZones) {
@@ -70,6 +81,7 @@ public class Grille {
             this.matriceCellules = niveauBase.getMatriceCellules();
             this.listeZones = niveauBase.getListeZones();
             this.historique = new ArrayList<>();
+            this.tempsEcoule = 0L;
         }
 
         this.estComplete = false;
@@ -161,8 +173,25 @@ public class Grille {
             historique.subList(indexActuel + 1, historique.size()).clear();
         }
 
-        historique.add(new int[] { ligne, colonne, ancienneValeur, nouvelleValeur, estCandidat ? 1 : 0 });
+        historique.add(new int[] { ligne, colonne, ancienneValeur, nouvelleValeur, estCandidat ? ACTION_CANDIDAT : ACTION_MOVE });
         indexActuel++;
+    }
+
+    private void enregistrerCoupCandidat(int ligne, int colonne, int valeur, boolean ajout) {
+        if (indexActuel < historique.size() - 1) {
+            historique.subList(indexActuel + 1, historique.size()).clear();
+        }
+        historique.add(new int[] { ligne, colonne, valeur, ajout ? 1 : 0, ACTION_CANDIDAT });
+        indexActuel++;
+    }
+
+    public void enregistrerUsageAide() {
+        if (indexActuel < historique.size() - 1) {
+            historique.subList(indexActuel + 1, historique.size()).clear();
+        }
+        historique.add(new int[] { -1, -1, 0, 0, ACTION_AIDE });
+        indexActuel++;
+        notifierObservateurs();
     }
 
     /**
@@ -183,6 +212,7 @@ public class Grille {
 
         enregistrerCoup(ligne, colonne, valeur, false); // enregistre la modification
         cellule.setValeur(valeur);
+        cellule.getListeCandidat().clear();
         validerGrille();
         notifierObservateurs();
     }
@@ -432,31 +462,59 @@ public class Grille {
     /**
      * recul dans la pile de coup
      */
-    public void retourArriere() {
+    public int retourArriere() {
         if (indexActuel < 0)
-            return;
+            return ACTION_AUCUNE;
 
         int[] coup = historique.get(indexActuel);
-        matriceCellules[coup[0]][coup[1]].setValeur(coup[2]); // Restaure ancienneValeur
+        int typeAction = coup[4];
+        if (typeAction == ACTION_MOVE) {
+            matriceCellules[coup[0]][coup[1]].setValeur(coup[2]); // Restaure ancienneValeur
+        } else if (typeAction == ACTION_CANDIDAT) {
+            Cellule cellule = matriceCellules[coup[0]][coup[1]];
+            int valeur = coup[2];
+            boolean ajout = coup[3] == 1;
+            if (ajout) {
+                cellule.getListeCandidat().remove(Integer.valueOf(valeur));
+            } else if (!cellule.getListeCandidat().contains(valeur)) {
+                cellule.getListeCandidat().add(valeur);
+            }
+        }
         indexActuel--;
 
         validerGrille();
         notifierObservateurs();
+        return typeAction;
     }
 
     /**
      * avance dans la pile de coup
      */
-    public void retourAvant() {
+    public int retourAvant() {
         if (indexActuel >= historique.size() - 1)
-            return;
+            return ACTION_AUCUNE;
 
         indexActuel++;
         int[] coup = historique.get(indexActuel);
-        matriceCellules[coup[0]][coup[1]].setValeur(coup[3]); // Applique nouvelleValeur
+        int typeAction = coup[4];
+        if (typeAction == ACTION_MOVE) {
+            matriceCellules[coup[0]][coup[1]].setValeur(coup[3]); // Applique nouvelleValeur
+        } else if (typeAction == ACTION_CANDIDAT) {
+            Cellule cellule = matriceCellules[coup[0]][coup[1]];
+            int valeur = coup[2];
+            boolean ajout = coup[3] == 1;
+            if (ajout) {
+                if (!cellule.getListeCandidat().contains(valeur)) {
+                    cellule.getListeCandidat().add(valeur);
+                }
+            } else {
+                cellule.getListeCandidat().remove(Integer.valueOf(valeur));
+            }
+        }
 
         validerGrille();
         notifierObservateurs();
+        return typeAction;
     }
 
     /**
@@ -475,7 +533,7 @@ public class Grille {
         if (!cellule.getListeCandidat().contains(valeur)) {
             cellule.getListeCandidat().add(valeur);
 
-            enregistrerCoup(ligne, colonne, valeur, true); // enregistre la modification
+            enregistrerCoupCandidat(ligne, colonne, valeur, true);
             notifierObservateurs();
         }
     }
@@ -495,16 +553,24 @@ public class Grille {
         if (cellule.getListeCandidat().contains(valeur)) {
             cellule.getListeCandidat().remove(Integer.valueOf(valeur));
 
-            enregistrerCoup(ligne, colonne, valeur, true); // enregistre la modification
+            enregistrerCoupCandidat(ligne, colonne, valeur, false);
             notifierObservateurs();
         }
+    }
+
+    public long getTempsEcoule() {
+        return tempsEcoule;
+    }
+
+    public void setTempsEcoule(long tempsEcoule) {
+        this.tempsEcoule = Math.max(0L, tempsEcoule);
     }
 
     public void saveGrille() {
         PartieSauvegardee ps = new PartieSauvegardee(
                 this.matriceCellules,
                 this.historique,
-                0 // temps ecouler a faire
+                this.tempsEcoule
         );
 
         SaveManager.sauvegarderPartie(nomJoueur, idNiveau, ps);
