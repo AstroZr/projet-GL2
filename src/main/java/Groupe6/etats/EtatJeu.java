@@ -17,6 +17,7 @@ public enum EtatJeu {
     SELECTION,
     CREATION,
     CONNEXION,
+    RECORDS,
     QUITTER;
 
     private static EtatJeu etatActuel =START;

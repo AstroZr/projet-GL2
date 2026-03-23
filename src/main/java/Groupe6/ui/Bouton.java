@@ -8,6 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+import Groupe6.audio.SoundManager;
 import Groupe6.fond.Fond;
 
 /**
@@ -27,6 +28,8 @@ public abstract class Bouton {
     int arc = 15; // 15px de rayon
     private RoundRectangle2D rect;
     private static final BasicStroke STROKE_BORDURE = new BasicStroke(2);
+    private static final BasicStroke STROKE_FOCUS   = new BasicStroke(3);
+    private boolean focusClavier = false;
 
     public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;
@@ -113,8 +116,11 @@ public abstract class Bouton {
         return sourisEnfonce;
     }
 
-    /** Définit l'état d'enfoncement du bouton. */
+    /** Définit l'état d'enfoncement ; joue le son de clic sur le front montant. */
     public void setSourisEnfonce(boolean sourisEnfonce) {
+        if (sourisEnfonce && !this.sourisEnfonce) {
+            SoundManager.getInstance().playClick();
+        }
         this.sourisEnfonce = sourisEnfonce;
     }
 
@@ -123,15 +129,24 @@ public abstract class Bouton {
         return sourisSurvol;
     }
 
-    /** Définit l'état de survol du bouton. */
+    /** Définit l'état de survol ; joue le son de survol sur le front montant. */
     public void setSourisSurvol(boolean sourisSurvol) {
+        if (sourisSurvol && !this.sourisSurvol) {
+            SoundManager.getInstance().playClick();
+        }
         this.sourisSurvol = sourisSurvol;
+    }
+
+    public boolean isFocusClavier() { return focusClavier; }
+
+    public void setFocusClavier(boolean focusClavier) {
+        this.focusClavier = focusClavier;
     }
     private void drawBackground(Graphics g, Fond fond) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Color bg;
-        if (sourisSurvol) {
+        if (sourisSurvol || focusClavier) {
             bg = sourisEnfonce ? fond.getCouleurFondBoutonClic() : fond.getCouleurFondBoutonSurvol();
         } else {
             bg = fond.getCouleurFondBouton();
@@ -139,7 +154,7 @@ public abstract class Bouton {
         g2d.setColor(bg);
         g2d.fill(rect);
         g2d.setColor(fond.getCouleurBordreBouton());
-        g2d.setStroke(STROKE_BORDURE);
+        g2d.setStroke(focusClavier ? STROKE_FOCUS : STROKE_BORDURE);
         g2d.draw(rect);
     }
 }

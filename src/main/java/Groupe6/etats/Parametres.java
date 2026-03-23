@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import Groupe6.audio.SoundManager;
 import Groupe6.fond.Fond;
 import Groupe6.fond.FondCatppuccin;
 import Groupe6.fond.FondClair;
@@ -547,6 +548,8 @@ public class Parametres extends Etats {
           appliquerThemeSelectionne();
           appliquerLangueSelectionnee();
           memoriserValeursAppliquees();
+          SoundManager.getInstance().setVolumeEffets(volumeEffets);
+          SoundManager.getInstance().setVolumeMusique(volumeMusique);
           sauvegarderParametresJoueur(game != null ? game.getJoueurCourant() : null);
         } else {
           synchroniseDepuisEntree = false;
@@ -662,6 +665,9 @@ public class Parametres extends Etats {
     themeApplique = Math.max(0, Math.min(themes.size() - 1, params.getModeSombre()));
     volumeEffetsApplique = Math.max(0f, Math.min(1f, params.getVolumeEffet() / 100f));
     volumeMusiqueApplique = Math.max(0f, Math.min(1f, params.getVolumeMusique() / 100f));
+
+    SoundManager.getInstance().setVolumeEffets(volumeEffetsApplique);
+    SoundManager.getInstance().setVolumeMusique(volumeMusiqueApplique);
 
     if (game != null) {
       String code = codesLangues.get(langueAppliquee);

@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
@@ -25,6 +26,7 @@ public class Menu extends Etats {
     private LayoutScale layoutScale;
     private String labelJouer;
     private String labelParametres;
+    private String labelRecords;
     private String labelQuitter;
 
     public Menu(Game game) {
@@ -44,9 +46,10 @@ public class Menu extends Etats {
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
 
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.SELECTION, labelJouer));
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap, bw, bh, EtatJeu.PARAMETRES, labelParametres));
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap, bw, bh, EtatJeu.QUITTER, labelQuitter));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy,            bw, bh, EtatJeu.SELECTION,  labelJouer));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap,      bw, bh, EtatJeu.PARAMETRES, labelParametres));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap,  bw, bh, EtatJeu.RECORDS,    labelRecords));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 3 * gap,  bw, bh, EtatJeu.QUITTER,    labelQuitter));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -63,18 +66,12 @@ public class Menu extends Etats {
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
 
-        boutons.get(0).setX(cx - bw / 2);
-        boutons.get(0).setY(cy);
-        boutons.get(0).setLargeur(bw);
-        boutons.get(0).setHauteur(bh);
-        boutons.get(1).setX(cx - bw / 2);
-        boutons.get(1).setY(cy + gap);
-        boutons.get(1).setLargeur(bw);
-        boutons.get(1).setHauteur(bh);
-        boutons.get(2).setX(cx - bw / 2);
-        boutons.get(2).setY(cy + 2 * gap);
-        boutons.get(2).setLargeur(bw);
-        boutons.get(2).setHauteur(bh);
+        for (int i = 0; i < boutons.size(); i++) {
+            boutons.get(i).setX(cx - bw / 2);
+            boutons.get(i).setY(cy + i * gap);
+            boutons.get(i).setLargeur(bw);
+            boutons.get(i).setHauteur(bh);
+        }
     }
 
     /** Dessine le fond animé et tous les boutons du menu. */
@@ -87,21 +84,18 @@ public class Menu extends Etats {
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyReleased(KeyEvent e) {}
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyPressed(KeyEvent e) {
+        gererNavigationClavier(e);
+    }
 
-    @Override
-    public void keyPressed(KeyEvent e) {}
-
-    /** Met à jour l'état de survol des boutons selon la position de la souris. */
     @Override
     public void mouseMoved(MouseEvent e) {
-        for (Bouton b : boutons) {
-            b.setSourisSurvol(isIn(e, b));
-        }
+        clearFocusClavier();
+        for (Bouton b : boutons) b.setSourisSurvol(isIn(e, b));
     }
 
     @Override
@@ -133,16 +127,16 @@ public class Menu extends Etats {
 
     @Override
     public void updateTexts() {
-        labelJouer = LangManager.get("menu.jouer");
+        labelJouer      = LangManager.get("menu.jouer");
         labelParametres = LangManager.get("menu.parametres");
-        labelQuitter = LangManager.get("menu.quitter");
+        labelRecords    = LangManager.get("menu.records");
+        labelQuitter    = LangManager.get("menu.quitter");
 
-        if (boutons == null || boutons.size() < 3) {
-            return;
-        }
+        if (boutons == null || boutons.size() < 4) return;
 
         ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelJouer);
         ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelParametres);
-        ((BoutonChangeurEtat) boutons.get(2)).setLabel(labelQuitter);
+        ((BoutonChangeurEtat) boutons.get(2)).setLabel(labelRecords);
+        ((BoutonChangeurEtat) boutons.get(3)).setLabel(labelQuitter);
     }
 }

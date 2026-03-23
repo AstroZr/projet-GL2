@@ -7,11 +7,13 @@ import java.awt.Graphics2D;
 import java.util.EnumMap;
 import java.util.Map;
 
+import Groupe6.audio.SoundManager;
 import Groupe6.etats.MethodesEtats;
 import Groupe6.etats.EtatJeu;
 import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
 import Groupe6.etats.Parametres;
+import Groupe6.etats.Records;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
@@ -48,6 +50,7 @@ public class Game implements Runnable {
     private Creation creation;
     private Jeu jeu;
     private Selection selection;
+    private Records records;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
@@ -77,6 +80,8 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.GRILLE, jeu);
         selection = new Selection(this);
         stateByEnum.put(EtatJeu.SELECTION, selection);
+        records = new Records(this);
+        stateByEnum.put(EtatJeu.RECORDS, records);
 
         notifierChangementLangue();
     }
@@ -117,6 +122,7 @@ public class Game implements Runnable {
         if (creation != null) creation.updateTexts();
         if (jeu != null) jeu.updateTexts();
         if (selection != null) selection.updateTexts();
+        if (records != null) records.updateTexts();
     }
 
     private void startGameLoop() {
@@ -142,8 +148,8 @@ public class Game implements Runnable {
     private void update() {
         EtatJeu etatCourant = EtatJeu.getEtatActuel();
         if (dernierEtat != null && etatCourant != dernierEtat) {
-            // Capture le dernier frame rendu de l'état sortant avant de démarrer la transition
             transitionManager.notifierChangementEtat(frameBuffer);
+            SoundManager.getInstance().playTransition();
         }
         dernierEtat = etatCourant;
         transitionManager.update();
