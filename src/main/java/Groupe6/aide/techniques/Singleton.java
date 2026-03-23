@@ -21,7 +21,7 @@ public class Singleton extends AideAbstract{
 
     @Override
     public boolean check(Grille grille){
-        if (this.nbUtilisation  < 3){
+        if (this.nbUtilisation >= 3){
             return false;
         }
         

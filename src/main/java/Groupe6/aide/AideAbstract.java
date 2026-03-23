@@ -30,6 +30,10 @@ public abstract class AideAbstract implements Aide{
         return new AideVisuel(this.aideVisuel);
     }
 
+    void setNbUtilisation(int nbUtilisation){
+        this.nbUtilisation = Math.max(0, nbUtilisation);
+    }
+
     public int getCost(int nbAides){
         return (nbAides - numero) * nbUtilisation;
     }
