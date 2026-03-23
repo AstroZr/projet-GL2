@@ -12,6 +12,7 @@ import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 public class Selection extends Etats {
@@ -164,9 +165,8 @@ public class Selection extends Etats {
 
     @Override
     public void updateTexts() {
-        boolean en = game != null && game.isEnglish();
-        labelTitre = en ? "Level selection" : "Sélection du niveau";
-        labelRetour = en ? "Back" : "Retour";
+        labelTitre = LangManager.get("selection.titre");
+        labelRetour = LangManager.get("common.retour");
 
         if (boutons == null || boutons.size() <= nombreNiveaux) {
             return;

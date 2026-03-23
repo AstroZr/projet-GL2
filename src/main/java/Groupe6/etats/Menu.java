@@ -9,6 +9,7 @@ import Groupe6.game.Game;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
@@ -87,22 +88,13 @@ public class Menu extends Etats {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyReleased(KeyEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
-    }
+    public void keyReleased(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'keyPressed'");
-    }
+    public void keyPressed(KeyEvent e) {}
 
     /** Met à jour l'état de survol des boutons selon la position de la souris. */
     @Override
@@ -113,16 +105,10 @@ public class Menu extends Etats {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseDragged'");
-    }
+    public void mouseDragged(MouseEvent e) {}
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseClicked'");
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     /** Marque le bouton sous la souris comme enfoncé lors de l'appui. */
     @Override
@@ -147,10 +133,9 @@ public class Menu extends Etats {
 
     @Override
     public void updateTexts() {
-        boolean en = game != null && game.isEnglish();
-        labelJouer = en ? "Play" : "Jouer";
-        labelParametres = en ? "Settings" : "Paramètres";
-        labelQuitter = en ? "Quit" : "Quitter";
+        labelJouer = LangManager.get("menu.jouer");
+        labelParametres = LangManager.get("menu.parametres");
+        labelQuitter = LangManager.get("menu.quitter");
 
         if (boutons == null || boutons.size() < 3) {
             return;

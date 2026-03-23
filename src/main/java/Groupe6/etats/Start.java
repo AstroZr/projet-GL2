@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
-
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
@@ -48,6 +49,8 @@ public class Start extends Etats {
     private LayoutScale layoutScale;
     private String labelCreation;
     private String labelConnexion;
+    private boolean synchroniseDepuisEntree = false;
+    private boolean hasProfiles = false;
 
     public Start(Game game) {
         super(game);
@@ -60,20 +63,20 @@ public class Start extends Etats {
         updateTexts();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
+    }
 
-        layoutScale.update(Constants.game_width, Constants.game_height);
-        int cx = layoutScale.centerX();
-        int cy = layoutScale.ratioY(Constants.Ratios.Start.RATIO_START_FORM_Y);
-        int gap = layoutScale.scaleX(Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF);
-        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
-        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
-
-        boutons.add(new BoutonChangeurEtat(cx - gap - bw, cy, bw, bh, EtatJeu.CREATION, labelCreation));
-        boutons.add(new BoutonChangeurEtat(cx + gap, cy, bw, bh, EtatJeu.CONNEXION, labelConnexion));
+    private void rechargerProfils() {
+        boolean ancien = hasProfiles;
+        hasProfiles = !SaveManager.listerJoueurs().isEmpty();
+        if (hasProfiles != ancien) lastLayoutWidth = -1; // force recalcul layout
     }
 
     @Override
     public void update() {
+        if (!synchroniseDepuisEntree) {
+            rechargerProfils();
+            synchroniseDepuisEntree = true;
+        }
         getFond().update();
         logoFloatScale = computeLogoFloatScale();
     }
@@ -85,9 +88,10 @@ public class Start extends Etats {
         return 1f + LOGO_FLOAT_AMPLITUDE * ease;
     }
 
-    /** Bloc logo → titre → boutons, centré, espacements et scaling depuis Constants.Ratios.Start. */
+    /** Bloc logo → nom app → boutons, centré. Boutons conditionnels selon présence de profils. */
     @Override
     protected void applyLayout(int w, int h) {
+        layoutScale.update(w, h);
         int cx = layoutScale.centerX();
 
         logoSize = layoutScale.scaleUniform(LOGO_DEFAULT_SIZE);
@@ -96,7 +100,7 @@ public class Start extends Etats {
 
         int gapLogoName = layoutScale.scaleUniform(Constants.Ratios.Start.ESPACEMENT_LOGO_NAME_REF);
         nameAppHeight = layoutScale.scaleUniform(Constants.Ratios.Start.NAME_APP_REF_HEIGHT);
-        nameAppWidth = (nameAppImage.getHeight() > 0)
+        nameAppWidth = (nameAppImage != null && nameAppImage.getHeight() > 0)
                 ? nameAppHeight * nameAppImage.getWidth() / nameAppImage.getHeight()
                 : nameAppHeight;
         nameAppX = cx - nameAppWidth / 2;
@@ -108,14 +112,13 @@ public class Start extends Etats {
         int bw = layoutScale.scaleX(LARGEUR_BOUTON);
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
-        boutons.get(0).setX(cx - gap - bw);
-        boutons.get(0).setY(buttonY);
-        boutons.get(0).setLargeur(bw);
-        boutons.get(0).setHauteur(bh);
-        boutons.get(1).setX(cx + gap);
-        boutons.get(1).setY(buttonY);
-        boutons.get(1).setLargeur(bw);
-        boutons.get(1).setHauteur(bh);
+        boutons.clear();
+        if (hasProfiles) {
+            boutons.add(new BoutonChangeurEtat(cx - gap - bw, buttonY, bw, bh, EtatJeu.CREATION, labelCreation));
+            boutons.add(new BoutonChangeurEtat(cx + gap, buttonY, bw, bh, EtatJeu.CONNEXION, labelConnexion));
+        } else {
+            boutons.add(new BoutonChangeurEtat(cx - bw / 2, buttonY, bw, bh, EtatJeu.CREATION, labelCreation));
+        }
     }
 
     /** Dessine le fond animé, le logo et tous les boutons de l'écran de démarrage. */
@@ -189,24 +192,21 @@ public class Start extends Etats {
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
             if (b.isSourisEnfonce() && isIn(e, b)) {
+                synchroniseDepuisEntree = false; // prêt pour la prochaine entrée
                 b.appliquerAction();
             }
             b.setSourisEnfonce(false);
         }
     }
 
-    /** Aucune mise à jour de texte dynamique pour cet écran. */
     @Override
     public void updateTexts() {
-        boolean en = game != null && game.isEnglish();
-        labelCreation = en ? "Create" : "Création";
-        labelConnexion = en ? "Login" : "Connexion";
+        labelCreation = LangManager.get("start.creation");
+        labelConnexion = LangManager.get("start.connexion");
 
-        if (boutons == null || boutons.size() < 2) {
-            return;
-        }
+        if (boutons == null || boutons.isEmpty()) return;
         ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelCreation);
-        ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelConnexion);
+        if (boutons.size() >= 2) ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelConnexion);
     }
 
 

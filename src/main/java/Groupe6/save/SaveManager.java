@@ -238,6 +238,11 @@ public class SaveManager {
      *
      * @return List<String>
      */
+    /** Retourne la liste des pseudos enregistrés dans l'annuaire. */
+    public static List<String> listerJoueurs() {
+        return new ArrayList<>(chargerAnnuaire().keySet());
+    }
+
     public static List<String> listerIdsNiveaux() {
         List<String> ids = new ArrayList<>();
         InputStream is = SaveManager.class.getResourceAsStream("/niveaux/index.txt");

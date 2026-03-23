@@ -24,6 +24,7 @@ import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
@@ -89,8 +90,9 @@ public class Parametres extends Etats {
     layoutScale = LayoutScale.getInstance();
     boutons = new ArrayList<>();
     updateTexts();
-    langueAppliquee = game != null ? game.getLangueSelectionnee() : 0; // utiliser constante pour reucpere la langue
-                                                                       // pour pas a regarder toute les fenetre
+    String langCode = game != null ? game.getLangueCode() : "fr";
+    langueAppliquee = codesLangues.indexOf(langCode);
+    if (langueAppliquee < 0) langueAppliquee = 0;
     themeApplique = detecterThemeActuel();
     synchroniserEditionAvecValeursAppliquees();
 
@@ -561,21 +563,24 @@ public class Parametres extends Etats {
 
   @Override
   public void updateTexts() {
-    boolean en = game != null && game.isEnglish();
+    languesAffichees = Arrays.asList(
+        LangManager.get("parametres.langue.fr"),
+        LangManager.get("parametres.langue.en"));
+    themesAffiches = Arrays.asList(
+        LangManager.get("parametres.theme.degrade"),
+        LangManager.get("parametres.theme.sombre"),
+        LangManager.get("parametres.theme.clair"),
+        LangManager.get("parametres.theme.catppuccin"));
 
-    languesAffichees = en ? Arrays.asList("French", "English") : Arrays.asList("Français", "English");
-    themesAffiches = en ? Arrays.asList("Gradient", "Dark mode", "Light mode", "Catppuccin")
-        : new ArrayList<>(themes);
-
-    titreParametres = en ? "Settings" : "Paramètres";
-    labelEffetsSonores = en ? "Sound effects" : "Effets sonores";
-    labelMusique = en ? "Music" : "Musique";
-    labelLangue = en ? "Language" : "Langue";
-    labelTheme = en ? "Theme" : "Thème";
-    suffixeMute = en ? " (Muted)" : " (Muet)";
-    boutonRetourLabel = en ? "Back" : "Retour";
-    boutonDefautLabel = en ? "Default" : "Défaut";
-    boutonAppliquerLabel = en ? "Apply" : "Appliquer";
+    titreParametres = LangManager.get("parametres.titre");
+    labelEffetsSonores = LangManager.get("parametres.effets");
+    labelMusique = LangManager.get("parametres.musique");
+    labelLangue = LangManager.get("parametres.langue");
+    labelTheme = LangManager.get("parametres.theme");
+    suffixeMute = LangManager.get("parametres.mute");
+    boutonRetourLabel = LangManager.get("common.retour");
+    boutonDefautLabel = LangManager.get("parametres.defaut");
+    boutonAppliquerLabel = LangManager.get("parametres.appliquer");
 
     if (boutons == null || boutons.size() < 3) {
       return;
@@ -588,7 +593,8 @@ public class Parametres extends Etats {
 
   private void appliquerLangueSelectionnee() {
     if (game != null) {
-      game.setLangueSelectionnee(langueSelectionnee);
+      String code = codesLangues.get(Math.max(0, Math.min(codesLangues.size() - 1, langueSelectionnee)));
+      game.setLangueSelectionnee(code);
     }
   }
 
@@ -651,13 +657,15 @@ public class Parametres extends Etats {
     }
 
     String langue = params.getLanguage();
-    langueAppliquee = "en".equalsIgnoreCase(langue) ? Game.LANGUE_ENGLISH : Game.LANGUE_FRANCAIS;
+    langueAppliquee = codesLangues.indexOf(langue != null ? langue.toLowerCase() : "fr");
+    if (langueAppliquee < 0) langueAppliquee = 0;
     themeApplique = Math.max(0, Math.min(themes.size() - 1, params.getModeSombre()));
     volumeEffetsApplique = Math.max(0f, Math.min(1f, params.getVolumeEffet() / 100f));
     volumeMusiqueApplique = Math.max(0f, Math.min(1f, params.getVolumeMusique() / 100f));
 
     if (game != null) {
-      game.setLangueSelectionnee(langueAppliquee);
+      String code = codesLangues.get(langueAppliquee);
+      game.setLangueSelectionnee(code);
     }
     synchroniserEditionAvecValeursAppliquees();
   }

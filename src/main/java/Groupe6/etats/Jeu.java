@@ -13,6 +13,7 @@ import Groupe6.models.Grille;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonAide;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.view.VueGrille;
 
 /**
@@ -343,14 +344,13 @@ public class Jeu extends Etats {
 
   @Override
   public void updateTexts() {
-    boolean en = game != null && game.isEnglish();
-    labelRetour = en ? "Back" : "Retour";
-    labelAide = en ? "Help" : "Aide";
-    labelUndo = en ? "Undo" : "Undo";
-    labelRedo = en ? "Redo" : "Redo";
-    labelCandidatOn = en ? "Candidate: ON" : "Candidat: ON";
-    labelCandidatOff = en ? "Candidate: OFF" : "Candidat: OFF";
-    labelTimer = en ? "Timer" : "Timer";
+    labelRetour = LangManager.get("common.retour");
+    labelAide = LangManager.get("jeu.aide");
+    labelUndo = LangManager.get("jeu.undo");
+    labelRedo = LangManager.get("jeu.redo");
+    labelCandidatOn = LangManager.get("jeu.candidat.on");
+    labelCandidatOff = LangManager.get("jeu.candidat.off");
+    labelTimer = LangManager.get("jeu.timer");
 
     if (boutons == null || boutons.isEmpty()) {
       return;
@@ -367,10 +367,6 @@ public class Jeu extends Etats {
     if (boutonRedo != null) {
       boutonRedo.setLabel(labelRedo);
     }
-    if (boutonModeCandidat != null) {
-      updateLabelModeCandidat();
-    }
-
     updateLabelModeCandidat();
   }
 

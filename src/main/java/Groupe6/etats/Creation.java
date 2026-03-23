@@ -13,6 +13,7 @@ import Groupe6.ui.BoutonCreation;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
@@ -204,10 +205,9 @@ public class Creation extends Etats implements MethodesEtats {
 
     @Override
     public void updateTexts() {
-        boolean en = game != null && game.isEnglish();
-        titreCreation = en ? "Create" : "Création";
-        placeholderIdentifiant = en ? "Username" : "Identifiant";
-        labelBoutonCreationProfil = en ? "Create profile" : "Création du profil";
+        titreCreation = LangManager.get("creation.titre");
+        placeholderIdentifiant = LangManager.get("creation.identifiant");
+        labelBoutonCreationProfil = LangManager.get("creation.bouton");
 
         if (textInput != null) {
             textInput.setPlaceholder(placeholderIdentifiant);

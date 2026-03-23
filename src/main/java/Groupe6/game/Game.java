@@ -16,14 +16,13 @@ import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
 import Groupe6.etats.Selection;
+import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
  */
 public class Game implements Runnable {
-
-    public static final int LANGUE_FRANCAIS = 0;
-    public static final int LANGUE_ENGLISH = 1;
 
     private final GamePanel gamePanel;
     private final GameWindow gameWindow;
@@ -36,7 +35,10 @@ public class Game implements Runnable {
     private int currentUPS = 0;
     private boolean debug = true;
     private boolean repeindreFlag = false;
-    private int langueSelectionnee = LANGUE_FRANCAIS;
+    private String langueCode = "fr";
+    private final TransitionManager transitionManager = new TransitionManager();
+    private EtatJeu dernierEtat = null;
+    private java.awt.image.BufferedImage frameBuffer = null;
     private String joueurCourant = "Invité";
 
     private Start start;
@@ -80,21 +82,18 @@ public class Game implements Runnable {
     }
 
     public boolean isEnglish() {
-        return langueSelectionnee == LANGUE_ENGLISH;
+        return "en".equals(langueCode);
     }
 
-    public int getLangueSelectionnee() {
-        return langueSelectionnee;
+    public String getLangueCode() {
+        return langueCode;
     }
 
-    public void setLangueSelectionnee(int nouvelleLangue) {
-        if (nouvelleLangue != LANGUE_FRANCAIS && nouvelleLangue != LANGUE_ENGLISH) {
-            return;
-        }
-        if (langueSelectionnee == nouvelleLangue) {
-            return;
-        }
-        langueSelectionnee = nouvelleLangue;
+    public void setLangueSelectionnee(String code) {
+        if (code == null || code.isBlank()) return;
+        if (langueCode.equals(code)) return;
+        langueCode = code;
+        LangManager.setLangue(code);
         notifierChangementLangue();
     }
 
@@ -110,9 +109,11 @@ public class Game implements Runnable {
     }
 
     private void notifierChangementLangue() {
+        LangManager.setLangue(langueCode);
         if (start != null) start.updateTexts();
         if (menu != null) menu.updateTexts();
         if (parametres != null) parametres.updateTexts();
+        if (connexion != null) connexion.updateTexts();
         if (creation != null) creation.updateTexts();
         if (jeu != null) jeu.updateTexts();
         if (selection != null) selection.updateTexts();
@@ -127,6 +128,7 @@ public class Game implements Runnable {
     public MethodesEtats getCurrentState() {
         EtatJeu e = EtatJeu.getEtatActuel();
         if (e == EtatJeu.QUITTER) {
+            EtatJeu.setEtatActuel(EtatJeu.MENU); // reset avant le dialog pour éviter les appels multiples
             quitterJeu();
             return stateByEnum.get(EtatJeu.MENU);
         }
@@ -138,11 +140,35 @@ public class Game implements Runnable {
     }
 
     private void update() {
+        EtatJeu etatCourant = EtatJeu.getEtatActuel();
+        if (dernierEtat != null && etatCourant != dernierEtat) {
+            // Capture le dernier frame rendu de l'état sortant avant de démarrer la transition
+            transitionManager.notifierChangementEtat(frameBuffer);
+        }
+        dernierEtat = etatCourant;
+        transitionManager.update();
         getCurrentState().update();
     }
 
     public void render(Graphics g) {
-        getCurrentState().draw(g);
+        int w = Constants.game_width;
+        int h = Constants.game_height;
+
+        // Maintenir le frame buffer à la bonne taille
+        if (frameBuffer == null || frameBuffer.getWidth() != w || frameBuffer.getHeight() != h) {
+            frameBuffer = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        }
+
+        // Rendre l'état courant dans le buffer hors-écran
+        Graphics2D offG = frameBuffer.createGraphics();
+        getCurrentState().draw(offG);
+        offG.dispose();
+
+        // Blit vers l'écran
+        g.drawImage(frameBuffer, 0, 0, null);
+
+        // Superposer l'ancien frame avec opacité décroissante (crossfade)
+        transitionManager.draw(g, w, h);
 
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
