@@ -24,6 +24,20 @@ public class TransitionManager {
     private static final float AMPLITUDE = 60f;   // hauteur de la sinusoïde en px
     private static final float FREQUENCE  = 2.8f;  // nombre de périodes sur la hauteur
 
+    // Résolution de la vague : 120 points suffisent pour un rendu fluide
+    private static final int WAVE_STEPS = 120;
+
+    // BasicStrokes pré-allouées (immuables, réutilisées chaque frame)
+    private static final BasicStroke STROKE_HALO   = new BasicStroke(44f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+    private static final BasicStroke STROKE_MEDIUM = new BasicStroke(18f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+    private static final BasicStroke STROKE_FIN    = new BasicStroke(4f,   BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+    private static final BasicStroke STROKE_LIGNE  = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+
+    // Tableaux/chemins pré-alloués, réinitialisés à chaque frame
+    private final float[] wx = new float[WAVE_STEPS + 1];
+    private final GeneralPath curtain  = new GeneralPath();
+    private final GeneralPath wavePath = new GeneralPath();
+
     private boolean enTransition = false;
     private long debutNs = 0;
     private BufferedImage ancienFrame = null;
@@ -75,22 +89,20 @@ public class TransitionManager {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // --- Précalcul des X de la vague pour chaque ligne ---
-        int steps = Math.max(height, 1);
-        float[] wx = new float[steps + 1];
-        for (int i = 0; i <= steps; i++) {
-            float fy = (float) i / steps;
+        // --- Précalcul des X de la vague (résolution réduite à WAVE_STEPS) ---
+        for (int i = 0; i <= WAVE_STEPS; i++) {
+            float fy = (float) i / WAVE_STEPS;
             wx[i] = sweepX + AMPLITUDE * (float) Math.sin(fy * FREQUENCE * 2f * Math.PI + phase);
         }
 
         // --- 1. Dessiner l'ancien état clippé à la zone droite de la vague ---
-        GeneralPath curtain = new GeneralPath();
+        curtain.reset();
         curtain.moveTo(wx[0], 0);
         curtain.lineTo(width, 0);
         curtain.lineTo(width, height);
-        curtain.lineTo(wx[steps], height);
-        for (int i = steps - 1; i >= 0; i--) {
-            curtain.lineTo(wx[i], (float) i / steps * height);
+        curtain.lineTo(wx[WAVE_STEPS], height);
+        for (int i = WAVE_STEPS - 1; i >= 0; i--) {
+            curtain.lineTo(wx[i], (float) i / WAVE_STEPS * height);
         }
         curtain.closePath();
 
@@ -100,36 +112,36 @@ public class TransitionManager {
         g2d.setClip(savedClip);
 
         // --- 2. Chemin de la vague (pour le glow) ---
-        GeneralPath wavePath = new GeneralPath();
+        wavePath.reset();
         wavePath.moveTo(wx[0], 0);
-        for (int i = 1; i <= steps; i++) {
-            wavePath.lineTo(wx[i], (float) i / steps * height);
+        for (int i = 1; i <= WAVE_STEPS; i++) {
+            wavePath.lineTo(wx[i], (float) i / WAVE_STEPS * height);
         }
 
         // Glow qui s'estompe à mesure que la transition avance
         float glowFade = Math.max(0f, 1f - raw * 1.4f);
 
         Composite prevComp = g2d.getComposite();
-
-        // Couche 1 — halo large (40px), très transparent
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.18f * glowFade));
         g2d.setColor(Color.WHITE);
-        g2d.setStroke(new BasicStroke(44f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+
+        // Couche 1 — halo large (44px), très transparent
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.18f * glowFade));
+        g2d.setStroke(STROKE_HALO);
         g2d.draw(wavePath);
 
         // Couche 2 — halo moyen (18px)
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.32f * glowFade));
-        g2d.setStroke(new BasicStroke(18f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        g2d.setStroke(STROKE_MEDIUM);
         g2d.draw(wavePath);
 
         // Couche 3 — trait lumineux fin (4px)
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.70f * glowFade));
-        g2d.setStroke(new BasicStroke(4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        g2d.setStroke(STROKE_FIN);
         g2d.draw(wavePath);
 
         // Couche 4 — ligne centrale blanche pure (1.5px)
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.90f * glowFade));
-        g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        g2d.setStroke(STROKE_LIGNE);
         g2d.draw(wavePath);
 
         g2d.setComposite(prevComp);

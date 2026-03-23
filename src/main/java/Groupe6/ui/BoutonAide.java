@@ -5,8 +5,6 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import Groupe6.aide.Aide;
 import Groupe6.aide.AideManager;
 import Groupe6.aide.AideTextuel;
@@ -61,7 +59,7 @@ public class BoutonAide extends Bouton {
 
         boolean aideTrouvee = aideManager.call(grille);
         if (!aideTrouvee) {
-            JOptionPane.showMessageDialog(null, "Aucune aide disponible pour l'instant.", "Aide", JOptionPane.INFORMATION_MESSAGE);
+            jeu.showAideOverlay("Aide", "Aucune aide disponible pour l'instant.");
             return;
         }
 
@@ -85,9 +83,7 @@ public class BoutonAide extends Bouton {
         if (aideTextuel == null) {
             return;
         }
-        String titre = aideTextuel.getTitre();
-        String texte = aideTextuel.getTexte();
-        JOptionPane.showMessageDialog(null, texte, titre, JOptionPane.INFORMATION_MESSAGE);
+        jeu.showAideOverlay(aideTextuel.getTitre(), aideTextuel.getTexte());
     }
 
     private void appliquerAideVisuelle(Grille grille, AideVisuel aideVisuel) {

@@ -19,18 +19,13 @@ public class AideManager{
     }
 
     public boolean call(Grille grille){
-        Iterator<Aide> iteratorAide = this.aides.iterator();
-        Aide aide = this.aides.get(0);
-        while (iteratorAide.hasNext() && !aide.check(grille)){
-            aide = iteratorAide.next();
+        for (Aide aide : this.aides) {
+            if (aide.check(grille)) {
+                this.cost = aide.load(grille, this.aides.size());
+                this.aide = aide;
+                return true;
+            }
         }
-
-        if (aide.check(grille)){
-            this.cost = aide.load(grille, this.aides.size());
-            this.aide = aide;
-            return true;
-        }
-
         return false;
     }
 

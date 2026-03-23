@@ -28,8 +28,8 @@ public class Game implements Runnable {
     private final GameWindow gameWindow;
     private Thread gameLoopThread;
 
-    private static final int TARGET_UPS = 200;
-    private static final int TARGET_FPS = 120;
+    private static final int TARGET_UPS = 60;
+    private static final int TARGET_FPS = 60;
 
     private int currentFPS = 0;
     private int currentUPS = 0;
