@@ -44,7 +44,7 @@ public class SaveManager {
                 if (annuaire != null) {
                     return annuaire;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -60,7 +60,7 @@ public class SaveManager {
                 gson.toJson(annuaire, writer);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -102,7 +102,7 @@ public class SaveManager {
                 gson.toJson(parametres, writer);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -128,8 +128,7 @@ public class SaveManager {
         return null;
     }
 
-    public static void sauvegarderPartie(
-            String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
+    public static void sauvegarderPartie(String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
         Map<String, String> annuaire = chargerAnnuaire();
 
         if (!annuaire.containsKey(nomJoueur)) {
@@ -147,7 +146,7 @@ public class SaveManager {
                 gson.toJson(partie, writer);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -165,7 +164,7 @@ public class SaveManager {
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, PartieSauvegardee.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -191,7 +190,7 @@ public class SaveManager {
                 if (temps != null) {
                     return temps;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -218,7 +217,7 @@ public class SaveManager {
                 gson.toJson(meilleursTemps, writer);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -272,7 +271,7 @@ public class SaveManager {
                 if (!line.isEmpty())
                     ids.add(line);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return ids;
@@ -317,7 +316,16 @@ public class SaveManager {
                     listeZones.add(zone);
                 }
 
-                return new Niveau(id, taille, matrice, listeZones);
+                int[][] matriceCorrection = new int[taille][taille];
+                JsonArray jsonCorrection = jsonObject.getAsJsonArray("matriceCorrection");
+                for (int i = 0; i < taille; i++) {
+                    JsonArray ligneJson = jsonCorrection.get(i).getAsJsonArray();
+                    for (int j = 0; j < taille; j++) {
+                        matriceCorrection[i][j] = ligneJson.get(j).getAsInt();
+                    }
+                }
+
+                return new Niveau(id, taille, matrice, listeZones, matriceCorrection);
 
             } catch (Exception e) {
                 e.printStackTrace();

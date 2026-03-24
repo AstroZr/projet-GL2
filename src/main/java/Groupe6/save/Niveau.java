@@ -11,15 +11,17 @@ public class Niveau {
     private int taille;
     private Cellule[][] matriceCellules;
     private List<ZoneCalcul> listeZones;
+    private int[][] matriceCorrection;
 
     public Niveau() {
     }
 
-    public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones) {
+    public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones, int[][] matriceCorrection) {
         this.id = id;
         this.taille = taille;
         this.matriceCellules = matriceCellules;
         this.listeZones = listeZones;
+        this.matriceCorrection = matriceCorrection;
     }
 
     public String getId() {
@@ -53,4 +55,9 @@ public class Niveau {
     public void setListeZones(List<ZoneCalcul> listeZones) {
         this.listeZones = listeZones;
     }
+
+    public int[][] getMatriceCorrection() {
+        return matriceCorrection;
+    }
+
 }
