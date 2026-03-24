@@ -113,7 +113,7 @@ public class Jeu extends Etats {
     boutons = new ArrayList<>();
     updateTexts();
     
-    AideManager aideManager = new AideManager();
+    AideManager aideManager = AideManager.getInstance();
 
     String joueurActuel = game.getJoueurCourant();
     if (joueurActuel == null)

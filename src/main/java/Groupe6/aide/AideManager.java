@@ -10,25 +10,33 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class AideManager{
-    private static List<Aide> aides;
+    private static AideManager instance = null;
+    private List<Aide> aides;
     private Aide aide;
     private int cost;
 
-    public AideManager(){
-        AideManager.aides = new ArrayList<>();
-        AideManager.aides.add(new Singleton());
-        AideManager.aides.add(new Reste());
+    private AideManager(){
+        this.aides = new ArrayList<>();
+        this.aides.add(new Singleton());
+        this.aides.add(new Reste());
+    }
+
+    public static  AideManager getInstance(){
+        if (instance == null){
+            instance = new AideManager();
+        }
+        return instance;
     }
 
     public boolean call(Grille grille){
-        Iterator<Aide> iteratorAide = AideManager.aides.iterator();
-        Aide aide = AideManager.aides.get(0);
+        Iterator<Aide> iteratorAide = this.aides.iterator();
+        Aide aide = this.aides.get(0);
         while (iteratorAide.hasNext() && !aide.check(grille)){
             aide = iteratorAide.next();
         }
 
         if (aide.check(grille)){
-            this.cost = aide.load(grille, AideManager.aides.size());
+            this.cost = aide.load(grille, this.aides.size());
             this.aide = aide;
             return true;
         }
@@ -44,38 +52,33 @@ public class AideManager{
     }
 
     public int getNbAides(){
-        return AideManager.aides.size();
+        return this.aides.size();
     }
 
-    public static Map<Integer, Integer> getNBUtilisations(){
+    public Map<Integer, Integer> getNBUtilisations(){
         Map<Integer, Integer> dicoNbUtilisation = new HashMap<>();
-        for (Aide aide : AideManager.aides){
+        for (Aide aide : this.aides){
             dicoNbUtilisation.put(aide.getId(), aide.getNbUtilisation());
         }
         return dicoNbUtilisation;
     }
 
-    public static void setNBUtilisations(Map<Integer, Integer> dicoNbUtilisation){
-        if (dicoNbUtilisation == null){
-            setNBUtilisationsZero();
-            return;
-        }
-
-        for (Aide aide : AideManager.aides){
-            aide.setNbUtilisation(dicoNbUtilisation.getOrDefault(aide.getId(), 0));
+    public void setNBUtilisations(Map<Integer, Integer> dicoNbUtilisation){
+        for (Aide aide : this.aides){
+            aide.setNbUtilisation(dicoNbUtilisation.get(aide.getId()));
         }
     }
 
-    public static void setNBUtilisationsZero(){
-        for (Aide aide : AideManager.aides){
+    public void setNBUtilisationsZero(){
+        for (Aide aide : this.aides){
             aide.setNbUtilisation(0);
         }
     }   
 
     public int[] saveVector(){
-        int[] vector = new int[AideManager.aides.size()];
-        for (int i = 0; i < AideManager.aides.size(); i++){
-            vector[i] = AideManager.aides.get(i).getNbUtilisation();
+        int[] vector = new int[this.aides.size()];
+        for (int i = 0; i < this.aides.size(); i++){
+            vector[i] = this.aides.get(i).getNbUtilisation();
         }
         return vector;
     }

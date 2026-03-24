@@ -116,7 +116,7 @@ public class BoutonAide extends Bouton {
     }
 
     public void resetProgression() {
-        this.aideManager = new AideManager();
+        this.aideManager = AideManager.getInstance();
         this.historiqueAides.clear();
         this.historiqueAides.add(copierVecteur(this.aideManager.saveVector()));
         this.indexAide = 0;
