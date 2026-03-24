@@ -3,6 +3,8 @@ package Groupe6.inputs;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.function.BiConsumer;
 
 import Groupe6.etats.MethodesEtats;
@@ -11,7 +13,7 @@ import Groupe6.game.GamePanel;
 /**
  * Écoute les événements souris (clic, mouvement, drag) et les transmet à l’état actuel.
  */
-public class MouseInputs implements MouseListener, MouseMotionListener {
+public class MouseInputs implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private final GamePanel gamePanel;
 
@@ -55,5 +57,10 @@ public class MouseInputs implements MouseListener, MouseMotionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         handleMouseEvent(e, (state, event) -> state.mouseReleased(event));
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        handleMouseEvent(e, (state, event) -> state.mouseWheelMoved((MouseWheelEvent) event));
     }
 }

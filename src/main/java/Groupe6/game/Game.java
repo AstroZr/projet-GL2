@@ -150,6 +150,7 @@ public class Game implements Runnable {
         if (dernierEtat != null && etatCourant != dernierEtat) {
             transitionManager.notifierChangementEtat(frameBuffer);
             SoundManager.getInstance().playTransition();
+            getCurrentState().onEnter();
         }
         dernierEtat = etatCourant;
         transitionManager.update();
