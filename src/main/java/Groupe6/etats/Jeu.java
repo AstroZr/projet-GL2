@@ -12,6 +12,7 @@ import Groupe6.game.Game;
 import Groupe6.models.Grille;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonAide;
+import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
 import Groupe6.view.VueGrille;
 import Groupe6.aide.AideManager;
@@ -108,26 +109,11 @@ public class Jeu extends Etats {
     startTimerMillis = System.currentTimeMillis();
 
     // Bouton retour au menu - position initiale
-    int x = 50;
+    int cx = 50;
     int cy = 950;
-    boutons.add(new BoutonChangeurEtat(
-        cx - LARGEUR_BOUTON / 2,
-        cy,
-        LARGEUR_BOUTON,
-        HAUTEUR_BOUTON,
-        EtatJeu.MENU,
-        labelRetour){
-        // sauvegarde grille
-          @Override
-          public void appliquerAction(){
-            if (grille != null) {
-              grille.saveGrille();
-            }
-            super.appliquerAction(); // Retourne au menu
-          }
-        });
+
     boutonRetour = new BoutonJeuAction(
-      x,
+      cx,
       cy,
       LARGEUR_BOUTON,
       HAUTEUR_BOUTON,
@@ -135,7 +121,8 @@ public class Jeu extends Etats {
       this::quitterNiveauVersMenu);
     boutons.add(boutonRetour);
 
-    int aideX = x + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
+    // Bouton aide 
+    int aideX = cx + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
     boutonAide = new BoutonAide(
       aideX,
       cy,
@@ -145,6 +132,7 @@ public class Jeu extends Etats {
       this);
     boutons.add(boutonAide);
 
+    // Bouton undo
     int undoX = aideX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
     boutonUndo = new BoutonJeuAction(
       undoX,
@@ -155,6 +143,7 @@ public class Jeu extends Etats {
       this::undoAction);
     boutons.add(boutonUndo);
 
+    // Bouton redo
     int redoX = undoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
     boutonRedo = new BoutonJeuAction(
       redoX,
@@ -165,6 +154,7 @@ public class Jeu extends Etats {
       this::redoAction);
     boutons.add(boutonRedo);
 
+    // Bouton mode candidat
     int candidatX = redoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
     boutonModeCandidat = new BoutonJeuAction(
       candidatX,
