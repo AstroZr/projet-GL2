@@ -7,7 +7,7 @@ public class Cellule {
     private final int colonne; // colonne de la cellule
     private int valeur; // valeur de la cellule
     private boolean estModifiable; // si on est en mode candidat
-    private boolean estSelectionnee; // si la cellule est selectionnee
+    private transient boolean estSelectionnee; // si la cellule est selectionnee
     private boolean estValide; // si la cellule est valide
     private boolean estErreur; // si la cellule est en erreur
     private transient ZoneCalcul zoneCalcul; // zone de calcul de la cellule

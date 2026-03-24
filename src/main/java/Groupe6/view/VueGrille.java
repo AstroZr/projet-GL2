@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import Groupe6.fond.Fond;
@@ -27,8 +28,11 @@ public class VueGrille {
     private static final Font FONT_VALEUR = new Font("Arial", Font.BOLD, 32);
     private static final Font FONT_ZONE = new Font("Arial", Font.BOLD, 14);
     private static final Font FONT_CANDIDAT = new Font("Arial", Font.BOLD, 16);
+    private static final BasicStroke STROKE_CONTOUR_GRILLE = new BasicStroke(4);
+    private static final BasicStroke STROKE_ZONE_SOUS_COUCHE = new BasicStroke(5);
     private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3);
     private static final BasicStroke STROKE_FINE = new BasicStroke(1);
+    private static final int MARGE_CASE = 2;
 
     private static final int TAILLE_GRILLE_DEFAULT = (int)(1080 / 1.5f);
     private static final int OFFSET_X_DEFAULT = (1920 - TAILLE_GRILLE_DEFAULT) / 2;
@@ -59,7 +63,16 @@ public class VueGrille {
 
         dessinerGrille(g2d, fond);
         dessinerBorduresZones(g2d, fond);
+        dessinerContourGrille(g2d, fond);
         dessinerZones(g2d, fond);
+    }
+
+    private void dessinerContourGrille(Graphics2D g2d, Fond fond) {
+        g2d.setStroke(STROKE_CONTOUR_GRILLE);
+        Color texte = fond.getCouleurTexte();
+        Color contour = new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 220);
+        g2d.setColor(contour);
+        g2d.drawRect(offsetX - 1, offsetY - 1, tailleGrille + 2, tailleGrille + 2);
     }
 
     private void dessinerGrille(Graphics2D g2d, Fond fond) {
@@ -73,11 +86,14 @@ public class VueGrille {
             for (int col = 0; col < taille; col++) {
                 int x = offsetX + col * tailleCellule;
                 int y = offsetY + ligne * tailleCellule;
+                int xCase = x + MARGE_CASE / 2;
+                int yCase = y + MARGE_CASE / 2;
+                int tailleCase = Math.max(1, tailleCellule - MARGE_CASE);
                 Cellule cellule = grille.getCellule(ligne, col);
 
-                dessinerFondCellule(g2d, cellule, x, y, fond);
-                dessinerBordureCellule(g2d, cellule, x, y, fond);
-                dessinerValeurCellule(g2d, cellule, x, y, fm, fontAscent, fond);
+                dessinerFondCellule(g2d, cellule, xCase, yCase, tailleCase, fond);
+                dessinerBordureCellule(g2d, cellule, xCase, yCase, tailleCase, fond);
+                dessinerValeurCellule(g2d, cellule, xCase, yCase, tailleCase, fm, fontAscent, fond);
             }
         }
     }
@@ -85,7 +101,7 @@ public class VueGrille {
     /**
      * Remplit le fond de la cellule selon son état (erreur, sélection, normal).
      */
-    private void dessinerFondCellule(Graphics2D g2d, Cellule cellule, int x, int y, Fond fond) {
+    private void dessinerFondCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
         if (cellule.estErreurDuplique() || !cellule.estValide()) {
             g2d.setColor(COULEUR_ERREUR);
         } else if (cellule.estSelectionnee()) {
@@ -93,26 +109,26 @@ public class VueGrille {
         } else {
             g2d.setColor(fond.getCouleurFondCellule());
         }
-        g2d.fillRect(x, y, tailleCellule, tailleCellule);
+        g2d.fillRect(x, y, tailleCase, tailleCase);
     }
 
     /**
      * Dessine la bordure fine de la cellule.
      */
-    private void dessinerBordureCellule(Graphics2D g2d, Cellule cellule, int x, int y, Fond fond) {
+    private void dessinerBordureCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
         g2d.setColor(fond.getCouleurTexte());
         g2d.setStroke(STROKE_FINE);
-        g2d.drawRect(x, y, tailleCellule, tailleCellule);
+        g2d.drawRect(x, y, tailleCase, tailleCase);
     }
 
     /**
      * Affiche la valeur numérique centrée dans la cellule, si présente.
      */
-    private void dessinerValeurCellule(Graphics2D g2d, Cellule cellule, int x, int y,
+    private void dessinerValeurCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase,
                                        FontMetrics fm, int fontAscent, Fond fond) {
         int valeur = cellule.getValeur();
         if (valeur == 0) {
-            dessinerCandidats(g2d, cellule, x, y, fond);
+            dessinerCandidats(g2d, cellule, x, y, tailleCase, fond);
             return;
         }
 
@@ -122,12 +138,12 @@ public class VueGrille {
         int strWidth = fm.stringWidth(valeurStr);
         g2d.drawString(
             valeurStr,
-            x + (tailleCellule - strWidth) / 2,
-            y + (tailleCellule + fontAscent) / 2 - 5
+            x + (tailleCase - strWidth) / 2,
+            y + (tailleCase + fontAscent) / 2 - 5
         );
     }
 
-    private void dessinerCandidats(Graphics2D g2d, Cellule cellule, int x, int y, Fond fond) {
+    private void dessinerCandidats(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
         List<Integer> candidats = cellule.getListeCandidat();
         if (candidats == null || candidats.isEmpty()) {
             return;
@@ -138,9 +154,9 @@ public class VueGrille {
         int nbMaxValeurs = grille.getTaille();
         int colonnes = (int) Math.ceil(Math.sqrt(nbMaxValeurs));
         int lignes = (int) Math.ceil((double) nbMaxValeurs / colonnes);
-        int marge = Math.max(6, tailleCellule / 12);
-        int zoneLargeur = tailleCellule - 2 * marge;
-        int zoneHauteur = tailleCellule - 2 * marge;
+        int marge = Math.max(6, tailleCase / 12);
+        int zoneLargeur = tailleCase - 2 * marge;
+        int zoneHauteur = tailleCase - 2 * marge;
         int pasX = Math.max(14, zoneLargeur / Math.max(1, colonnes));
         int pasY = Math.max(14, zoneHauteur / Math.max(1, lignes));
         FontMetrics fm = g2d.getFontMetrics();
@@ -166,8 +182,6 @@ public class VueGrille {
      */
     private void dessinerBorduresZones(Graphics2D g2d, Fond fond) {
         int taille = grille.getTaille();
-        g2d.setStroke(STROKE_EPAISSE);
-        g2d.setColor(fond.getCouleurBordureZone());
 
         for (int ligne = 0; ligne < taille; ligne++) {
             for (int col = 0; col < taille; col++) {
@@ -178,22 +192,32 @@ public class VueGrille {
 
                 // Bord du haut
                 if (ligne == 0 || grille.getCellule(ligne - 1, col).getZoneCalcul() != zone) {
-                    g2d.drawLine(x, y, x + tailleCellule, y);
+                    dessinerTraitZone(g2d, fond, x, y, x + tailleCellule, y);
                 }
                 // Bord du bas
                 if (ligne == taille - 1 || grille.getCellule(ligne + 1, col).getZoneCalcul() != zone) {
-                    g2d.drawLine(x, y + tailleCellule, x + tailleCellule, y + tailleCellule);
+                    dessinerTraitZone(g2d, fond, x, y + tailleCellule, x + tailleCellule, y + tailleCellule);
                 }
                 // Bord gauche
                 if (col == 0 || grille.getCellule(ligne, col - 1).getZoneCalcul() != zone) {
-                    g2d.drawLine(x, y, x, y + tailleCellule);
+                    dessinerTraitZone(g2d, fond, x, y, x, y + tailleCellule);
                 }
                 // Bord droit
                 if (col == taille - 1 || grille.getCellule(ligne, col + 1).getZoneCalcul() != zone) {
-                    g2d.drawLine(x + tailleCellule, y, x + tailleCellule, y + tailleCellule);
+                    dessinerTraitZone(g2d, fond, x + tailleCellule, y, x + tailleCellule, y + tailleCellule);
                 }
             }
         }
+    }
+
+    private void dessinerTraitZone(Graphics2D g2d, Fond fond, int x1, int y1, int x2, int y2) {
+        g2d.setStroke(STROKE_ZONE_SOUS_COUCHE);
+        g2d.setColor(fond.getCouleurTexte());
+        g2d.drawLine(x1, y1, x2, y2);
+
+        g2d.setStroke(STROKE_EPAISSE);
+        g2d.setColor(fond.getCouleurBordureZone());
+        g2d.drawLine(x1, y1, x2, y2);
     }
 
     private void dessinerZones(Graphics2D g2d, Fond fond) {
@@ -236,14 +260,8 @@ public class VueGrille {
      * Gère les touches pressées (suppression).
      */
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() >= KeyEvent.VK_1 && e.getKeyCode() <= KeyEvent.VK_9) {
-            int valeur = e.getKeyCode() - KeyEvent.VK_0;
-            saisirValeur(valeur);
-            return;
-        }
-
-        if (e.getKeyCode() >= KeyEvent.VK_NUMPAD1 && e.getKeyCode() <= KeyEvent.VK_NUMPAD9) {
-            int valeur = e.getKeyCode() - KeyEvent.VK_NUMPAD0;
+        int valeur = extraireValeurNumerique(e);
+        if (valeur >= 1 && valeur <= 9) {
             saisirValeur(valeur);
             return;
         }
@@ -251,8 +269,65 @@ public class VueGrille {
         if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
             Cellule cellule = grille.getCelluleSelectionnee();
             if (cellule != null) {
-                grille.supprimerChiffre(cellule.getLigne(), cellule.getColonne());
+                if (modeCandidat) {
+                    supprimerTousCandidats(cellule);
+                } else {
+                    grille.supprimerChiffre(cellule.getLigne(), cellule.getColonne());
+                }
             }
+        }
+
+        // Support du minus du pavé numérique pour supprimer
+        if (e.getKeyCode() == KeyEvent.VK_SUBTRACT) {
+            Cellule cellule = grille.getCelluleSelectionnee();
+            if (cellule != null) {
+                if (modeCandidat) {
+                    supprimerTousCandidats(cellule);
+                } else {
+                    grille.supprimerChiffre(cellule.getLigne(), cellule.getColonne());
+                }
+            }
+        }
+    }
+
+    private int extraireValeurNumerique(KeyEvent e) {
+        int code = e.getKeyCode();
+
+        if (code >= KeyEvent.VK_1 && code <= KeyEvent.VK_9) {
+            return code - KeyEvent.VK_0;
+        }
+
+        if (code >= KeyEvent.VK_NUMPAD1 && code <= KeyEvent.VK_NUMPAD9) {
+            return code - KeyEvent.VK_NUMPAD0;
+        }
+
+        if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_NUMPAD) {
+            switch (code) {
+                case KeyEvent.VK_END: return 1;
+                case KeyEvent.VK_DOWN: return 2;
+                case KeyEvent.VK_PAGE_DOWN: return 3;
+                case KeyEvent.VK_LEFT: return 4;
+                case KeyEvent.VK_CLEAR: return 5;
+                case KeyEvent.VK_RIGHT: return 6;
+                case KeyEvent.VK_HOME: return 7;
+                case KeyEvent.VK_UP: return 8;
+                case KeyEvent.VK_PAGE_UP: return 9;
+                default: break;
+            }
+        }
+
+        char c = e.getKeyChar();
+        if (Character.isDigit(c)) {
+            return Character.getNumericValue(c);
+        }
+
+        return -1;
+    }
+
+    private void supprimerTousCandidats(Cellule cellule) {
+        List<Integer> candidats = new ArrayList<>(cellule.getListeCandidat());
+        for (Integer candidat : candidats) {
+            grille.supprimerCandidat(cellule.getLigne(), cellule.getColonne(), candidat);
         }
     }
 

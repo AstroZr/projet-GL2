@@ -35,6 +35,14 @@ public class Parametres extends Etats {
 
   private static final int LARGEUR_BOUTON = 200;
   private static final int HAUTEUR_BOUTON = 44;
+  
+  // Track which state we should return to (MENU or GRILLE)
+  private static EtatJeu etatSource = EtatJeu.MENU;
+  private EtatJeu etatSourcePrecedent = null;  // Track last used value to detect changes
+  
+  public static void setEtatSource(EtatJeu etat) {
+    etatSource = etat;
+  }
 
   private LayoutScale layoutScale;
 
@@ -138,7 +146,7 @@ public class Parametres extends Etats {
     int totalWidth = bw * 3 + gap * 2;
     int startX = cx - totalWidth / 2;
 
-    boutons.add(new BoutonChangeurEtat(startX, by, bw, bh, EtatJeu.MENU, boutonRetourLabel));
+    boutons.add(new BoutonChangeurEtat(startX, by, bw, bh, etatSource, boutonRetourLabel));
     boutons.add(new BoutonChangeurEtat(startX + bw + gap, by, bw, bh, EtatJeu.PARAMETRES, boutonDefautLabel));
     boutons.add(new BoutonChangeurEtat(startX + 2 * (bw + gap), by, bw, bh, EtatJeu.PARAMETRES, boutonAppliquerLabel));
   }
@@ -151,6 +159,13 @@ public class Parametres extends Etats {
       synchroniserEditionAvecValeursAppliquees();
       synchroniseDepuisEntree = true;
     }
+    
+    // Si etatSource a changé depuis la dernière fois, recréer les boutons
+    if (etatSourcePrecedent != etatSource) {
+      calculerPositions();
+      etatSourcePrecedent = etatSource;
+    }
+    
     getFond().update();
   }
 

@@ -20,6 +20,7 @@ import Groupe6.utilz.Constants;
 import Groupe6.utilz.LangManager;
 import Groupe6.view.VueGrille;
 import Groupe6.aide.AideManager;
+import Groupe6.save.SaveManager;
 
 /**
  * État du jeu en cours : affiche et gère la grille Mathdoku.
@@ -80,6 +81,7 @@ public class Jeu extends Etats {
   private BoutonJeuAction boutonUndo;
   private BoutonJeuAction boutonRedo;
   private BoutonJeuAction boutonModeCandidat;
+  private BoutonJeuAction boutonParametres;
   private BoutonAide boutonAide;
   private final ArrayList<BoutonJeuAction> boutonsNumeriques = new ArrayList<>();
   private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
@@ -89,12 +91,18 @@ public class Jeu extends Etats {
   private String labelRedo;
   private String labelCandidatOn;
   private String labelCandidatOff;
+  private String labelParametres;
   private String labelTimer;
   private long startTimerMillis;
   private long baseElapsedMillis;
+  private boolean timerPaused = false;
+  private long pausedElapsedMillis = 0;
   private boolean overlayAideVisible = false;
   private String overlayAideTitre = "";
   private String overlayAideTexte = "";
+  private boolean victoireAnnoncee = false;
+  private String labelVictoireTitre;
+  private String labelVictoireTexte;
 
   public Jeu(Game game) {
     super(game);
@@ -111,6 +119,7 @@ public class Jeu extends Etats {
     if (joueurActuel == null)
       joueurActuel = "testUser";
     grille = new Grille(joueurActuel, "test");
+    victoireAnnoncee = false;
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -120,7 +129,6 @@ public class Jeu extends Etats {
     // Bouton retour au menu - position initiale
     int cx = 50;
     int cy = 950;
-
     boutonRetour = new BoutonJeuAction(
       cx,
       cy,
@@ -179,6 +187,16 @@ public class Jeu extends Etats {
       });
     boutons.add(boutonModeCandidat);
 
+    int paramX = candidatX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
+    boutonParametres = new BoutonJeuAction(
+      paramX,
+      cy,
+      LARGEUR_BOUTON,
+      HAUTEUR_BOUTON,
+      labelParametres,
+      this::ouvrirParametresDepuisJeu);
+    boutons.add(boutonParametres);
+
     initBoutonsNumeriques();
     updateLabelModeCandidat();
   }
@@ -192,7 +210,17 @@ public class Jeu extends Etats {
     if (joueurActuel == null)
       joueurActuel = "testUser";
     grille = new Grille(joueurActuel, idNiveau);
+    if (grille.estComplete()) {
+      long tempsTermine = grille.getTempsEcoule();
+      if (tempsTermine > 0) {
+        SaveManager.enregistrerMeilleurTemps(joueurActuel, idNiveau, tempsTermine);
+      }
+      grille = new Grille(joueurActuel, idNiveau, true);
+    }
+    victoireAnnoncee = false;
     vueGrille = new VueGrille(grille);
+    timerPaused = false;
+    pausedElapsedMillis = 0;
     baseElapsedMillis = grille.getTempsEcoule();
     startTimerMillis = System.currentTimeMillis();
     if (boutonAide != null) {
@@ -221,10 +249,14 @@ public class Jeu extends Etats {
 
   @Override
   public void update() {
+    if (timerPaused && !victoireAnnoncee) {
+      resumeTimer();
+    }
     // Mettre à jour la logique du jeu si nécessaire
     if (grille != null) {
       grille.setTempsEcoule(getElapsedMillis());
     }
+    verifierVictoire();
     getFond().update();
   }
 
@@ -239,7 +271,7 @@ public class Jeu extends Etats {
     int x = 50;
     int cy = h - 130; // 130px du bas
 
-    if (boutons.size() >= 5) {
+    if (boutons.size() >= 6) {
       boutons.get(0).setX(x);
       boutons.get(0).setY(cy);
 
@@ -265,6 +297,11 @@ public class Jeu extends Etats {
       boutons.get(4).setY(panelY + 120);
       boutons.get(4).setLargeur(200);
       boutons.get(4).setHauteur(HAUTEUR_BOUTON);
+
+      boutons.get(5).setX(panelX);
+      boutons.get(5).setY(panelY + 70);
+      boutons.get(5).setLargeur(200);
+      boutons.get(5).setHauteur(HAUTEUR_BOUTON);
     }
 
     int panelX = Math.max(20, w - 250);
@@ -322,6 +359,9 @@ public class Jeu extends Etats {
   public void mouseReleased(MouseEvent e) {
     if (overlayAideVisible) {
       hideAideOverlay();
+      if (victoireAnnoncee) {
+        EtatJeu.setEtatActuel(EtatJeu.SELECTION);
+      }
       return;
     }
     for (Bouton b : boutons) {
@@ -385,7 +425,10 @@ public class Jeu extends Etats {
     labelRedo = LangManager.get("jeu.redo");
     labelCandidatOn = LangManager.get("jeu.candidat.on");
     labelCandidatOff = LangManager.get("jeu.candidat.off");
+    labelParametres = LangManager.get("menu.parametres");
     labelTimer = LangManager.get("jeu.timer");
+    labelVictoireTitre = LangManager.get("jeu.victoire.titre");
+    labelVictoireTexte = LangManager.get("jeu.victoire.texte");
 
     if (boutons == null || boutons.isEmpty()) {
       return;
@@ -401,6 +444,9 @@ public class Jeu extends Etats {
     }
     if (boutonRedo != null) {
       boutonRedo.setLabel(labelRedo);
+    }
+    if (boutonParametres != null) {
+      boutonParametres.setLabel(labelParametres);
     }
     updateLabelModeCandidat();
   }
@@ -562,12 +608,58 @@ public class Jeu extends Etats {
   }
 
   private long getElapsedMillis() {
+    if (timerPaused) {
+      return pausedElapsedMillis;
+    }
     return baseElapsedMillis + Math.max(0L, System.currentTimeMillis() - startTimerMillis);
+  }
+
+  private void pauseTimer() {
+    if (!timerPaused) {
+      pausedElapsedMillis = getElapsedMillis();
+      timerPaused = true;
+    }
+  }
+
+  private void resumeTimer() {
+    if (timerPaused) {
+      baseElapsedMillis = pausedElapsedMillis;
+      startTimerMillis = System.currentTimeMillis();
+      timerPaused = false;
+    }
   }
 
   private void quitterNiveauVersMenu() {
     sauvegarderEtatNiveauCourant();
-    EtatJeu.setEtatActuel(EtatJeu.MENU);
+    pauseTimer();
+    EtatJeu.setEtatActuel(EtatJeu.SELECTION);
+  }
+
+  private void verifierVictoire() {
+    if (grille == null || victoireAnnoncee || !grille.estComplete()) {
+      return;
+    }
+
+    pauseTimer();
+    long tempsFinal = getElapsedMillis();
+    grille.setTempsEcoule(tempsFinal);
+    grille.saveGrille();
+
+    SaveManager.enregistrerMeilleurTemps(
+      grille.getNomJoueur(),
+      grille.getIdNiveau(),
+      tempsFinal
+    );
+
+    showAideOverlay(labelVictoireTitre, labelVictoireTexte + " " + formatTimer());
+    victoireAnnoncee = true;
+  }
+
+  private void ouvrirParametresDepuisJeu() {
+    sauvegarderEtatNiveauCourant();
+    pauseTimer();
+    Parametres.setEtatSource(EtatJeu.GRILLE);
+    EtatJeu.setEtatActuel(EtatJeu.PARAMETRES);
   }
 
   public void sauvegarderEtatNiveauCourant() {

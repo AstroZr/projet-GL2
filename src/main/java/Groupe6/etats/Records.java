@@ -34,6 +34,9 @@ public class Records extends Etats {
 
     private static final int LARGEUR_BTN = 200;
     private static final int HAUTEUR_BTN = 44;
+
+    private LayoutScale layoutScale;
+
     private static final int SCROLL_SPEED = 20;
 
     private LayoutScale layoutScale;
@@ -194,6 +197,7 @@ public class Records extends Etats {
             g2d.drawString(labelNiveau + " : " + niv, rightX + 12, rRowY + 16);
             rRowY += 28;
 
+            List<Map.Entry<String, Long>> classement = SaveManager.chargerClassementGlobal(niv);
             List<Map.Entry<String, Long>> classement = classements.get(niv);
             g2d.setFont(FONT_TEXTE);
             if (classement.isEmpty()) {
