@@ -9,7 +9,7 @@ import Groupe6.aide.AideManager;
 import Groupe6.models.Cellule;
 
 public class PartieSauvegardee {
-
+    private AideManager aideManager;
     private Cellule[][] matriceCellules;
     private List<int[]> historique;
     private long tempsEcoule;
@@ -18,13 +18,14 @@ public class PartieSauvegardee {
     public PartieSauvegardee() {
         this.historique = new ArrayList<>();
         this.nbAidesUtilisees = new HashMap<>();
+        this.aideManager = AideManager.getInstance();
     }
 
     public PartieSauvegardee(Cellule[][] matriceCellules, List<int[]> historique, long tempsEcoule) {
         this.matriceCellules = matriceCellules;
         this.historique = historique;
         this.tempsEcoule = tempsEcoule;
-        this.nbAidesUtilisees = AideManager.getNBUtilisations();
+        this.nbAidesUtilisees = this.aideManager.getNBUtilisations();
     }
 
     public Cellule[][] getMatriceCellules() {

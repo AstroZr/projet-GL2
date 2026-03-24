@@ -30,6 +30,7 @@ public class Grille {
     private String nomJoueur;
     private String idNiveau;
     private long tempsEcoule;
+    private AideManager aideManager;
 
     // Etat du jeu
     private boolean estComplete;
@@ -57,7 +58,9 @@ public class Grille {
         }
 
         PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
-        AideManager.setNBUtilisationsZero();
+
+        this.aideManager = AideManager.getInstance();
+        this.aideManager.setNBUtilisationsZero();
 
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
@@ -69,7 +72,7 @@ public class Grille {
                 this.historique = new ArrayList<>();
             }
             this.listeZones = niveauBase.getListeZones();
-            AideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees()); 
+            this.aideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees()); 
             this.tempsEcoule = sauvegarde.getTempsEcoule();
             this.indexActuel = this.historique.size() - 1;
 
