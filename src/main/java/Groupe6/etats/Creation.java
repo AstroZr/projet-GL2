@@ -183,11 +183,35 @@ public class Creation extends Etats implements MethodesEtats {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (bouton.isSourisEnfonce() && isIn(e, bouton)) {
+        // On empêche le changement d'écran (et donc la création d'une sauvegarde)
+        // -> si le pseudo est vide, en revanche si il est valide on autorise
+        if (bouton.isSourisEnfonce() && isIn(e, bouton)){
+          String pseudo = getPseudoSaisi();
+          if (pseudo != null && !pseudo.trim().isEmpty()){
+
+            /* BLOCAGE DE CREATION DE NOM DE PROFIL DEJA EXISTANT (en commentaire actuellement pour permettre la connexion sans passer par connexion)
+            //vérif pour voir si le joueur existe déjà dans l'annuaire ou non (pour éviter de permettre création d'un profil déjà existant)
+            if(Groupe6.save.SaveManager.chargerParametres(pseudo) != null){
+                System.out.println("Erreur : Le profil '" + pseudo + "' existe déjà.");
+                textInput.clear(); 
+            }
+            else{
+                METTRE ICI les 4 lignes ci-dessous qui ne sont pas en commentaire
+            }
+            */
+
+            game.setJoueurCourant(pseudo);
+
+            // génération du dossier du joueur avec ses paramètres par défaut
+            Groupe6.save.ParametresJoueur pjParDefaut = new Groupe6.save.ParametresJoueur(pseudo, "Fr", 50, 50, 0);
+            Groupe6.save.SaveManager.sauvegarderParametres(pjParDefaut);
             bouton.appliquerAction();
-        }
-        bouton.setSourisEnfonce(false);
+          }
+      }
+      bouton.setSourisEnfonce(false);
     }
+
+    
 
     @Override
     public void updateTexts() {

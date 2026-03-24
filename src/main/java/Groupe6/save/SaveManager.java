@@ -1,31 +1,31 @@
 package Groupe6.save;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
-
+import Groupe6.models.Cellule;
+import Groupe6.models.TypeOperation;
+import Groupe6.models.ZoneCalcul;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import Groupe6.models.Cellule;
-import Groupe6.models.TypeOperation;
-import Groupe6.models.ZoneCalcul;
-
+import com.google.gson.reflect.TypeToken;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SaveManager {
-    
+
     private static final String SAVE_FOLDER = "saveGame/";
     private static final String SETTINGS_FILE = "settings.json";
     private static final String ANNUAIRE_FILE = "annuaire.json";
@@ -35,38 +35,39 @@ public class SaveManager {
 
     private static Map<String, String> chargerAnnuaire() {
         String cheminFichier = SAVE_FOLDER + ANNUAIRE_FILE;
-        
+
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
-                Type type = new TypeToken<Map<String, String>>(){}.getType();
+                Type type = new TypeToken<Map<String, String>>() {
+                }.getType();
                 Map<String, String> annuaire = gson.fromJson(reader, type);
                 if (annuaire != null) {
                     return annuaire;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
+
         return new HashMap<>();
     }
 
     private static void sauvegarderAnnuaire(Map<String, String> annuaire) {
         try {
             Files.createDirectories(Paths.get(SAVE_FOLDER));
-            
+
             try (FileWriter writer = new FileWriter(SAVE_FOLDER + ANNUAIRE_FILE)) {
                 gson.toJson(annuaire, writer);
             }
-            
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private static String getOuCreerIdJoueur(String nomJoueur) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (annuaire.containsKey(nomJoueur)) {
             return annuaire.get(nomJoueur);
         }
@@ -96,19 +97,19 @@ public class SaveManager {
 
         try {
             Files.createDirectories(Paths.get(dossierJoueur));
-            
+
             try (FileWriter writer = new FileWriter(cheminFichier)) {
                 gson.toJson(parametres, writer);
             }
-            
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static ParametresJoueur chargerParametres(String nomJoueur) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (!annuaire.containsKey(nomJoueur)) {
             return null;
         }
@@ -123,13 +124,13 @@ public class SaveManager {
                 e.printStackTrace();
             }
         }
-        
+
         return null;
     }
 
     public static void sauvegarderPartie(String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (!annuaire.containsKey(nomJoueur)) {
             return;
         }
@@ -140,19 +141,19 @@ public class SaveManager {
 
         try {
             Files.createDirectories(Paths.get(dossierJoueur));
-            
+
             try (FileWriter writer = new FileWriter(cheminFichier)) {
                 gson.toJson(partie, writer);
             }
-            
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
+
     public static PartieSauvegardee chargerPartie(String nomJoueur, String idSauvegarde) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (!annuaire.containsKey(nomJoueur)) {
             return null;
         }
@@ -163,17 +164,17 @@ public class SaveManager {
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, PartieSauvegardee.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
+
         return null;
     }
 
     public static Map<String, Long> chargerMeilleursTemps(String nomJoueur) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (!annuaire.containsKey(nomJoueur)) {
             return new HashMap<>();
         }
@@ -183,22 +184,24 @@ public class SaveManager {
 
         if (Files.exists(Paths.get(cheminFichier))) {
             try (FileReader reader = new FileReader(cheminFichier)) {
-                Type type = new TypeToken<Map<String, Long>>(){}.getType();
+                Type type = new TypeToken<Map<String, Long>>() {
+                }.getType();
                 Map<String, Long> temps = gson.fromJson(reader, type);
                 if (temps != null) {
                     return temps;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
+
         return new HashMap<>();
     }
 
-    private static void sauvegarderMeilleursTemps(String nomJoueur, Map<String, Long> meilleursTemps) {
+    private static void sauvegarderMeilleursTemps(
+            String nomJoueur, Map<String, Long> meilleursTemps) {
         Map<String, String> annuaire = chargerAnnuaire();
-        
+
         if (!annuaire.containsKey(nomJoueur)) {
             return;
         }
@@ -209,23 +212,47 @@ public class SaveManager {
 
         try {
             Files.createDirectories(Paths.get(dossierJoueur));
-            
+
             try (FileWriter writer = new FileWriter(cheminFichier)) {
                 gson.toJson(meilleursTemps, writer);
             }
-            
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void enregistrerMeilleurTemps(String nomJoueur, String idNiveau, long nouveauTemps) {
+    public static void enregistrerMeilleurTemps(
+            String nomJoueur, String idNiveau, long nouveauTemps) {
         Map<String, Long> tempsActuels = chargerMeilleursTemps(nomJoueur);
-        
+
         if (!tempsActuels.containsKey(idNiveau) || nouveauTemps < tempsActuels.get(idNiveau)) {
             tempsActuels.put(idNiveau, nouveauTemps);
             sauvegarderMeilleursTemps(nomJoueur, tempsActuels);
         }
+    }
+
+    /**
+     * Liste les niveaux en récupérant le contenu de index.txt.
+     *
+     * @return List<String>
+     */
+    public static List<String> listerIdsNiveaux() {
+        List<String> ids = new ArrayList<>();
+        InputStream is = SaveManager.class.getResourceAsStream("/niveaux/index.txt");
+        if (is == null)
+            return ids;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty())
+                    ids.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ids;
     }
 
     public static Niveau chargerNiveau(String idNiveau) {
@@ -267,7 +294,16 @@ public class SaveManager {
                     listeZones.add(zone);
                 }
 
-                return new Niveau(id, taille, matrice, listeZones);
+                int[][] matriceCorrection = new int[taille][taille];
+                JsonArray jsonCorrection = jsonObject.getAsJsonArray("matriceCorrection");
+                for (int i = 0; i < taille; i++) {
+                    JsonArray ligneJson = jsonCorrection.get(i).getAsJsonArray();
+                    for (int j = 0; j < taille; j++) {
+                        matriceCorrection[i][j] = ligneJson.get(j).getAsInt();
+                    }
+                }
+
+                return new Niveau(id, taille, matrice, listeZones, matriceCorrection);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -275,7 +311,7 @@ public class SaveManager {
         } else {
             System.err.println("Fichier de niveau introuvable : " + cheminRessource);
         }
-        
+
         return null;
     }
 }

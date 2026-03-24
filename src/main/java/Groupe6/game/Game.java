@@ -15,6 +15,9 @@ import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
+import Groupe6.save.ParametresJoueur;
+import Groupe6.save.SaveManager;
+import Groupe6.etats.Selection;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
@@ -36,6 +39,7 @@ public class Game implements Runnable {
     private boolean debug = true;
     private boolean repeindreFlag = false;
     private int langueSelectionnee = LANGUE_FRANCAIS;
+    private String joueurCourant = "Invité";
 
     private Start start;
     private Menu menu;
@@ -43,6 +47,7 @@ public class Game implements Runnable {
     private Connexion connexion;
     private Creation creation;
     private Jeu jeu;
+    private Selection selection;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
@@ -70,6 +75,8 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.CREATION, creation);
         jeu = new Jeu(this);
         stateByEnum.put(EtatJeu.GRILLE, jeu);
+        selection = new Selection(this);
+        stateByEnum.put(EtatJeu.SELECTION, selection);
 
         notifierChangementLangue();
     }
@@ -93,22 +100,21 @@ public class Game implements Runnable {
         notifierChangementLangue();
     }
 
+    public String getJoueurCourant() {
+        return joueurCourant;
+    }
+
+    public void setJoueurCourant(String pseudo) {
+        this.joueurCourant = pseudo;
+    }
+
     private void notifierChangementLangue() {
-        if (start != null) {
-            start.updateTexts();
-        }
-        if (menu != null) {
-            menu.updateTexts();
-        }
-        if (parametres != null) {
-            parametres.updateTexts();
-        }
-        if (creation != null) {
-            creation.updateTexts();
-        }
-        if (jeu != null) {
-            jeu.updateTexts();
-        }
+        if (start != null) start.updateTexts();
+        if (menu != null) menu.updateTexts();
+        if (parametres != null) parametres.updateTexts();
+        if (creation != null) creation.updateTexts();
+        if (jeu != null) jeu.updateTexts();
+        if (selection != null) selection.updateTexts();
     }
 
     private void startGameLoop() {
@@ -201,11 +207,16 @@ public class Game implements Runnable {
     }
     
     /** Sauvegarde l’état du jeu ; appelée avant fermeture (ex. dialogue fenêtre). */
-    public void saveGame() {
+   public void saveGame() {
         try {
             System.out.println("Sauvegarde du jeu en cours...");
             
-            jeu.getGrille().saveGrille();
+            // sauvegarde la grille si une partie est en cours
+            if(jeu != null && jeu.getGrille() != null){
+                jeu.getGrille().saveGrille();
+            }
+
+            // (les paramètres sont déjà sauvegardés via le bouton appliquer de Parametres.java)
 
             Thread.sleep(500);
             System.out.println("Jeu sauvegardé avec succès !");

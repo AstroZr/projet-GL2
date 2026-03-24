@@ -24,12 +24,7 @@ public interface Aide {
      * @return le nombre d'utilisations de l'aide
      */
     int getNbUtilisation();
-
-    /**
-     * Retourne l'aide sous forme textuelle.
-     *
-     * @return l'objet {@link AideTextuel} contenant l'aide textuelle
-     */
+    void setNbUtilisation(int nbUtilisation);
     AideTextuel getAideTextuel();
 
     /**

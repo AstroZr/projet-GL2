@@ -21,6 +21,11 @@ public abstract class AideAbstract implements Aide{
     }
 
     @Override
+    public void setNbUtilisation(int nbUtilisation){
+        this.nbUtilisation = nbUtilisation;
+    }
+
+    @Override
     public AideTextuel getAideTextuel(){
         return new AideTextuel(this.aideTextuel);
     }

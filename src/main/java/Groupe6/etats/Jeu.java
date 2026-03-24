@@ -12,6 +12,7 @@ import Groupe6.models.ZoneCalcul;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.view.VueGrille;
+import Groupe6.aide.AideManager;
 
 /**
  * État du jeu en cours : affiche et gère la grille Mathdoku.
@@ -34,15 +35,13 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
+    
+    AideManager aideManager = new AideManager();
 
-    // Créer la grille (modèle)
-    grille = new Grille("Invité", "test");
-
-    // Exemple : ajouter des zones de calcul
-    ZoneCalcul zone1 = new ZoneCalcul(5, TypeOperation.ADDITION);
-    zone1.ajouterCellule(grille.getCellule(0, 0));
-    zone1.ajouterCellule(grille.getCellule(0, 1));
-    grille.ajouterZone(zone1);
+    String joueurActuel = game.getJoueurCourant();
+    if (joueurActuel == null)
+      joueurActuel = "testUser";
+    grille = new Grille(joueurActuel, "test");
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -56,8 +55,32 @@ public class Jeu extends Etats {
         LARGEUR_BOUTON,
         HAUTEUR_BOUTON,
         EtatJeu.MENU,
-        labelRetour));
+        labelRetour){
+        // sauvegarde grille
+          @Override
+          public void appliquerAction(){
+            if (grille != null) {
+              grille.saveGrille();
+            }
+            super.appliquerAction(); // Retourne au menu
+          }
+        });
+  }
 
+  public void chargerNiveau(String idNiveau) {
+    System.out.println("Chargement du niveau : " + idNiveau);
+    String joueurActuel = game.getJoueurCourant();
+    if (joueurActuel == null)
+      joueurActuel = "testUser";
+    grille = new Grille(joueurActuel, idNiveau);
+    vueGrille = new VueGrille(grille);
+    lastLayoutWidth = -1;
+    lastLayoutHeight = -1;
+  }
+
+  // getters pour la save
+  public Grille getGrille() {
+    return grille;
   }
 
   @Override
@@ -162,9 +185,5 @@ public class Jeu extends Etats {
       return;
     }
     ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelRetour);
-  }
-
-  public Grille getGrille() {
-    return grille;
   }
 }

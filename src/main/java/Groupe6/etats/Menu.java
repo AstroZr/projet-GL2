@@ -43,7 +43,7 @@ public class Menu extends Etats {
         int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
 
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.GRILLE, labelJouer));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy, bw, bh, EtatJeu.SELECTION, labelJouer));
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap, bw, bh, EtatJeu.PARAMETRES, labelParametres));
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap, bw, bh, EtatJeu.QUITTER, labelQuitter));
     }

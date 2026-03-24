@@ -4,11 +4,13 @@ import Groupe6.aide.techniques.*;
 import Groupe6.models.Grille;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class AideManager{
-    private List<Aide> aides;
+    private static List<Aide> aides;
     private Aide aide;
     private int cost;
 
@@ -19,14 +21,14 @@ public class AideManager{
     }
 
     public boolean call(Grille grille){
-        Iterator<Aide> iteratorAide = this.aides.iterator();
-        Aide aide = this.aides.get(0);
+        Iterator<Aide> iteratorAide = AideManager.aides.iterator();
+        Aide aide = AideManager.aides.get(0);
         while (iteratorAide.hasNext() && !aide.check(grille)){
             aide = iteratorAide.next();
         }
 
         if (aide.check(grille)){
-            this.cost = aide.load(grille, this.aides.size());
+            this.cost = aide.load(grille, AideManager.aides.size());
             this.aide = aide;
             return true;
         }
@@ -43,13 +45,33 @@ public class AideManager{
     }
 
     public int getNbAides(){
-        return this.aides.size();
+        return AideManager.aides.size();
     }
 
+    public static Map<Integer, Integer> getNBUtilisations(){
+        Map<Integer, Integer> dicoNbUtilisation = new HashMap<>();
+        for (Aide aide : AideManager.aides){
+            dicoNbUtilisation.put(aide.getId(), aide.getNbUtilisation());
+        }
+        return dicoNbUtilisation;
+    }
+
+    public static void setNBUtilisations(Map<Integer, Integer> dicoNbUtilisation){
+        for (Aide aide : AideManager.aides){
+            aide.setNbUtilisation(dicoNbUtilisation.get(aide.getId()));
+        }
+    }
+
+    public static void setNBUtilisationsZero(){
+        for (Aide aide : AideManager.aides){
+            aide.setNbUtilisation(0);
+        }
+    }   
+
     public int[] saveVector(){
-        int[] vector = new int[this.aides.size()];
-        for (int i = 0; i < this.aides.size(); i++){
-            vector[i] = this.aides.get(i).getNbUtilisation();
+        int[] vector = new int[AideManager.aides.size()];
+        for (int i = 0; i < AideManager.aides.size(); i++){
+            vector[i] = AideManager.aides.get(i).getNbUtilisation();
         }
         return vector;
     }

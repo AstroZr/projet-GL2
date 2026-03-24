@@ -82,7 +82,7 @@ public class Connexion extends Etats {
 
   @Override
   public void mouseReleased(MouseEvent e) {
-    // TODO Auto-generated method stub
+    //TODO pseudo vide/paramètres
     throw new UnsupportedOperationException("Unimplemented method 'mouseReleased'");
   }
 
