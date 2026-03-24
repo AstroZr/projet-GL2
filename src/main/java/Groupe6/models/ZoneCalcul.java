@@ -62,26 +62,26 @@ public class ZoneCalcul {
 
             case SOUSTRACTION:
                 // Pour la soustraction, on fait le premier moins les autres.
-                Collections.sort(valeurs); // Tri croissant sinon on peut avoir des résultats négatifs
+                Collections.sort(valeurs, Collections.reverseOrder()); // Tri décroissant sinon on peut avoir des
+                                                                       // résultats négatifs
                 int premier = valeurs.get(0);
-                int reste = 0;
                 for (int i = 1; i < valeurs.size(); i++) {
-                    reste += valeurs.get(i);
+                    premier -= valeurs.get(i);
                 }
-                return (premier - reste) == valeurCible;
+                return (premier) == valeurCible;
 
             case MULTIPLICATION:
                 return valeurs.stream().mapToInt(Integer::intValue).reduce(1, (a, b) -> a * b) == valeurCible;
 
             case DIVISION:
                 // Pour la division, on fait le premier divisé par les autres.
-                Collections.sort(valeurs); // Tri croissant sinon on peut avoir des résultats négatifs
+                Collections.sort(valeurs, Collections.reverseOrder()); // Tri croissant sinon on peut avoir des
+                                                                       // résultats négatifs
                 int premierDiv = valeurs.get(0);
-                int diviseur = 1;
                 for (int i = 1; i < valeurs.size(); i++) {
-                    diviseur *= valeurs.get(i);
+                    premierDiv /= valeurs.get(i);
                 }
-                return (premierDiv / diviseur) == valeurCible;
+                return (premierDiv) == valeurCible;
 
             case AUCUNE:
                 // Cas d'une seule case avec le chiffre donné
@@ -119,11 +119,11 @@ public class ZoneCalcul {
         return typeOperation;
     }
 
-
     /**
      * Explore les combinaisons .
+     * 
      * @param index     L index de la cellule vide que l on traite actuellement
-     * @param max       Valeur maximale 
+     * @param max       Valeur maximale
      * @param resultats Liste accumulant le combinaison valides trouve
      */
     private void rechercherRecursive(List<Cellule> vides, int index, int max, List<List<Integer>> resultats) {
@@ -144,18 +144,19 @@ public class ZoneCalcul {
         for (int i = 1; i <= max; i++) {
             // On simule le remplissage
             celluleCourante.setValeur(i);
-            
+
             // appel recursif pour la cellule suivante
             rechercherRecursive(vides, index + 1, max, resultats);
-            
+
             // On vide la cellule
-            celluleCourante.setValeur(0); 
+            celluleCourante.setValeur(0);
         }
     }
 
     /**
      * trouver les Combinaisons de touche
-     * @param max  Valeur maximale  
+     * 
+     * @param max Valeur maximale
      */
     public List<List<Integer>> trouverCombinaisons(int max) {
         List<Cellule> vides = new ArrayList<>();
