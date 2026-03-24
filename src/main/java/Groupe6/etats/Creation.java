@@ -188,8 +188,11 @@ public class Creation extends Etats implements MethodesEtats {
         if (bouton.isSourisEnfonce() && isIn(e, bouton)){
           String pseudo = getPseudoSaisi();
           if (pseudo != null && !pseudo.trim().isEmpty()){
-              // TODO paramètres/profil
               game.setJoueurCourant(pseudo);
+
+              // génération du dossier du joueur avec ses paramètres par défaut
+              Groupe6.save.ParametresJoueur pjParDefaut = new Groupe6.save.ParametresJoueur(pseudo, "Fr", 50, 50, 0);
+              Groupe6.save.SaveManager.sauvegarderParametres(pjParDefaut);
               bouton.appliquerAction();
           }
       }

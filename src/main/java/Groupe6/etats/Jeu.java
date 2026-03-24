@@ -55,7 +55,16 @@ public class Jeu extends Etats {
         LARGEUR_BOUTON,
         HAUTEUR_BOUTON,
         EtatJeu.MENU,
-        labelRetour));
+        labelRetour){
+        // sauvegarde grille
+          @Override
+          public void appliquerAction(){
+            if (grille != null) {
+              grille.saveGrille();
+            }
+            super.appliquerAction(); // Retourne au menu
+          }
+        });
   }
 
   public void chargerNiveau(String idNiveau) {

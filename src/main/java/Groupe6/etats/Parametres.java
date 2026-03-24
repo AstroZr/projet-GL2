@@ -542,6 +542,13 @@ public class Parametres extends Etats {
           appliquerThemeSelectionne();
           appliquerLangueSelectionnee();
           memoriserValeursAppliquees();
+
+          // Sauvegarde des réglages sons et thème du joueur
+          String pseudo = game.getJoueurCourant();
+          if (pseudo != null && !pseudo.equals("Invité")) {
+            Groupe6.save.ParametresJoueur pj = new Groupe6.save.ParametresJoueur(pseudo, langueSelectionnee == 0 ? "Fr" : "En", (int)(volumeEffets * 100), (int)(volumeMusique * 100), themeSelectionne);
+            Groupe6.save.SaveManager.sauvegarderParametres(pj);
+          }  
         } else {
           synchroniseDepuisEntree = false;
           synchroniserEditionAvecValeursAppliquees();
