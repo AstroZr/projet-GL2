@@ -57,8 +57,13 @@ public class AideManager{
     }
 
     public static void setNBUtilisations(Map<Integer, Integer> dicoNbUtilisation){
+        if (dicoNbUtilisation == null){
+            setNBUtilisationsZero();
+            return;
+        }
+
         for (Aide aide : AideManager.aides){
-            aide.setNbUtilisation(dicoNbUtilisation.get(aide.getId()));
+            aide.setNbUtilisation(dicoNbUtilisation.getOrDefault(aide.getId(), 0));
         }
     }
 

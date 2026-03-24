@@ -41,6 +41,10 @@ public class Grille {
      * @param idNiveau  L'identifiant du niveau à charger
      */
     public Grille(String nomJoueur, String idNiveau) {
+        this(nomJoueur, idNiveau, false);
+    }
+
+    public Grille(String nomJoueur, String idNiveau, boolean ignorerSauvegarde) {
         this.nomJoueur = nomJoueur;
         this.idNiveau = idNiveau;
 
@@ -56,7 +60,7 @@ public class Grille {
             return;
         }
 
-        PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
+        PartieSauvegardee sauvegarde = ignorerSauvegarde ? null : SaveManager.chargerPartie(nomJoueur, idNiveau);
         AideManager.setNBUtilisationsZero();
 
         this.taille = niveauBase.getTaille();
@@ -89,7 +93,7 @@ public class Grille {
         }
 
         nettoyerSelection();
-        this.estComplete = false;
+        validerGrille();
     }
 
     /**

@@ -19,6 +19,7 @@ import Groupe6.utilz.Constants;
 import Groupe6.utilz.LangManager;
 import Groupe6.view.VueGrille;
 import Groupe6.aide.AideManager;
+import Groupe6.save.SaveManager;
 
 /**
  * État du jeu en cours : affiche et gère la grille Mathdoku.
@@ -98,6 +99,9 @@ public class Jeu extends Etats {
   private boolean overlayAideVisible = false;
   private String overlayAideTitre = "";
   private String overlayAideTexte = "";
+  private boolean victoireAnnoncee = false;
+  private String labelVictoireTitre;
+  private String labelVictoireTexte;
 
   public Jeu(Game game) {
     super(game);
@@ -114,6 +118,7 @@ public class Jeu extends Etats {
     if (joueurActuel == null)
       joueurActuel = "testUser";
     grille = new Grille(joueurActuel, "test");
+    victoireAnnoncee = false;
 
     // Créer la vue
     vueGrille = new VueGrille(grille);
@@ -123,22 +128,6 @@ public class Jeu extends Etats {
     // Bouton retour au menu - position initiale
     int x = 50;
     int cy = 950;
-    boutons.add(new BoutonChangeurEtat(
-        cx - LARGEUR_BOUTON / 2,
-        cy,
-        LARGEUR_BOUTON,
-        HAUTEUR_BOUTON,
-        EtatJeu.MENU,
-        labelRetour){
-        // sauvegarde grille
-          @Override
-          public void appliquerAction(){
-            if (grille != null) {
-              grille.saveGrille();
-            }
-            super.appliquerAction(); // Retourne au menu
-          }
-        });
     boutonRetour = new BoutonJeuAction(
       x,
       cy,
@@ -216,10 +205,19 @@ public class Jeu extends Etats {
     if (joueurActuel == null)
       joueurActuel = "testUser";
     grille = new Grille(joueurActuel, idNiveau);
+    if (grille.estComplete()) {
+      long tempsTermine = grille.getTempsEcoule();
+      if (tempsTermine > 0) {
+        SaveManager.enregistrerMeilleurTemps(joueurActuel, idNiveau, tempsTermine);
+      }
+      grille = new Grille(joueurActuel, idNiveau, true);
+    }
+    victoireAnnoncee = false;
     vueGrille = new VueGrille(grille);
+    timerPaused = false;
+    pausedElapsedMillis = 0;
     baseElapsedMillis = grille.getTempsEcoule();
     startTimerMillis = System.currentTimeMillis();
-    resumeTimer();
     if (boutonAide != null) {
       boutonAide.resetProgression();
     }
@@ -246,13 +244,14 @@ public class Jeu extends Etats {
 
   @Override
   public void update() {
-    if (timerPaused) {
+    if (timerPaused && !victoireAnnoncee) {
       resumeTimer();
     }
     // Mettre à jour la logique du jeu si nécessaire
     if (grille != null) {
       grille.setTempsEcoule(getElapsedMillis());
     }
+    verifierVictoire();
     getFond().update();
   }
 
@@ -420,6 +419,8 @@ public class Jeu extends Etats {
     labelCandidatOff = LangManager.get("jeu.candidat.off");
     labelParametres = LangManager.get("menu.parametres");
     labelTimer = LangManager.get("jeu.timer");
+    labelVictoireTitre = LangManager.get("jeu.victoire.titre");
+    labelVictoireTexte = LangManager.get("jeu.victoire.texte");
 
     if (boutons == null || boutons.isEmpty()) {
       return;
@@ -624,6 +625,26 @@ public class Jeu extends Etats {
     sauvegarderEtatNiveauCourant();
     pauseTimer();
     EtatJeu.setEtatActuel(EtatJeu.MENU);
+  }
+
+  private void verifierVictoire() {
+    if (grille == null || victoireAnnoncee || !grille.estComplete()) {
+      return;
+    }
+
+    pauseTimer();
+    long tempsFinal = getElapsedMillis();
+    grille.setTempsEcoule(tempsFinal);
+    grille.saveGrille();
+
+    SaveManager.enregistrerMeilleurTemps(
+      grille.getNomJoueur(),
+      grille.getIdNiveau(),
+      tempsFinal
+    );
+
+    showAideOverlay(labelVictoireTitre, labelVictoireTexte + " " + formatTimer());
+    victoireAnnoncee = true;
   }
 
   private void ouvrirParametresDepuisJeu() {
