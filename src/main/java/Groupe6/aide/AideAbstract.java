@@ -21,6 +21,11 @@ public abstract class AideAbstract implements Aide{
     }
 
     @Override
+    public void setNbUtilisation(int nbUtilisation){
+        this.nbUtilisation = Math.max(0, nbUtilisation);
+    }
+
+    @Override
     public AideTextuel getAideTextuel(){
         return new AideTextuel(this.aideTextuel);
     }
@@ -28,11 +33,6 @@ public abstract class AideAbstract implements Aide{
     @Override
     public AideVisuel getAideVisuel(){
         return new AideVisuel(this.aideVisuel);
-    }
-
-    @Override
-    public void setNbUtilisation(int nbUtilisation){
-        this.nbUtilisation = Math.max(0, nbUtilisation);
     }
 
     public int getCost(int nbAides){

@@ -89,6 +89,15 @@ public class Menu extends Etats {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode();
+        char c = Character.toLowerCase(e.getKeyChar());
+        
+        // Si on va appuyer sur Entrée/Espace sur le bouton Paramètres (index 1)
+        if ((code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) 
+                && indiceFocusClavierBouton == 1) {
+            Parametres.setEtatSource(EtatJeu.MENU);
+        }
+        
         gererNavigationClavier(e);
     }
 
@@ -114,11 +123,15 @@ public class Menu extends Etats {
         }
     }
 
-    /** Déclenche l'action du bouton si le clic est valide (appui puis relâchement sur le même bouton). */
     @Override
     public void mouseReleased(MouseEvent e) {
-        for (Bouton b : boutons) {
+        for (int i = 0; i < boutons.size(); i++) {
+            Bouton b = boutons.get(i);
             if (b.isSourisEnfonce() && isIn(e, b)) {
+                // Si c'est le bouton Paramètres (index 1), setter la source avant de naviguer
+                if (i == 1) {  // bouton Paramètres
+                    Parametres.setEtatSource(EtatJeu.MENU);
+                }
                 b.appliquerAction();
             }
             b.setSourisEnfonce(false);

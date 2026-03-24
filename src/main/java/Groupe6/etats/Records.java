@@ -24,23 +24,25 @@ import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État « meilleurs temps » : records du joueur courant + classement global par niveau.
+ * État « meilleurs temps » : records du joueur courant + classement global par
+ * niveau.
  */
 public class Records extends Etats {
 
-    private static final Font FONT_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD,  28);
-    private static final Font FONT_SOUS  = new Font("Berlin Sans FB Demi", Font.BOLD,  18);
+    private static final Font FONT_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 28);
+    private static final Font FONT_SOUS = new Font("Berlin Sans FB Demi", Font.BOLD, 18);
     private static final Font FONT_TEXTE = new Font("Berlin Sans FB Demi", Font.PLAIN, 15);
 
     private static final int LARGEUR_BTN = 200;
     private static final int HAUTEUR_BTN = 44;
-    private static final int SCROLL_SPEED = 20;
 
     private LayoutScale layoutScale;
 
-    private int scrollLeft  = 0;
+    private static final int SCROLL_SPEED = 20;
+
+    private int scrollLeft = 0;
     private int scrollRight = 0;
-    private int maxScrollLeft  = 0;
+    private int maxScrollLeft = 0;
     private int maxScrollRight = 0;
 
     private String labelTitre;
@@ -112,9 +114,9 @@ public class Records extends Etats {
         int panelW = layoutScale.scaleX(420);
         int panelH = layoutScale.scaleY(580);
         int panelY = layoutScale.ratioY(140f / 1080f);
-        int leftX  = layoutScale.ratioX(0.08f);
+        int leftX = layoutScale.ratioX(0.08f);
         int rightX = w - leftX - panelW;
-        int rowH   = layoutScale.scaleY(36);
+        int rowH = layoutScale.scaleY(36);
 
         int visibleH = panelH - 60;
 
@@ -128,7 +130,7 @@ public class Records extends Etats {
 
         int cLeftH = niveaux.size() * (rowH + 6);
         maxScrollLeft = Math.max(0, cLeftH - visibleH);
-        scrollLeft    = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
+        scrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
 
         // Sauvegarder le clip original
         java.awt.Shape clipOriginal = g2d.getClip();
@@ -182,7 +184,7 @@ public class Records extends Etats {
             cRightH += entries * (rowH + 4) + 10;
         }
         maxScrollRight = Math.max(0, cRightH - visibleH);
-        scrollRight    = Math.max(0, Math.min(scrollRight, maxScrollRight));
+        scrollRight = Math.max(0, Math.min(scrollRight, maxScrollRight));
 
         g2d.setClip(rightX, panelY + 50, panelW, visibleH);
         g2d.translate(0, -scrollRight);
@@ -209,7 +211,8 @@ public class Records extends Etats {
                     dessinerLigne(g2d, rightX + 12, rRowY, panelW - 24, rowH, rangStr, tempsStr, moi);
                     rRowY += rowH + 4;
                     rang++;
-                    if (rang > 5) break;
+                    if (rang > 5)
+                        break;
                 }
             }
             rRowY += 10;
@@ -241,7 +244,7 @@ public class Records extends Etats {
     private void dessinerIndicateurScroll(Graphics2D g2d, int x, int y, int w, int h, boolean versHaut) {
         GradientPaint gp;
         Color transparent = new Color(0, 0, 0, 0);
-        Color opaque      = new Color(0, 0, 0, 90);
+        Color opaque = new Color(0, 0, 0, 90);
         if (versHaut) {
             gp = new GradientPaint(x, y, opaque, x, y + h, transparent);
         } else {
@@ -253,7 +256,7 @@ public class Records extends Etats {
     }
 
     private void dessinerLigne(Graphics2D g2d, int x, int y, int w, int h,
-                                String gauche, String droite, boolean surbrillance) {
+            String gauche, String droite, boolean surbrillance) {
         if (surbrillance) {
             g2d.setColor(new Color(70, 130, 180, 80));
             g2d.fillRoundRect(x, y, w, h, 8, 8);
@@ -261,7 +264,7 @@ public class Records extends Etats {
         g2d.setFont(FONT_TEXTE);
         FontMetrics fm = g2d.getFontMetrics();
         g2d.setColor(getFond().getCouleurTexte());
-        g2d.drawString(gauche,  x + 8,                                     y + (h + fm.getAscent()) / 2 - 2);
+        g2d.drawString(gauche, x + 8, y + (h + fm.getAscent()) / 2 - 2);
         g2d.drawString(droite, x + w - fm.stringWidth(droite) - 8, y + (h + fm.getAscent()) / 2 - 2);
     }
 
@@ -272,20 +275,25 @@ public class Records extends Etats {
 
     @Override
     public void updateTexts() {
-        labelTitre      = LangManager.get("records.titre");
-        labelMesTemps   = LangManager.get("records.mestemps");
+        labelTitre = LangManager.get("records.titre");
+        labelMesTemps = LangManager.get("records.mestemps");
         labelClassement = LangManager.get("records.classement");
-        labelAucun      = LangManager.get("records.aucun");
-        labelRetour     = LangManager.get("common.retour");
-        labelNiveau     = LangManager.get("records.niveau");
+        labelAucun = LangManager.get("records.aucun");
+        labelRetour = LangManager.get("common.retour");
+        labelNiveau = LangManager.get("records.niveau");
 
         if (boutons != null && !boutons.isEmpty()) {
             ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelRetour);
         }
     }
 
-    @Override public void keyTyped(KeyEvent e) {}
-    @Override public void keyReleased(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -295,7 +303,8 @@ public class Records extends Etats {
     @Override
     public void mouseMoved(MouseEvent e) {
         clearFocusClavier();
-        for (Bouton b : boutons) b.setSourisSurvol(isIn(e, b));
+        for (Bouton b : boutons)
+            b.setSourisSurvol(isIn(e, b));
     }
 
     @Override
@@ -303,7 +312,7 @@ public class Records extends Etats {
         int delta = e.getUnitsToScroll() * layoutScale.scaleY(SCROLL_SPEED);
         int cx = layoutScale.centerX();
         if (e.getX() < cx) {
-            scrollLeft  = Math.max(0, Math.min(scrollLeft  + delta, maxScrollLeft));
+            scrollLeft = Math.max(0, Math.min(scrollLeft + delta, maxScrollLeft));
         } else {
             scrollRight = Math.max(0, Math.min(scrollRight + delta, maxScrollRight));
         }
@@ -311,24 +320,31 @@ public class Records extends Etats {
 
     @Override
     public void onEnter() {
-        scrollLeft  = 0;
+        scrollLeft = 0;
         scrollRight = 0;
     }
 
-    @Override public void mouseDragged(MouseEvent e) {}
-    @Override public void mouseClicked(MouseEvent e) {}
+    @Override
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
 
     @Override
     public void mousePressed(MouseEvent e) {
         for (Bouton b : boutons) {
-            if (isIn(e, b)) b.setSourisEnfonce(true);
+            if (isIn(e, b))
+                b.setSourisEnfonce(true);
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
-            if (b.isSourisEnfonce() && isIn(e, b)) b.appliquerAction();
+            if (b.isSourisEnfonce() && isIn(e, b))
+                b.appliquerAction();
             b.setSourisEnfonce(false);
         }
     }
