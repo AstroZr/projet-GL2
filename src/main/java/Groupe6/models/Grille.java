@@ -3,9 +3,11 @@ package Groupe6.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import Groupe6.aide.Aide;
 import Groupe6.save.Niveau;
 import Groupe6.save.PartieSauvegardee;
 import Groupe6.save.SaveManager;
+import Groupe6.aide.AideManager;
 
 /**
  * Modèle logique de la grille de jeu.
@@ -49,6 +51,7 @@ public class Grille {
         }
 
         PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
+        AideManager.setNBUtilisationsZero();
 
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
@@ -57,6 +60,7 @@ public class Grille {
             this.matriceCellules = sauvegarde.getMatriceCellules();
             this.historique = sauvegarde.getHistorique();
             this.listeZones = niveauBase.getListeZones();
+            AideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees()); 
 
             // relie les zones de niveauBase aux cellules de la sauvegarde
             for (ZoneCalcul zone : listeZones) {

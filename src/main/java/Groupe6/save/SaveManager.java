@@ -128,8 +128,7 @@ public class SaveManager {
         return null;
     }
 
-    public static void sauvegarderPartie(
-            String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
+    public static void sauvegarderPartie(String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
         Map<String, String> annuaire = chargerAnnuaire();
 
         if (!annuaire.containsKey(nomJoueur)) {

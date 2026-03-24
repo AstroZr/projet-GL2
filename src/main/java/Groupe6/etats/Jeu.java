@@ -12,6 +12,7 @@ import Groupe6.models.ZoneCalcul;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.view.VueGrille;
+import Groupe6.aide.AideManager;
 
 /**
  * État du jeu en cours : affiche et gère la grille Mathdoku.
@@ -34,6 +35,8 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
+    
+    AideManager aideManager = new AideManager();
 
     String joueurActuel = game.getJoueurCourant();
     if (joueurActuel == null)
