@@ -84,6 +84,7 @@ public class Grille {
             this.tempsEcoule = 0L;
         }
 
+        nettoyerSelection();
         this.estComplete = false;
     }
 
@@ -146,15 +147,28 @@ public class Grille {
         if (estHorsLimites(ligne, colonne))
             return;
 
-        // Désélectionner l'ancienne
-        if (celluleSelectionnee != null) {
-            celluleSelectionnee.setEstSelectionnee(false);
-        }
+        nettoyerSelection();
 
         // Sélectionner la nouvelle
         celluleSelectionnee = matriceCellules[ligne][colonne];
         celluleSelectionnee.setEstSelectionnee(true);
         notifierObservateurs();
+    }
+
+    private void nettoyerSelection() {
+        celluleSelectionnee = null;
+        if (matriceCellules == null) {
+            return;
+        }
+
+        for (int ligne = 0; ligne < taille; ligne++) {
+            for (int col = 0; col < taille; col++) {
+                Cellule cellule = matriceCellules[ligne][col];
+                if (cellule != null) {
+                    cellule.setEstSelectionnee(false);
+                }
+            }
+        }
     }
 
     /**
