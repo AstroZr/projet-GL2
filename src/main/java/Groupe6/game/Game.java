@@ -15,8 +15,6 @@ import Groupe6.etats.Parametres;
 import Groupe6.etats.Start;
 import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
-import Groupe6.save.ParametresJoueur;
-import Groupe6.save.SaveManager;
 import Groupe6.etats.Selection;
 
 /**
@@ -106,6 +104,9 @@ public class Game implements Runnable {
 
     public void setJoueurCourant(String pseudo) {
         this.joueurCourant = pseudo;
+        if (parametres != null) {
+            parametres.chargerParametresJoueur(pseudo);
+        }
     }
 
     private void notifierChangementLangue() {
@@ -217,6 +218,12 @@ public class Game implements Runnable {
             }
 
             // (les paramètres sont déjà sauvegardés via le bouton appliquer de Parametres.java)
+            if (parametres != null) {
+                parametres.sauvegarderProfilActuel();
+            }
+            if (jeu != null) {
+                jeu.sauvegarderEtatNiveauCourant();
+            }
 
             Thread.sleep(500);
             System.out.println("Jeu sauvegardé avec succès !");

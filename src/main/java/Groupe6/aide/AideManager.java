@@ -75,4 +75,21 @@ public class AideManager{
         }
         return vector;
     }
+
+    public void restoreVector(int[] vector){
+        if (vector == null){
+            return;
+        }
+
+        int n = Math.min(vector.length, this.aides.size());
+        for (int i = 0; i < n; i++){
+            Aide aide = this.aides.get(i);
+            if (aide instanceof AideAbstract){
+                ((AideAbstract) aide).setNbUtilisation(vector[i]);
+            }
+        }
+
+        this.aide = null;
+        this.cost = 0;
+    }
 }

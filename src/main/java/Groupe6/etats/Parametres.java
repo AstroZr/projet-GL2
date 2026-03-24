@@ -19,6 +19,8 @@ import Groupe6.fond.FondClair;
 import Groupe6.fond.FondDegrade;
 import Groupe6.fond.FondFonce;
 import Groupe6.game.Game;
+import Groupe6.save.ParametresJoueur;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
@@ -142,6 +144,7 @@ public class Parametres extends Etats {
   @Override
   public void update() {
     if (!synchroniseDepuisEntree) {
+      chargerParametresJoueur(game != null ? game.getJoueurCourant() : null);
       synchroniserEditionAvecValeursAppliquees();
       synchroniseDepuisEntree = true;
     }
@@ -542,13 +545,7 @@ public class Parametres extends Etats {
           appliquerThemeSelectionne();
           appliquerLangueSelectionnee();
           memoriserValeursAppliquees();
-
-          // Sauvegarde des réglages sons et thème du joueur
-          String pseudo = game.getJoueurCourant();
-          if (pseudo != null && !pseudo.equals("Invité")) {
-            Groupe6.save.ParametresJoueur pj = new Groupe6.save.ParametresJoueur(pseudo, langueSelectionnee == 0 ? "Fr" : "En", (int)(volumeEffets * 100), (int)(volumeMusique * 100), themeSelectionne);
-            Groupe6.save.SaveManager.sauvegarderParametres(pj);
-          }  
+          sauvegarderParametresJoueur(game != null ? game.getJoueurCourant() : null);
         } else {
           synchroniseDepuisEntree = false;
           synchroniserEditionAvecValeursAppliquees();
@@ -641,5 +638,58 @@ public class Parametres extends Etats {
     dropdownLangueOuvert = false;
     dropdownThemeOuvert = false;
     indexSurvolTheme = -1;
+  }
+
+  public void chargerParametresJoueur(String pseudo) {
+    if (pseudo == null || pseudo.trim().isEmpty()) {
+      return;
+    }
+
+    ParametresJoueur params = SaveManager.chargerParametres(pseudo);
+    if (params == null) {
+      return;
+    }
+
+    String langue = params.getLanguage();
+    langueAppliquee = "en".equalsIgnoreCase(langue) ? Game.LANGUE_ENGLISH : Game.LANGUE_FRANCAIS;
+    themeApplique = Math.max(0, Math.min(themes.size() - 1, params.getModeSombre()));
+    volumeEffetsApplique = Math.max(0f, Math.min(1f, params.getVolumeEffet() / 100f));
+    volumeMusiqueApplique = Math.max(0f, Math.min(1f, params.getVolumeMusique() / 100f));
+
+    if (game != null) {
+      game.setLangueSelectionnee(langueAppliquee);
+    }
+    synchroniserEditionAvecValeursAppliquees();
+  }
+
+  private void sauvegarderParametresJoueur(String pseudo) {
+    if (pseudo == null || pseudo.trim().isEmpty()) {
+      return;
+    }
+
+    String codeLangue = codesLangues.get(Math.max(0, Math.min(codesLangues.size() - 1, langueSelectionnee)));
+    ParametresJoueur params = new ParametresJoueur(
+        pseudo,
+        codeLangue,
+        Math.round(volumeEffets * 100f),
+        Math.round(volumeMusique * 100f),
+        themeSelectionne);
+    SaveManager.sauvegarderParametres(params);
+  }
+
+  public void sauvegarderProfilActuel() {
+    String pseudo = game != null ? game.getJoueurCourant() : null;
+    if (pseudo == null || pseudo.trim().isEmpty()) {
+      return;
+    }
+
+    String codeLangue = codesLangues.get(Math.max(0, Math.min(codesLangues.size() - 1, langueAppliquee)));
+    ParametresJoueur params = new ParametresJoueur(
+        pseudo,
+        codeLangue,
+        Math.round(volumeEffetsApplique * 100f),
+        Math.round(volumeMusiqueApplique * 100f),
+        themeApplique);
+    SaveManager.sauvegarderParametres(params);
   }
 }

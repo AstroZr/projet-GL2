@@ -7,6 +7,8 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
+import Groupe6.save.ParametresJoueur;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.BoutonCreation;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;

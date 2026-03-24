@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import Groupe6.fond.Fond;
 import Groupe6.models.Cellule;
@@ -25,11 +26,12 @@ public class VueGrille {
     private static final Color COULEUR_ERREUR = new Color(255, 100, 100, 180);
     private static final Font FONT_VALEUR = new Font("Arial", Font.BOLD, 32);
     private static final Font FONT_ZONE = new Font("Arial", Font.BOLD, 14);
+    private static final Font FONT_CANDIDAT = new Font("Arial", Font.BOLD, 16);
     private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3);
     private static final BasicStroke STROKE_FINE = new BasicStroke(1);
 
     private static final int TAILLE_GRILLE_DEFAULT = (int)(1080 / 1.5f);
-    private static final int OFFSET_X_DEFAULT = 40;
+    private static final int OFFSET_X_DEFAULT = (1920 - TAILLE_GRILLE_DEFAULT) / 2;
     private static final int OFFSET_Y_DEFAULT = (1080 - TAILLE_GRILLE_DEFAULT) / 2;
 
     private final Grille grille;
@@ -37,6 +39,7 @@ public class VueGrille {
     private int tailleGrille;
     private int offsetX;
     private int offsetY;
+    private boolean modeCandidat;
 
     public VueGrille(Grille grille) {
         this.grille = grille;
@@ -44,6 +47,7 @@ public class VueGrille {
         offsetX = OFFSET_X_DEFAULT;
         offsetY = OFFSET_Y_DEFAULT;
         tailleGrille = TAILLE_GRILLE_DEFAULT;
+        modeCandidat = false;
     }
 
     /**
@@ -107,7 +111,10 @@ public class VueGrille {
     private void dessinerValeurCellule(Graphics2D g2d, Cellule cellule, int x, int y,
                                        FontMetrics fm, int fontAscent, Fond fond) {
         int valeur = cellule.getValeur();
-        if (valeur == 0) return;
+        if (valeur == 0) {
+            dessinerCandidats(g2d, cellule, x, y, fond);
+            return;
+        }
 
         g2d.setColor(fond.getCouleurTexte());
         g2d.setFont(FONT_VALEUR);
@@ -118,6 +125,38 @@ public class VueGrille {
             x + (tailleCellule - strWidth) / 2,
             y + (tailleCellule + fontAscent) / 2 - 5
         );
+    }
+
+    private void dessinerCandidats(Graphics2D g2d, Cellule cellule, int x, int y, Fond fond) {
+        List<Integer> candidats = cellule.getListeCandidat();
+        if (candidats == null || candidats.isEmpty()) {
+            return;
+        }
+
+        g2d.setColor(fond.getCouleurTexte());
+        g2d.setFont(FONT_CANDIDAT);
+        int nbMaxValeurs = grille.getTaille();
+        int colonnes = (int) Math.ceil(Math.sqrt(nbMaxValeurs));
+        int lignes = (int) Math.ceil((double) nbMaxValeurs / colonnes);
+        int marge = Math.max(6, tailleCellule / 12);
+        int zoneLargeur = tailleCellule - 2 * marge;
+        int zoneHauteur = tailleCellule - 2 * marge;
+        int pasX = Math.max(14, zoneLargeur / Math.max(1, colonnes));
+        int pasY = Math.max(14, zoneHauteur / Math.max(1, lignes));
+        FontMetrics fm = g2d.getFontMetrics();
+
+        for (Integer candidat : candidats) {
+            if (candidat == null || candidat < 1 || candidat > nbMaxValeurs) {
+                continue;
+            }
+            int index = candidat - 1;
+            int col = index % colonnes;
+            int row = index / colonnes;
+            String texte = String.valueOf(candidat);
+            int tx = x + marge + col * pasX + (pasX - fm.stringWidth(texte)) / 2;
+            int ty = y + marge + row * pasY + fm.getAscent();
+            g2d.drawString(texte, tx, ty);
+        }
     }
 
     /**
@@ -189,12 +228,7 @@ public class VueGrille {
         char c = e.getKeyChar();
         if (Character.isDigit(c)) {
             int valeur = Character.getNumericValue(c);
-            if (valeur >= 1 && valeur <= grille.getTaille()) {
-                Cellule cellule = grille.getCelluleSelectionnee();
-                if (cellule != null) {
-                    grille.ajouterChiffre(cellule.getLigne(), cellule.getColonne(), valeur);
-                }
-            }
+            saisirValeur(valeur);
         }
     }
 
@@ -202,6 +236,18 @@ public class VueGrille {
      * Gère les touches pressées (suppression).
      */
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() >= KeyEvent.VK_1 && e.getKeyCode() <= KeyEvent.VK_9) {
+            int valeur = e.getKeyCode() - KeyEvent.VK_0;
+            saisirValeur(valeur);
+            return;
+        }
+
+        if (e.getKeyCode() >= KeyEvent.VK_NUMPAD1 && e.getKeyCode() <= KeyEvent.VK_NUMPAD9) {
+            int valeur = e.getKeyCode() - KeyEvent.VK_NUMPAD0;
+            saisirValeur(valeur);
+            return;
+        }
+
         if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
             Cellule cellule = grille.getCelluleSelectionnee();
             if (cellule != null) {
@@ -209,10 +255,40 @@ public class VueGrille {
             }
         }
     }
+
+    public void saisirValeur(int valeur) {
+        if (valeur < 1 || valeur > grille.getTaille()) {
+            return;
+        }
+
+        Cellule cellule = grille.getCelluleSelectionnee();
+        if (cellule == null) {
+            return;
+        }
+
+        if (modeCandidat) {
+            if (cellule.getListeCandidat().contains(valeur)) {
+                grille.supprimerCandidat(cellule.getLigne(), cellule.getColonne(), valeur);
+            } else {
+                grille.ajouterCandidat(cellule.getLigne(), cellule.getColonne(), valeur);
+            }
+        } else {
+            grille.ajouterChiffre(cellule.getLigne(), cellule.getColonne(), valeur);
+        }
+    }
+
+    public void toggleModeCandidat() {
+        modeCandidat = !modeCandidat;
+    }
+
+    public boolean isModeCandidat() {
+        return modeCandidat;
+    }
+
     public void applyLayout(int w, int h) {
         tailleGrille = (int)(h / 1.5f);
         tailleCellule = tailleGrille / grille.getTaille();
-        offsetX = (int)(w / 48);
+        offsetX = (w - tailleGrille) / 2;
         offsetY = (h - tailleGrille) / 2;
     }
 }
