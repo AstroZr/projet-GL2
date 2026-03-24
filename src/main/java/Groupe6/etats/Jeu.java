@@ -14,6 +14,7 @@ import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonAide;
 import Groupe6.utilz.Constants;
 import Groupe6.view.VueGrille;
+import Groupe6.aide.AideManager;
 
 /**
  * État du jeu en cours : affiche et gère la grille Mathdoku.
@@ -93,6 +94,8 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
+    
+    AideManager aideManager = new AideManager();
 
     String joueurActuel = game.getJoueurCourant();
     if (joueurActuel == null)
@@ -107,6 +110,22 @@ public class Jeu extends Etats {
     // Bouton retour au menu - position initiale
     int x = 50;
     int cy = 950;
+    boutons.add(new BoutonChangeurEtat(
+        cx - LARGEUR_BOUTON / 2,
+        cy,
+        LARGEUR_BOUTON,
+        HAUTEUR_BOUTON,
+        EtatJeu.MENU,
+        labelRetour){
+        // sauvegarde grille
+          @Override
+          public void appliquerAction(){
+            if (grille != null) {
+              grille.saveGrille();
+            }
+            super.appliquerAction(); // Retourne au menu
+          }
+        });
     boutonRetour = new BoutonJeuAction(
       x,
       cy,

@@ -208,10 +208,16 @@ public class Game implements Runnable {
     }
     
     /** Sauvegarde l’état du jeu ; appelée avant fermeture (ex. dialogue fenêtre). */
-    public void saveGame() {
+   public void saveGame() {
         try {
             System.out.println("Sauvegarde du jeu en cours...");
+            
+            // sauvegarde la grille si une partie est en cours
+            if(jeu != null && jeu.getGrille() != null){
+                jeu.getGrille().saveGrille();
+            }
 
+            // (les paramètres sont déjà sauvegardés via le bouton appliquer de Parametres.java)
             if (parametres != null) {
                 parametres.sauvegarderProfilActuel();
             }

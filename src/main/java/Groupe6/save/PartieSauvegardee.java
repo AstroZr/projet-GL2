@@ -2,7 +2,10 @@ package Groupe6.save;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+import Groupe6.aide.AideManager;
 import Groupe6.models.Cellule;
 
 public class PartieSauvegardee {
@@ -10,15 +13,18 @@ public class PartieSauvegardee {
     private Cellule[][] matriceCellules;
     private List<int[]> historique;
     private long tempsEcoule;
+    private Map<Integer, Integer> nbAidesUtilisees;
 
     public PartieSauvegardee() {
         this.historique = new ArrayList<>();
+        this.nbAidesUtilisees = new HashMap<>();
     }
 
     public PartieSauvegardee(Cellule[][] matriceCellules, List<int[]> historique, long tempsEcoule) {
         this.matriceCellules = matriceCellules;
         this.historique = historique;
         this.tempsEcoule = tempsEcoule;
+        this.nbAidesUtilisees = AideManager.getNBUtilisations();
     }
 
     public Cellule[][] getMatriceCellules() {
@@ -43,5 +49,9 @@ public class PartieSauvegardee {
 
     public void setTempsEcoule(long tempsEcoule) {
         this.tempsEcoule = tempsEcoule;
+    }
+
+    public Map<Integer, Integer> getNbAidesUtilisees() {
+        return nbAidesUtilisees;
     }
 }
