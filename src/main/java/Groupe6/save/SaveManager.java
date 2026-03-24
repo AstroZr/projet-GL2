@@ -237,6 +237,28 @@ public class SaveManager {
      *
      * @return List<String>
      */
+    /** Retourne la liste des pseudos enregistrés dans l'annuaire. */
+    public static List<String> listerJoueurs() {
+        return new ArrayList<>(chargerAnnuaire().keySet());
+    }
+
+    /**
+     * Retourne le classement global pour un niveau donné :
+     * liste de (nomJoueur, tempsMs) triée du meilleur au moins bon.
+     */
+    public static List<Map.Entry<String, Long>> chargerClassementGlobal(String idNiveau) {
+        Map<String, String> annuaire = chargerAnnuaire();
+        List<Map.Entry<String, Long>> classement = new ArrayList<>();
+        for (String nomJoueur : annuaire.keySet()) {
+            Map<String, Long> temps = chargerMeilleursTemps(nomJoueur);
+            if (temps.containsKey(idNiveau)) {
+                classement.add(new java.util.AbstractMap.SimpleEntry<>(nomJoueur, temps.get(idNiveau)));
+            }
+        }
+        classement.sort(Map.Entry.comparingByValue());
+        return classement;
+    }
+
     public static List<String> listerIdsNiveaux() {
         List<String> ids = new ArrayList<>();
         InputStream is = SaveManager.class.getResourceAsStream("/niveaux/index.txt");

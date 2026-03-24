@@ -32,7 +32,6 @@ public class AideManager{
             this.aide = aide;
             return true;
         }
-
         return false;
     }
 

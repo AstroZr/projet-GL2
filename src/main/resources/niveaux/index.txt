@@ -6,3 +6,5 @@ facile4
 moyen1
 moyen2
 moyen3
+test6
+test7

@@ -53,6 +53,15 @@ public class Constants {
             public static final float RATIO_SELECTION_BUTTONS_Y = 400f / 1080f;
             public static final float RATIO_SELECTION_RETOUR_Y  = 900f / 1080f;
         }
+        public static class Connexion {
+            public static final float RATIO_LOGO_Y = 140f / 1080f;
+            public static final int ESPACEMENT_LOGO_NAME_REF = 40;
+            public static final int ESPACEMENT_NAME_TITLE_REF = 24;
+            public static final int ESPACEMENT_TITLE_BOUTONS_REF = 40;
+            public static final int ESPACEMENT_BOUTONS_REF = 16;
+            public static final int NAME_APP_REF_HEIGHT = 80;
+            public static final int TITLE_FONT_SIZE_REF = 24;
+        }
     }
 
 }

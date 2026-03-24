@@ -1,10 +1,12 @@
 package Groupe6.etats;
 
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.Color;
+import Groupe6.audio.SoundManager;
 import Groupe6.fond.Fond;
 import Groupe6.fond.FondDegrade;
 import Groupe6.game.Game;
@@ -96,5 +98,58 @@ public abstract class Etats implements MethodesEtats {
 
     /** Applique le positionnement des éléments UI pour les dimensions données. */
     protected abstract void applyLayout(int w, int h);
+
+    // ── Navigation clavier ────────────────────────────────────────────────────
+
+    /** Indice du bouton actuellement focalisé au clavier (-1 = aucun). */
+    protected int indiceFocusClavierBouton = -1;
+
+    /**
+     * Déplace le focus clavier de {@code delta} positions dans la liste des boutons.
+     * Joue le son de survol.
+     */
+    protected void deplacerFocusBouton(int delta) {
+        if (boutons == null || boutons.isEmpty()) return;
+        for (Bouton b : boutons) b.setFocusClavier(false);
+        if (indiceFocusClavierBouton < 0) {
+            indiceFocusClavierBouton = delta > 0 ? 0 : boutons.size() - 1;
+        } else {
+            indiceFocusClavierBouton = (indiceFocusClavierBouton + delta + boutons.size()) % boutons.size();
+        }
+        boutons.get(indiceFocusClavierBouton).setFocusClavier(true);
+        SoundManager.getInstance().playClick();
+    }
+
+    /**
+     * Gère les touches de navigation (↑↓←→, hjkl, Entrée/Espace).
+     * @return {@code true} si la touche a été consommée.
+     */
+    protected boolean gererNavigationClavier(KeyEvent e) {
+        int code = e.getKeyCode();
+        char c = Character.toLowerCase(e.getKeyChar());
+        if (code == KeyEvent.VK_DOWN || code == KeyEvent.VK_RIGHT || c == 'j' || c == 'l') {
+            deplacerFocusBouton(1);
+            return true;
+        }
+        if (code == KeyEvent.VK_UP || code == KeyEvent.VK_LEFT || c == 'k' || c == 'h') {
+            deplacerFocusBouton(-1);
+            return true;
+        }
+        if ((code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE)
+                && indiceFocusClavierBouton >= 0
+                && indiceFocusClavierBouton < boutons.size()) {
+            boutons.get(indiceFocusClavierBouton).appliquerAction();
+            return true;
+        }
+        return false;
+    }
+
+    /** Efface le focus clavier (appelé quand la souris reprend la main). */
+    protected void clearFocusClavier() {
+        indiceFocusClavierBouton = -1;
+        if (boutons != null) {
+            for (Bouton b : boutons) b.setFocusClavier(false);
+        }
+    }
 
 }

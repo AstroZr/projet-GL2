@@ -1,10 +1,13 @@
 package Groupe6.etats;
 
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.RenderingHints;
 import java.awt.Graphics2D;
 
@@ -14,6 +17,7 @@ import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonAide;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.view.VueGrille;
 import Groupe6.aide.AideManager;
 
@@ -32,6 +36,8 @@ public class Jeu extends Etats {
   private static final Font FONT_TIMER = new Font("Berlin Sans FB Demi", Font.BOLD, 22);
   private static final Font FONT_LABEL = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
   private static final Font FONT_BOUTON = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
+  private static final Font FONT_OVERLAY_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 20);
+  private static final Font FONT_OVERLAY_TEXTE = new Font("Berlin Sans FB Demi", Font.PLAIN, 15);
 
   private static class BoutonJeuAction extends Bouton {
     private String label;
@@ -86,6 +92,9 @@ public class Jeu extends Etats {
   private String labelTimer;
   private long startTimerMillis;
   private long baseElapsedMillis;
+  private boolean overlayAideVisible = false;
+  private String overlayAideTitre = "";
+  private String overlayAideTexte = "";
 
   public Jeu(Game game) {
     super(game);
@@ -200,6 +209,16 @@ public class Jeu extends Etats {
     return grille;
   }
 
+  public void showAideOverlay(String titre, String texte) {
+    this.overlayAideTitre = titre != null ? titre : "";
+    this.overlayAideTexte = texte != null ? texte : "";
+    this.overlayAideVisible = true;
+  }
+
+  public void hideAideOverlay() {
+    this.overlayAideVisible = false;
+  }
+
   @Override
   public void update() {
     // Mettre à jour la logique du jeu si nécessaire
@@ -278,6 +297,10 @@ public class Jeu extends Etats {
     for (Bouton b : boutons) {
       b.draw(g, getFond());
     }
+
+    if (overlayAideVisible) {
+      drawAideOverlay(g);
+    }
   }
 
   @Override
@@ -297,6 +320,10 @@ public class Jeu extends Etats {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    if (overlayAideVisible) {
+      hideAideOverlay();
+      return;
+    }
     for (Bouton b : boutons) {
       if (b.isSourisEnfonce() && isIn(e, b)) {
         b.appliquerAction();
@@ -352,14 +379,13 @@ public class Jeu extends Etats {
 
   @Override
   public void updateTexts() {
-    boolean en = game != null && game.isEnglish();
-    labelRetour = en ? "Back" : "Retour";
-    labelAide = en ? "Help" : "Aide";
-    labelUndo = en ? "Undo" : "Undo";
-    labelRedo = en ? "Redo" : "Redo";
-    labelCandidatOn = en ? "Candidate: ON" : "Candidat: ON";
-    labelCandidatOff = en ? "Candidate: OFF" : "Candidat: OFF";
-    labelTimer = en ? "Timer" : "Timer";
+    labelRetour = LangManager.get("common.retour");
+    labelAide = LangManager.get("jeu.aide");
+    labelUndo = LangManager.get("jeu.undo");
+    labelRedo = LangManager.get("jeu.redo");
+    labelCandidatOn = LangManager.get("jeu.candidat.on");
+    labelCandidatOff = LangManager.get("jeu.candidat.off");
+    labelTimer = LangManager.get("jeu.timer");
 
     if (boutons == null || boutons.isEmpty()) {
       return;
@@ -376,10 +402,6 @@ public class Jeu extends Etats {
     if (boutonRedo != null) {
       boutonRedo.setLabel(labelRedo);
     }
-    if (boutonModeCandidat != null) {
-      updateLabelModeCandidat();
-    }
-
     updateLabelModeCandidat();
   }
 
@@ -423,6 +445,88 @@ public class Jeu extends Etats {
       boutonsNumeriques.add(btn);
       boutons.add(btn);
     }
+  }
+
+  private void drawAideOverlay(Graphics g) {
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+    int w = Constants.game_width;
+    int h = Constants.game_height;
+
+    // Fond semi-transparent
+    g2d.setColor(new Color(0, 0, 0, 160));
+    g2d.fillRect(0, 0, w, h);
+
+    // Boîte centrale
+    int boxW = Math.min(480, w - 80);
+    int boxH = 220;
+    int boxX = (w - boxW) / 2;
+    int boxY = (h - boxH) / 2;
+
+    g2d.setColor(getFond().getCouleurFondBouton());
+    g2d.fillRoundRect(boxX, boxY, boxW, boxH, 20, 20);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(boxX, boxY, boxW, boxH, 20, 20);
+
+    // Titre
+    g2d.setColor(getFond().getCouleurTexte());
+    g2d.setFont(FONT_OVERLAY_TITRE);
+    FontMetrics fmTitre = g2d.getFontMetrics();
+    int titreX = boxX + (boxW - fmTitre.stringWidth(overlayAideTitre)) / 2;
+    g2d.drawString(overlayAideTitre, titreX, boxY + 42);
+
+    // Séparateur
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawLine(boxX + 20, boxY + 55, boxX + boxW - 20, boxY + 55);
+
+    // Texte (multi-lignes)
+    g2d.setColor(getFond().getCouleurTexte());
+    g2d.setFont(FONT_OVERLAY_TEXTE);
+    FontMetrics fmTexte = g2d.getFontMetrics();
+    int textX = boxX + 24;
+    int textY = boxY + 80;
+    int maxWidth = boxW - 48;
+    for (String line : wrapText(overlayAideTexte, fmTexte, maxWidth)) {
+      g2d.drawString(line, textX, textY);
+      textY += fmTexte.getHeight() + 2;
+    }
+
+    // Bouton fermer
+    int btnW = 120;
+    int btnH = 36;
+    int btnX = boxX + (boxW - btnW) / 2;
+    int btnY = boxY + boxH - 52;
+    g2d.setColor(getFond().getCouleurFondCellule());
+    g2d.fillRoundRect(btnX, btnY, btnW, btnH, 10, 10);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(btnX, btnY, btnW, btnH, 10, 10);
+    g2d.setColor(getFond().getCouleurTexte());
+    g2d.setFont(FONT_LABEL);
+    FontMetrics fmBtn = g2d.getFontMetrics();
+    String labelOk = "OK";
+    g2d.drawString(labelOk, btnX + (btnW - fmBtn.stringWidth(labelOk)) / 2, btnY + (btnH + fmBtn.getAscent()) / 2 - 2);
+  }
+
+  private List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
+    List<String> lines = new ArrayList<>();
+    for (String paragraph : text.split("\n")) {
+      String[] words = paragraph.split(" ");
+      StringBuilder current = new StringBuilder();
+      for (String word : words) {
+        String candidate = current.length() == 0 ? word : current + " " + word;
+        if (fm.stringWidth(candidate) > maxWidth && current.length() > 0) {
+          lines.add(current.toString());
+          current = new StringBuilder(word);
+        } else {
+          current = new StringBuilder(candidate);
+        }
+      }
+      if (current.length() > 0) {
+        lines.add(current.toString());
+      }
+    }
+    return lines;
   }
 
   private void drawPanelDroit(Graphics g) {

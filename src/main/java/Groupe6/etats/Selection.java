@@ -12,11 +12,13 @@ import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 public class Selection extends Etats {
 
-    private static final int LARGEUR_BOUTON = 400;
+    private static final int LARGEUR_BOUTON = 280;
+    private static final int GAP_COLONNES_REF = 60;
     private static final int HAUTEUR_BOUTON = 55;
     private static final int ESPACEMENT_BOUTONS_REF = 64;
     private static final Font FONT_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 36);
@@ -63,9 +65,15 @@ public class Selection extends Etats {
         nombreNiveaux = ids.size();
         Jeu jeu = game.getJeu();
 
+        int colGap = layoutScale.scaleUniform(GAP_COLONNES_REF);
+        int leftX  = cx - colGap / 2 - bw;
+        int rightX = cx + colGap / 2;
+
         for (int i = 0; i < ids.size(); i++) {
             String id = ids.get(i);
-            boutons.add(new BoutonNiveau(cx - bw / 2, startY + i * gap, bw, bh, id, jeu));
+            int bx = (i % 2 == 0) ? leftX : rightX;
+            int by = startY + (i / 2) * gap;
+            boutons.add(new BoutonNiveau(bx, by, bw, bh, id, jeu));
         }
 
         int retourY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_RETOUR_Y);
@@ -87,10 +95,14 @@ public class Selection extends Etats {
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
         int startY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_BUTTONS_Y);
 
+        int colGap = layoutScale.scaleUniform(GAP_COLONNES_REF);
+        int leftX  = cx - colGap / 2 - bw;
+        int rightX = cx + colGap / 2;
+
         for (int i = 0; i < nombreNiveaux; i++) {
             Bouton b = boutons.get(i);
-            b.setX(cx - bw / 2);
-            b.setY(startY + i * gap);
+            b.setX((i % 2 == 0) ? leftX : rightX);
+            b.setY(startY + (i / 2) * gap);
             b.setLargeur(bw);
             b.setHauteur(bh);
         }
@@ -164,9 +176,8 @@ public class Selection extends Etats {
 
     @Override
     public void updateTexts() {
-        boolean en = game != null && game.isEnglish();
-        labelTitre = en ? "Level selection" : "Sélection du niveau";
-        labelRetour = en ? "Back" : "Retour";
+        labelTitre = LangManager.get("selection.titre");
+        labelRetour = LangManager.get("common.retour");
 
         if (boutons == null || boutons.size() <= nombreNiveaux) {
             return;
