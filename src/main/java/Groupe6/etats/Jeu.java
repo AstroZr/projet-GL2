@@ -354,6 +354,9 @@ public class Jeu extends Etats {
   public void mouseReleased(MouseEvent e) {
     if (overlayAideVisible) {
       hideAideOverlay();
+      if (victoireAnnoncee) {
+        EtatJeu.setEtatActuel(EtatJeu.SELECTION);
+      }
       return;
     }
     for (Bouton b : boutons) {
@@ -624,7 +627,7 @@ public class Jeu extends Etats {
   private void quitterNiveauVersMenu() {
     sauvegarderEtatNiveauCourant();
     pauseTimer();
-    EtatJeu.setEtatActuel(EtatJeu.MENU);
+    EtatJeu.setEtatActuel(EtatJeu.SELECTION);
   }
 
   private void verifierVictoire() {
