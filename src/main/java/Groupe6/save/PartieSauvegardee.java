@@ -25,6 +25,7 @@ public class PartieSauvegardee {
         this.matriceCellules = matriceCellules;
         this.historique = historique;
         this.tempsEcoule = tempsEcoule;
+        this.aideManager = AideManager.getInstance();
         this.nbAidesUtilisees = this.aideManager.getNBUtilisations();
     }
 
