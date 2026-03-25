@@ -13,6 +13,8 @@ public class Reste extends AideAbstract{
 
     public Reste(){
         super(1);
+        this.titre = "Technique du reste";
+        this.description = "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !";
     }
 
     @Override
@@ -68,17 +70,17 @@ public class Reste extends AideAbstract{
 
         switch (this.nbUtilisation){
             case 0:
-                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !");
+                this.aideTextuel = new AideTextuel(this.titre, this.description);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
             
             case 1:
-                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé ! Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index) + " !");
+                this.aideTextuel = new AideTextuel(this.titre, this.description + " Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index + 1) + " !");
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
             
             default:
-                this.aideTextuel = new AideTextuel("Technique du reste", "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !" + "!");
+                this.aideTextuel = new AideTextuel(this.titre, this.description + " Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index + 1) + "!");
                 if (this.isLigne){
                     for (int colonne = 0; colonne < taille; colonne++){
                         this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.index, colonne, new String()));

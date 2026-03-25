@@ -9,6 +9,8 @@ public interface Aide {
     AideTextuel getAideTextuel();
     AideVisuel getAideVisuel();
     boolean check(Grille grille);
+    String getTitre();
+    String getDescription();
 
     // Must be called after check awnser true
     int load(Grille grille, int nbAides);

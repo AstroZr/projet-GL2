@@ -5,6 +5,8 @@ public abstract class AideAbstract implements Aide{
     protected int nbUtilisation = 0;
     protected AideTextuel aideTextuel;
     protected AideVisuel aideVisuel;
+    protected String titre;
+    protected String description;
 
     public AideAbstract(int numero){
         this.numero = numero;
@@ -37,5 +39,15 @@ public abstract class AideAbstract implements Aide{
 
     public int getCost(int nbAides){
         return (nbAides - numero) * nbUtilisation;
+    }
+
+    @Override
+    public String getTitre(){
+        return this.titre;
+    }
+
+    @Override
+    public String getDescription(){
+        return this.description;
     }
 }
