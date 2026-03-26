@@ -1,0 +1,36 @@
+{
+  "id": "test",
+  "taille": 4,
+  "listeZones": [
+    {
+      "valeurCible": 5,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 0, "colonne": 0 },
+        { "ligne": 0, "colonne": 1 }
+      ]
+    },
+    {
+      "valeurCible": 2,
+      "typeOperation": "AUCUNE",
+      "listeCellules": [
+        { "ligne": 1, "colonne": 0 }
+      ]
+    },
+    {
+      "valeurCible": 7,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [
+        { "ligne": 2, "colonne": 0 },
+        { "ligne": 2, "colonne": 1 },
+        { "ligne": 2, "colonne": 2 }
+      ]
+    }
+  ],
+  "matriceCorrection": [
+    [2, 3, 4, 1],
+    [4, 1, 2, 3],
+    [3, 2, 1, 4],
+    [1, 4, 3, 2]
+  ]
+}

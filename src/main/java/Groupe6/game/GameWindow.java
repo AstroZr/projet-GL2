@@ -5,6 +5,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import Groupe6.utilz.LangManager;
 
 /**
  * Fenêtre principale (JFrame) : contient le GamePanel, gère fermeture (sauvegarde) et focus.
@@ -13,6 +14,7 @@ public class GameWindow extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private final Game game;
+    private volatile boolean dialogEnCours = false;
 
     public GameWindow(GamePanel gamePanel, Game game) {
         this.game = game;
@@ -45,10 +47,16 @@ public class GameWindow extends JFrame {
     }
 
     public void handleWindowClosing() {
+        if (dialogEnCours) return;
+        dialogEnCours = true;
+
+        String message = LangManager.get("fenetre.quitter.message");
+        String title = LangManager.get("fenetre.quitter.titre");
+
         int choice = JOptionPane.showConfirmDialog(
             this,
-            "Voulez-vous sauvegarder avant de quitter ?",
-            "Confirmation de fermeture",
+            message,
+            title,
             JOptionPane.YES_NO_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );
@@ -69,6 +77,7 @@ public class GameWindow extends JFrame {
                 break;
             case JOptionPane.CANCEL_OPTION:
             default:
+                dialogEnCours = false;
                 break;
         }
     }

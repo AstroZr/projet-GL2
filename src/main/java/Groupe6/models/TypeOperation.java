@@ -1,16 +1,26 @@
 package Groupe6.models;
 
 /**
- * Enumération des types d'opérations possibles pour une zone de calcul.
+ * Énumération des types d'opérations mathématiques possibles pour une ZoneCalcul.
+ * 
+ * Valeurs:
+ * - ADDITION (+): somme des cellules = valeurCible
+ * - SOUSTRACTION (-): première valeur (décroissante) - reste = valeurCible
+ * - MULTIPLICATION (*): produit des cellules = valeurCible
+ * - DIVISION (/): première valeur (décroissante) / reste = valeurCible
+ * - AUCUNE (""):  cas spécial, une seule cellule doit égaler la cible
+ * 
+ * Stocke aussi le symbole pour affichage dans la grille.
  */
 public enum TypeOperation {
-    ADDITION("+"),
-    SOUSTRACTION("-"),
-    MULTIPLICATION("*"),
-    DIVISION("/"),
-    AUCUNE("");
+    // ====== OPÉRATIONS MATHÉMATIQUES ======
+    ADDITION("+"),              // Somme
+    SOUSTRACTION("-"),          // Soustraction décroissante
+    MULTIPLICATION("*"),        // Produit
+    DIVISION("/"),              // Division décroissante
+    AUCUNE("");                 // Zone avec une seule cellule (pas d'opération)
 
-    private final String symbole;
+    private final String symbole;  // Symbole pour l'affichage (+, -, *, /)
 
     /**
      * Constructeur de l'opération

@@ -5,13 +5,23 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Représente une zone de calcul contenant plusieurs cellules
- * devant respecter une opération mathématique.
+ * Représente une zone de calcul contenant plusieurs cellules devant respecter une opération mathématique.
+ * 
+ * Responsabilités:
+ * - Gérer un groupe de cellules liées par une contrainte mathématique
+ * - Vérifier que l'opération est satisfaite: valeurCible = op(cell1, cell2, ...)
+ * - Support des 4 opérations: +, -, *, / avec gestion spéciale (ex: soustraction décroissante)
+ * - Accepte zones incomplètes (retourne true) ; valide seulement quand complètes
+ * 
+ * Exemple: Zone avec target=6, operation=+, cells=[2,3,1] => 2+3+1=6 ✓
  */
 public class ZoneCalcul {
-    private final List<Cellule> listeCellules; // Liste des cellules de la zone de calcul
-    private final int valeurCible; // Valeur cible de la zone de calcul
-    private final TypeOperation typeOperation; // Type d'opération de la zone de calcul
+    // ====== CELLULES ======
+    private final List<Cellule> listeCellules;  // Cellules appartenant à cette zone
+    
+    // ====== CONTRAINTE MATHÉMATIQUE ======
+    private final int valeurCible;              // Valeur que l'opération doit atteindre (target sum/product/etc)
+    private final TypeOperation typeOperation;  // Type d'opération (+, -, *, /)
 
     /**
      * Constructeur d'une zone de calcul.
@@ -62,26 +72,26 @@ public class ZoneCalcul {
 
             case SOUSTRACTION:
                 // Pour la soustraction, on fait le premier moins les autres.
-                Collections.sort(valeurs); // Tri croissant sinon on peut avoir des résultats négatifs
+                Collections.sort(valeurs, Collections.reverseOrder()); // Tri décroissant sinon on peut avoir des
+                                                                       // résultats négatifs
                 int premier = valeurs.get(0);
-                int reste = 0;
                 for (int i = 1; i < valeurs.size(); i++) {
-                    reste += valeurs.get(i);
+                    premier -= valeurs.get(i);
                 }
-                return (premier - reste) == valeurCible;
+                return (premier) == valeurCible;
 
             case MULTIPLICATION:
                 return valeurs.stream().mapToInt(Integer::intValue).reduce(1, (a, b) -> a * b) == valeurCible;
 
             case DIVISION:
                 // Pour la division, on fait le premier divisé par les autres.
-                Collections.sort(valeurs); // Tri croissant sinon on peut avoir des résultats négatifs
+                Collections.sort(valeurs, Collections.reverseOrder()); // Tri croissant sinon on peut avoir des
+                                                                       // résultats négatifs
                 int premierDiv = valeurs.get(0);
-                int diviseur = 1;
                 for (int i = 1; i < valeurs.size(); i++) {
-                    diviseur *= valeurs.get(i);
+                    premierDiv /= valeurs.get(i);
                 }
-                return (premierDiv / diviseur) == valeurCible;
+                return (premierDiv) == valeurCible;
 
             case AUCUNE:
                 // Cas d'une seule case avec le chiffre donné
@@ -118,4 +128,57 @@ public class ZoneCalcul {
     public TypeOperation getTypeOperation() {
         return typeOperation;
     }
+
+    /**
+     * Explore les combinaisons .
+     * 
+     * @param index     L index de la cellule vide que l on traite actuellement
+     * @param max       Valeur maximale
+     * @param resultats Liste accumulant le combinaison valides trouve
+     */
+    private void rechercherRecursive(List<Cellule> vides, int index, int max, List<List<Integer>> resultats) {
+        // Cas de base : toutes les cellules vides ont une valeur de test
+        if (index == vides.size()) {
+            if (verifierMaths()) {
+                List<Integer> combinaison = new ArrayList<>();
+                for (Cellule c : vides) {
+                    combinaison.add(c.getValeur());
+                }
+                resultats.add(combinaison);
+            }
+            return;
+        }
+
+        Cellule celluleCourante = vides.get(index);
+
+        for (int i = 1; i <= max; i++) {
+            // On simule le remplissage
+            celluleCourante.setValeur(i);
+
+            // appel recursif pour la cellule suivante
+            rechercherRecursive(vides, index + 1, max, resultats);
+
+            // On vide la cellule
+            celluleCourante.setValeur(0);
+        }
+    }
+
+    /**
+     * trouver les Combinaisons de touche
+     * 
+     * @param max Valeur maximale
+     */
+    public List<List<Integer>> trouverCombinaisons(int max) {
+        List<Cellule> vides = new ArrayList<>();
+        for (Cellule c : listeCellules) {
+            if (c.estVide()) {
+                vides.add(c);
+            }
+        }
+
+        List<List<Integer>> resultats = new ArrayList<>();
+        rechercherRecursive(vides, 0, max, resultats);
+        return resultats;
+    }
+
 }

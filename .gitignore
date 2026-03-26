@@ -1,7 +1,15 @@
 *.class
 target/
+saveGame/
 Semantique.md
 .settings/
 .classpath
 .project
 .bin/
+.settings/
+.classpath
+.claude/
+CLAUDE.md
+saveGame/
+.m2/
+bin/

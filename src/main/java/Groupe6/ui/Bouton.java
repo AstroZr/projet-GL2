@@ -5,27 +5,45 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+import Groupe6.audio.SoundManager;
+import Groupe6.fond.Fond;
+
 /**
- * Base abstraite pour les boutons UI : position, zone de clic, image(s), survol/enfoncement.
- * Les sous-classes implémentent appliquerAction() et peuvent surcharger draw() et chargerImages().
+ * Base abstraite pour les boutons UI : position, zone de clic, images, survol/enfoncement.
+ * 
+ * Responsabilités:
+ * - Gérer la positionning et la zone de délimitation du bouton
+ * - Détecter survolage souris et état enfoncé
+ * - Render du bouton avec arrondi et bordure
+ * - Support du focus clavier (pour accessibilité)
+ * - Callback abstrait appliquerAction() pour chaque sous-classe
+ * 
+ * Sous-classes: BoutonChangeurEtat, BoutonAide, BoutonCreation, BoutonParametre, BoutonConnexion, etc.
  */
 public abstract class Bouton {
-    protected int x;
-    protected int y;
-    protected int largeur;
-    protected int hauteur;
-    protected Rectangle delimitation;
-    protected BufferedImage[] img;
-    protected boolean sourisSurvol;
-    protected boolean sourisEnfonce;
-
-    int arc = 15; // 15px de rayon
-    private RoundRectangle2D rect;
-    private Color[] backgroundColor;
+    // ====== POSITIONNEMENT ======
+    protected int x;               // Coordonnée X (pixels)
+    protected int y;               // Coordonnée Y (pixels)
+    protected int largeur;         // Largeur du bouton (pixels)
+    protected int hauteur;         // Hauteur du bouton (pixels)
+    protected Rectangle delimitation;  // Zone de clic (Rectangle de hit-test)
+    
+    // ====== APPARENCE ======
+    protected BufferedImage[] img;  // Images du bouton (états différents)
+    protected boolean sourisSurvol; // true si souris passe sur le bouton
+    protected boolean sourisEnfonce; // true si bouton actuellement enfoncé
+    
+    // ====== AFFICHAGE ARRONDI ======
+    int arc = 15;  // Rayon d'arrondi des coins (15px)
+    private RoundRectangle2D rect;  // Forme avec coins arrondis pour affichage
+    private static final BasicStroke STROKE_BORDURE = new BasicStroke(2);  // Bordure normal
+    private static final BasicStroke STROKE_FOCUS = new BasicStroke(3);   // Bordure focus clavier
+    
+    // ====== CLAVIER ======
+    private boolean focusClavier = false;  // true si bouton a le focus clavier
 
     public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;
@@ -33,10 +51,6 @@ public abstract class Bouton {
         this.largeur = largeur;
         this.hauteur = hauteur;
         creationDelimitation();
-        backgroundColor = new Color[3]; // 3 états : 0 normal, 1 hover, 2 clicked
-        backgroundColor[0] = new Color(200, 200, 200, 180);
-        backgroundColor[1] = new Color(220,220,220, 180);
-        backgroundColor[2] = new Color(240,240,240,180);
     }
 
     private void creationDelimitation() {
@@ -52,9 +66,9 @@ public abstract class Bouton {
     /** Action exécutée au clic ; à implémenter par les sous-classes. */
     public abstract void appliquerAction();
 
-    /** Dessine le bouton (image si disponible, sinon rectangle gris avec bordure). */
-    public void draw(Graphics g) { 
-        drawBackground(g);
+    /** Dessine le bouton (rectangle arrondi coloré selon le thème). */
+    public void draw(Graphics g, Fond fond) {
+        drawBackground(g, fond);
     }
 
     /** Retourne la zone de délimitation du bouton. */
@@ -116,8 +130,11 @@ public abstract class Bouton {
         return sourisEnfonce;
     }
 
-    /** Définit l'état d'enfoncement du bouton. */
+    /** Définit l'état d'enfoncement ; joue le son de clic sur le front montant. */
     public void setSourisEnfonce(boolean sourisEnfonce) {
+        if (sourisEnfonce && !this.sourisEnfonce) {
+            SoundManager.getInstance().playClick();
+        }
         this.sourisEnfonce = sourisEnfonce;
     }
 
@@ -126,17 +143,32 @@ public abstract class Bouton {
         return sourisSurvol;
     }
 
-    /** Définit l'état de survol du bouton. */
+    /** Définit l'état de survol ; joue le son de survol sur le front montant. */
     public void setSourisSurvol(boolean sourisSurvol) {
+        if (sourisSurvol && !this.sourisSurvol) {
+            SoundManager.getInstance().playClick();
+        }
         this.sourisSurvol = sourisSurvol;
     }
-    private void drawBackground(Graphics g) {
-      Graphics2D g2d = (Graphics2D) g;
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g2d.setColor(backgroundColor[sourisSurvol ? (sourisEnfonce ? 2 : 1) : 0]);
-      g2d.fill(rect);
-      g2d.setColor(Color.GRAY);
-      g2d.setStroke(new BasicStroke(2));
-      g2d.draw(rect);
+
+    public boolean isFocusClavier() { return focusClavier; }
+
+    public void setFocusClavier(boolean focusClavier) {
+        this.focusClavier = focusClavier;
+    }
+    private void drawBackground(Graphics g, Fond fond) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Color bg;
+        if (sourisSurvol || focusClavier) {
+            bg = sourisEnfonce ? fond.getCouleurFondBoutonClic() : fond.getCouleurFondBoutonSurvol();
+        } else {
+            bg = fond.getCouleurFondBouton();
+        }
+        g2d.setColor(bg);
+        g2d.fill(rect);
+        g2d.setColor(fond.getCouleurBordreBouton());
+        g2d.setStroke(focusClavier ? STROKE_FOCUS : STROKE_BORDURE);
+        g2d.draw(rect);
     }
 }

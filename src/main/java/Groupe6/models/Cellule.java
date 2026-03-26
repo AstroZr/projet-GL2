@@ -1,14 +1,41 @@
 package Groupe6.models;
 
+import java.util.List;
+
+/**
+ * Représente une cellule unique de la grille CalcuDoku.
+ * 
+ * Responsabilités:
+ * - Stocker la valeur (0 = vide, 1 à N = valeur entrée)
+ * - Gérer les candidats (petits chiffres "hints")
+ * - Mémoriser l'état de validité (pas de doublon, contrainte zone OK)
+ * - Indiquer si la cellule est sélectionnée ou modifiable
+ * - Lien bidirectionnel avec sa ZoneCalcul
+ * 
+ * Immutable: ligne et colonne ne changent jamais (référence géographique fixe)
+ * Transient: estSelectionnee et zoneCalcul ne sont pas sérialisées en JSON
+ */
 public class Cellule {
-    private final int ligne; // ligne de la cellule
-    private final int colonne; // colonne de la cellule
-    private int valeur; // valeur de la cellule
-    private boolean estModifiable; // si on est en mode candidat
-    private boolean estSelectionnee; // si la cellule est selectionnee
-    private boolean estValide; // si la cellule est valide
-    private boolean estErreur; // si la cellule est en erreur
-    private ZoneCalcul zoneCalcul; // zone de calcul de la cellule
+    // ====== POSITIONNEMENT (Immuable) ======
+    private final int ligne;           // Index de ligne (0-based, ne change jamais)
+    private final int colonne;         // Index de colonne (0-based, ne change jamais)
+    
+    // ====== VALEUR ======
+    private int valeur;                // Valeur saisie (0 = vide, 1 à N = numéro) (0 indique une cellule vide)
+    private List<Integer> listeCandidat = new java.util.ArrayList<>();  // Petits chiffres "candidats" affichés en mode hint
+    
+    // ====== MODIFIABILITÉ ======
+    private boolean estModifiable;     // Si la cellule peut être modifiée (false pour les pré-remplies)
+    
+    // ====== ÉTAT DE SÉLECTION (Transient = non sérialisé) ======
+    private transient boolean estSelectionnee;  // True si cette cellule est actuellement sélectionnée par le joueur
+    
+    // ====== VALIDITÉ ======
+    private boolean estValide;         // False si contrainte mathématique échouée quand zone complète
+    private boolean estErreur;         // False si doublon détecté (même valeur dans la ligne/colonne)
+    
+    // ====== ZONE ASSOCIÉE (Transient = non sérialisé) ======
+    private transient ZoneCalcul zoneCalcul;  // Référence à la ZoneCalcul parente (pour validation rapide)
 
     /**
      * Constructeur d'une cellule.
@@ -160,5 +187,14 @@ public class Cellule {
      */
     public void setZoneCalcul(ZoneCalcul zoneCalcul) {
         this.zoneCalcul = zoneCalcul;
+    }
+
+    /**
+     * guetteur pour une liste de candidat
+     * 
+     * @return la liste de candidat d une cellule 
+     */
+    public List<Integer> getListeCandidat() {
+        return listeCandidat;
     }
 }

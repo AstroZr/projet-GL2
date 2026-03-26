@@ -7,44 +7,70 @@ import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 import Groupe6.game.Game;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
-
 import Groupe6.utilz.Constants;
 import Groupe6.utilz.HelpMethods;
+import Groupe6.utilz.LangManager;
+import Groupe6.utilz.LayoutScale;
 
 /**
- * État d'écran de démarrage : fond en dégradé, logo animé, titre, boutons Création / Connexion.
- *
- * @author Lounol72
- * @version 1.0
- * @since 2026-01-28
+ * État « SPLASH/DÉMARRAGE » : première écran vue (animation logo, sélection joueur).
+ * 
+ * Affichage:
+ * - Fond en dégradé animé
+ * - Logo CalcuDoku (float haut/bas sinusoïdalement)
+ * - Image du titre "MathDoku" / "CalcuDoku"
+ * - Formulaire joueur ou 2 boutons (Créer/Connexion) selon profils existants
+ * 
+ * Animation du logo:
+ * - Float: sinuso amplitude 6% sur période 2.2s
+ * - Lerp: scale de 1.0 à valeur courante sur ~0.25s (smooth in)
+ * 
+ * Flux:
+ * - Si des profils existent: affiche boutons Créer/Connexion
+ * - Si pas de profils: affiche formulaire créer joueur
+ * 
+ * Héritage: Etats
  */
-public class Start extends Etats implements MethodesEtats {
+public class Start extends Etats {
 
-    private static final int LARGEUR_BOUTON = 250;
-    private static final int HAUTEUR_BOUTON = 55;
-    private static final int LOGO_DEFAULT_SIZE = 320;
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int LARGEUR_BOUTON = 250;               // Largeur boutons Créer/Connexion
+    private static final int HAUTEUR_BOUTON = 55;               // Hauteur boutons
+    private static final int LOGO_DEFAULT_SIZE = 320;            // Taille logo par défaut
 
-    private int logoX;
-    private int logoY;
-    private int logoSize;
-    private BufferedImage logo;
+    // ====== ANIMATION LOGO ======
+    private int logoX;                                            // Position X du logo
+    private int logoY;                                            // Position Y du logo (base)
+    private int logoSize;                                         // Taille du logo (pixels)
+    private BufferedImage logo;                                   // Image du logo
+    
+    private static final float LOGO_FLOAT_AMPLITUDE = 0.06f;      // Amplitude float (6% de Y)
+    private static final float LOGO_FLOAT_PERIOD_SEC = 2.2f;      // Période sinuso (2.2 sec)
+    private static final float LOGO_DISPLAY_LERP = 0.25f;         // Durée lerp affichage (0.25 sec)
+    private final long logoAnimStartNanos = System.nanoTime();    // Timestamp démarrage
+    private float logoFloatScale = 1f;                            // Scale current (1.0 = normal)
+    private float displayedLogoScale = 1f;                        // Scale affiché (lerped)
 
-    private static final float LOGO_FLOAT_AMPLITUDE = 0.06f;
-    private static final float LOGO_FLOAT_PERIOD_SEC = 2.2f;
-    private static final float LOGO_DISPLAY_LERP = 0.25f;
-    private final long logoAnimStartNanos = System.nanoTime();
-    private float logoFloatScale = 1f;
-    private float displayedLogoScale = 1f;
+    // ====== IMAGE TITRE ======
+    private BufferedImage nameAppImage;   // Image du nom du jeu
+    private int nameAppX;                 // Position X du titre
+    private int nameAppY;                 // Position Y du titre
+    private int nameAppWidth;             // Largeur titre
+    private int nameAppHeight;            // Hauteur titre
 
-    private BufferedImage nameAppImage;
-    private int nameAppX;
-    private int nameAppY;
-    private int nameAppWidth;
-    private int nameAppHeight;
-
-    private FondDegrade fondDegrade;
+    // ====== SCALING & LAYOUT ======
+    private LayoutScale layoutScale;      // Responsable du redimensionnement responsive
+    
+    // ====== TEXTES LOCALISÉS ======
+    private String labelCreation;         // "Créer joueur"
+    private String labelConnexion;        // "Se connecter"
+    
+    // ====== ÉTAT ======
+    private boolean synchroniseDepuisEntree = false;  // Flag pour sync au premier draw
+    private boolean hasProfiles = false;              // True si des profils existent
 
     public Start(Game game) {
         super(game);
@@ -52,24 +78,26 @@ public class Start extends Etats implements MethodesEtats {
     }
 
     private void initClasses() {
+        layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
-        fondDegrade = FondDegrade.getInstance();
+        updateTexts();
         logo = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "Logo_Rect.png");
         nameAppImage = HelpMethods.getSpriteAtlas(HelpMethods.LOGO + "NameApp.png");
+    }
 
-        int cx = (int) (Constants.game_width * Constants.Ratios.RATIO_CENTER_X);
-        int cy = (int) (Constants.game_height * Constants.Ratios.Start.RATIO_START_FORM_Y);
-        int gap = (int) (Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF * ((float) Constants.game_width / Constants.REF_WIDTH));
-        int bw = LARGEUR_BOUTON;
-        int bh = HAUTEUR_BOUTON;
-
-        boutons.add(new BoutonChangeurEtat(cx - gap - bw, cy, bw, bh, EtatJeu.CREATION, "Creation"));
-        boutons.add(new BoutonChangeurEtat(cx + gap, cy, bw, bh, EtatJeu.CONNEXION, "Connexion"));
+    private void rechargerProfils() {
+        boolean ancien = hasProfiles;
+        hasProfiles = !SaveManager.listerJoueurs().isEmpty();
+        if (hasProfiles != ancien) lastLayoutWidth = -1; // force recalcul layout
     }
 
     @Override
     public void update() {
-        fondDegrade.update();
+        if (!synchroniseDepuisEntree) {
+            rechargerProfils();
+            synchroniseDepuisEntree = true;
+        }
+        getFond().update();
         logoFloatScale = computeLogoFloatScale();
     }
 
@@ -80,52 +108,44 @@ public class Start extends Etats implements MethodesEtats {
         return 1f + LOGO_FLOAT_AMPLITUDE * ease;
     }
 
-    @Override
-    public void updateLayout(int gameWidth, int gameHeight) {
-        applyLayout(gameWidth, gameHeight);
-    }
-
-    /** Bloc logo → titre → boutons, centré, espacements et scaling depuis Constants.Ratios.Start. */
+    /** Bloc logo → nom app → boutons, centré. Boutons conditionnels selon présence de profils. */
     @Override
     protected void applyLayout(int w, int h) {
-        float scaleX = (float) w / Constants.REF_WIDTH;
-        float scaleY = (float) h / Constants.REF_HEIGHT;
-        float scale = Math.min(scaleX, scaleY);
-        int cx = (int) (w * Constants.Ratios.RATIO_CENTER_X);
+        layoutScale.update(w, h);
+        int cx = layoutScale.centerX();
 
-        logoSize = (int) (LOGO_DEFAULT_SIZE * scale);
+        logoSize = layoutScale.scaleUniform(LOGO_DEFAULT_SIZE);
         logoX = cx - logoSize / 2;
-        logoY = (int) (h * Constants.Ratios.Start.RATIO_LOGO_Y);
+        logoY = layoutScale.ratioY(Constants.Ratios.Start.RATIO_LOGO_Y);
 
-        int gapLogoName = (int) (Constants.Ratios.Start.ESPACEMENT_LOGO_NAME_REF * scale);
-        nameAppHeight = (int) (Constants.Ratios.Start.NAME_APP_REF_HEIGHT * scale);
-        nameAppWidth = (nameAppImage.getHeight() > 0)
+        int gapLogoName = layoutScale.scaleUniform(Constants.Ratios.Start.ESPACEMENT_LOGO_NAME_REF);
+        nameAppHeight = layoutScale.scaleUniform(Constants.Ratios.Start.NAME_APP_REF_HEIGHT);
+        nameAppWidth = (nameAppImage != null && nameAppImage.getHeight() > 0)
                 ? nameAppHeight * nameAppImage.getWidth() / nameAppImage.getHeight()
                 : nameAppHeight;
         nameAppX = cx - nameAppWidth / 2;
         nameAppY = logoY + logoSize + gapLogoName;
 
-        int gapNameButtons = (int) (Constants.Ratios.Start.ESPACEMENT_NAME_BOUTONS_REF * scale);
+        int gapNameButtons = layoutScale.scaleUniform(Constants.Ratios.Start.ESPACEMENT_NAME_BOUTONS_REF);
         int buttonY = nameAppY + nameAppHeight + gapNameButtons;
-        int gap = (int) (Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF * scaleX);
-        int bw = (int) (LARGEUR_BOUTON * scaleX);
-        int bh = (int) (HAUTEUR_BOUTON * scaleY);
+        int gap = layoutScale.scaleX(Constants.Ratios.Start.ESPACEMENT_BOUTONS_REF);
+        int bw = layoutScale.scaleX(LARGEUR_BOUTON);
+        int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
 
-        boutons.get(0).setX(cx - gap - bw);
-        boutons.get(0).setY(buttonY);
-        boutons.get(0).setLargeur(bw);
-        boutons.get(0).setHauteur(bh);
-        boutons.get(1).setX(cx + gap);
-        boutons.get(1).setY(buttonY);
-        boutons.get(1).setLargeur(bw);
-        boutons.get(1).setHauteur(bh);
+        boutons.clear();
+        if (hasProfiles) {
+            boutons.add(new BoutonChangeurEtat(cx - gap - bw, buttonY, bw, bh, EtatJeu.CREATION, labelCreation));
+            boutons.add(new BoutonChangeurEtat(cx + gap, buttonY, bw, bh, EtatJeu.CONNEXION, labelConnexion));
+        } else {
+            boutons.add(new BoutonChangeurEtat(cx - bw / 2, buttonY, bw, bh, EtatJeu.CREATION, labelCreation));
+        }
     }
 
     /** Dessine le fond animé, le logo et tous les boutons de l'écran de démarrage. */
     @Override
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
-        fondDegrade.draw(g);
+        getFond().draw(g);
 
         displayedLogoScale += (logoFloatScale - displayedLogoScale) * LOGO_DISPLAY_LERP;
         int drawSize = (int) (logoSize * displayedLogoScale);
@@ -133,7 +153,7 @@ public class Start extends Etats implements MethodesEtats {
         g.drawImage(logo, logoX + offset, logoY + offset, drawSize, drawSize, null);
         g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
         for (Bouton b : boutons) {
-            b.draw(g);
+            b.draw(g, getFond());
         }
         // super.drawGrid(g);
     }
@@ -192,16 +212,21 @@ public class Start extends Etats implements MethodesEtats {
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
             if (b.isSourisEnfonce() && isIn(e, b)) {
+                synchroniseDepuisEntree = false; // prêt pour la prochaine entrée
                 b.appliquerAction();
             }
             b.setSourisEnfonce(false);
         }
     }
 
-    /** Aucune mise à jour de texte dynamique pour cet écran. */
     @Override
     public void updateTexts() {
-        // Optionnel : mise à jour de libellés dynamiques
+        labelCreation = LangManager.get("start.creation");
+        labelConnexion = LangManager.get("start.connexion");
+
+        if (boutons == null || boutons.isEmpty()) return;
+        ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelCreation);
+        if (boutons.size() >= 2) ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelConnexion);
     }
 
 

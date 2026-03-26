@@ -6,22 +6,47 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
+import Groupe6.fond.Fond;
+import Groupe6.utilz.FontCache;
+
 /**
- * Champ de saisie texte : zone rectangulaire, focus, placeholder, limite de caractères.
- * update() prépare les couleurs/texte ; draw() affiche ; handleKeyTyped() gère la saisie.
+ * Champ de saisie texte (input field) pour formulaires.
+ * 
+ * Caractéristiques:
+ * - Zone rectangulaire avec bordure
+ * - Focus clavier avec couleur d'accent
+ * - Placeholder (texte vide par défaut)
+ * - Limite de caractères configurable
+ * - Support complet couleurs thème (fond, texte, bordure, placeholder)
+ * - Cursor: barre verticale animée
+ * 
+ * Flux:
+ * 1. Clic souris: focusPris = true
+ * 2. Clavier: appel handleKeyTyped(char) pour ajout/suppression
+ * 3. update(fond): met à jour couleurs selon thème
+ * 4. draw(g, fond): affichage final
+ * 
+ * Utilisé dans: Creation (pseudo), Connexion (optionnel), etc.
  */
 public class TextInput {
 
-    private final Rectangle bounds;
-    private final StringBuilder text;
-    private final String placeholder;
-    private final int maxLength;
-    private boolean focused;
+    // ====== FONT ======
+    private static final Font FONT_INPUT = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 18);
+    
+    // ====== GÉOMÉTRIE ======
+    private final Rectangle bounds;     // Zone du champ (x, y, width, height)
+    
+    // ====== CONTENU ======
+    private final StringBuilder text;   // Texte saisi (mutable pour efficacité)
+    private String placeholder;         // Texte affiché quand champ vide
+    private final int maxLength;        // Longueur max (0 = illimité)
+    private boolean focused;            // True si clavier attentif à ce champ
    
-    /** Valeurs précalculées par update() pour draw() */
-    private Color borderColor;
-    private Color textColor;
-    private String displayText;
+    // ====== RENDU (mis à jour par update) ======
+    /** Couleurs et texte précalculés par update() pour draw() */
+    private Color borderColor;          // Couleur bordure (accent si focus)
+    private Color textColor;            // Couleur texte (placeholder ou normal)
+    private String displayText;         // Texte affiché (texte ou placeholder)
 
     /**
      * @param x          Position X (pixels)
@@ -42,21 +67,21 @@ public class TextInput {
         this.displayText = this.placeholder;
     }
 
-    /** Met à jour les valeurs affichées (couleurs, texte) ; à appeler par l’état avant draw. */
-    public void update() {
-        borderColor = focused ? Color.BLUE : Color.WHITE;
+    /** Met à jour les valeurs affichées (couleurs, texte) selon le thème actif. */
+    public void update(Fond fond) {
+        borderColor = focused ? fond.getCouleurAccent() : fond.getCouleurBordreBouton();
         displayText = text.length() > 0 ? text.toString() : placeholder;
-        textColor = text.length() == 0 ? Color.GRAY : Color.BLACK;
+        textColor = text.length() == 0 ? fond.getCouleurPlaceholder() : fond.getCouleurTexte();
     }
 
-    /** Dessine le champ à partir des valeurs précalculées par update(). */
-    public void draw(Graphics g) {
-        g.setColor(focused ? Color.WHITE : Color.GRAY);
+    /** Dessine le champ à partir des valeurs précalculées par update(Fond). */
+    public void draw(Graphics g, Fond fond) {
+        g.setColor(focused ? fond.getCouleurFondInputFocus() : fond.getCouleurFondInput());
         g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         g.setColor(borderColor);
         g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 18));
-        g.setColor(focused ? textColor : Color.WHITE);
+        g.setFont(FONT_INPUT);
+        g.setColor(textColor);
         int fy = bounds.y + (bounds.height + g.getFontMetrics().getAscent()) / 2 - 2;
         g.drawString(displayText, bounds.x + 8, fy);
     }
@@ -116,6 +141,10 @@ public class TextInput {
             int len = Math.min(s.length(), maxLength);
             text.append(s, 0, len);
         }
+    }
+
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder != null ? placeholder : "";
     }
 
     /** Retourne la zone de délimitation du champ. */
