@@ -6,6 +6,7 @@ import Groupe6.aide.AideVisuel;
 import Groupe6.aide.EffetVisuel;
 import Groupe6.aide.TypeEffect;
 import Groupe6.models.Grille;
+import Groupe6.utilz.LangManager;
 
 public class Reste extends AideAbstract{
     private boolean isLigne; // if false, isLigne est une colonne
@@ -13,8 +14,12 @@ public class Reste extends AideAbstract{
 
     public Reste(){
         super(1);
-        this.titre = "Technique du reste";
-        this.description = "Lorsqu'il ne reste qu'une case de libre dans une ligne ou colonne, cette case peut facilement être trouvé !";
+        refreshTexts();
+    }
+
+    private void refreshTexts() {
+        this.titre = LangManager.get("aide.reste.titre");
+        this.description = LangManager.get("aide.reste.description");
     }
 
     @Override
@@ -64,6 +69,7 @@ public class Reste extends AideAbstract{
 
     @Override
     public int load(Grille grille, int nbAides){
+        refreshTexts();
         int taille = grille.getTaille(); // par sécurité
 
         this.aideVisuel = new AideVisuel();
@@ -75,12 +81,12 @@ public class Reste extends AideAbstract{
                 return this.getCost(nbAides);
             
             case 1:
-                this.aideTextuel = new AideTextuel(this.titre, this.description + " Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index + 1) + " !");
+                this.aideTextuel = new AideTextuel(this.titre, this.description + " " + LangManager.get("aide.reste.position") + " " + LangManager.get(this.isLigne ? "aide.reste.ligne" : "aide.reste.colonne") + " " + LangManager.get("aide.reste.numero") + " " + String.valueOf(this.index + 1) + " !");
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
             
             default:
-                this.aideTextuel = new AideTextuel(this.titre, this.description + " Ici la " + ((this.isLigne) ? "ligne" : "colonne") + " est la numéro : " + String.valueOf(this.index + 1) + "!");
+                this.aideTextuel = new AideTextuel(this.titre, this.description + " " + LangManager.get("aide.reste.position") + " " + LangManager.get(this.isLigne ? "aide.reste.ligne" : "aide.reste.colonne") + " " + LangManager.get("aide.reste.numero") + " " + String.valueOf(this.index + 1) + "!");
                 if (this.isLigne){
                     for (int colonne = 0; colonne < taille; colonne++){
                         this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.index, colonne, new String()));

@@ -14,6 +14,7 @@ import Groupe6.aide.TypeEffect;
 import Groupe6.etats.Jeu;
 import Groupe6.fond.Fond;
 import Groupe6.utilz.FontCache;
+import Groupe6.utilz.LangManager;
 import Groupe6.models.Grille;
 
 /**
@@ -60,7 +61,7 @@ public class BoutonAide extends Bouton {
 
         boolean aideTrouvee = aideManager.call(grille);
         if (!aideTrouvee) {
-            jeu.showAideOverlay("Aide", "Aucune aide disponible pour l'instant.");
+            jeu.showAideOverlay(LangManager.get("aide.overlay.titre"), LangManager.get("aide.overlay.aucune"));
             return;
         }
 
