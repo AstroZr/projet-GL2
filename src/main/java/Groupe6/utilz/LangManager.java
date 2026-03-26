@@ -9,17 +9,30 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**
- * Gestionnaire de langue : charge les fichiers {@code langue_XX.properties}
- * depuis le classpath et expose {@link #get(String)} pour récupérer une chaîne traduite.
- * <p>
- * Utilisation : {@code LangManager.get("menu.jouer")}
+ * Gestionnaire centralisé de la localisation (i18n) du jeu.
+ * 
+ * Utilise ResourceBundle avec fichiers .properties pour charger les textes traduits.
+ * Format: langue_XX.properties (ex: langue_fr.properties, langue_en.properties)
+ * 
+ * Clés exemple: menu.jouer, menu.quitter, grille.victoire, parametres.volume, etc.
+ * 
+ * Fonctionnement:
+ * - Charge le bundle en fonction de la langue courante
+ * - Fallback automatique vers le français si clé manquante
+ * - UTF-8 support complet via Utf8Control personnalisé
+ * 
+ * Utilisation:
+ *   LangManager.setLangue("en");          // Basculer en anglais
+ *   String titre = LangManager.get("menu.jouer");  // Charger une chaîne
  */
 public final class LangManager {
 
-    private static String langueCode = "fr";
-    private static ResourceBundle bundle = null;
+    // ====== ÉTAT GLOBAL ======
+    private static String langueCode = "fr";       // Langue courante ("fr", "en", etc.)
+    private static ResourceBundle bundle = null;   // Bundle des chaînes traduits (null force rechargement)
 
-    private LangManager() {}
+    // ====== SINGLETON (privates) ======
+    private LangManager() {}  // Constructeur privé (classe statique uniquement)
 
     /** Définit la langue active et recharge le bundle. */
     public static void setLangue(String code) {

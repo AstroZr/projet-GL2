@@ -12,22 +12,48 @@ import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.FontCache;
 import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
+/**
+ * État « SELECTION DE NIVEAU » : affiche les niveaux disponibles sous forme de grille de boutons.
+ * 
+ * Layout:
+ * - Titre: "Sélectionner un niveau"
+ * - Grille de boutons (par défaut: 3 colonnes × N lignes)
+ * - Chaque bouton est un BoutonNiveau custom (chargé de lancer Jeu avec ce niveau)
+ * - Bouton RETOUR en bas pour revenir au Menu
+ * 
+ * Interaction:
+ * - Clic sur BoutonNiveau("facile1") → Jeu.chargerNiveau("facile1") → EtatJeu.GRILLE
+ * - Les niveaux sont lus depuis SaveManager.chargerLesNiveaux()
+ * 
+ * Responsivité:
+ * - Calcule positions boutons selon game_width/game_height (padding, gap, center)
+ * - Réadjuste à chaque resize via updateLayout
+ * 
+ * Héritage: Etats
+ */
 public class Selection extends Etats {
 
-    private static final int LARGEUR_BOUTON = 280;
-    private static final int GAP_COLONNES_REF = 60;
-    private static final int HAUTEUR_BOUTON = 55;
-    private static final int ESPACEMENT_BOUTONS_REF = 64;
-    private static final Font FONT_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 36);
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int LARGEUR_BOUTON = 280;          // Largeur boutons niveaux
+    private static final int GAP_COLONNES_REF = 60;          // Espacement horizontal entre colonnes
+    private static final int HAUTEUR_BOUTON = 55;           // Hauteur boutons
+    private static final int ESPACEMENT_BOUTONS_REF = 64;    // Espacement vertical
+    
+    // ====== AFFICHAGE ======
+    private static final Font FONT_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 36);  // Titre
 
-    private LayoutScale layoutScale;
-    private int nombreNiveaux;
-    private int titreTy;
-    private String labelTitre;
-    private String labelRetour;
+    // ====== SCALING & LAYOUT ======
+    private LayoutScale layoutScale;  // Responsable du redimensionnement
+    private int nombreNiveaux;        // Nombre de niveaux chargés
+    private int titreTy;              // Position Y du titre
+    
+    // ====== TEXTES LOCALISÉS ======
+    private String labelTitre;        // "Sélectionner un niveau"
+    private String labelRetour;       // "Retour"
 
     private static class BoutonNiveau extends BoutonChangeurEtat {
         private final Jeu jeu;

@@ -12,24 +12,38 @@ import Groupe6.audio.SoundManager;
 import Groupe6.fond.Fond;
 
 /**
- * Base abstraite pour les boutons UI : position, zone de clic, image(s), survol/enfoncement.
- * Les sous-classes implémentent appliquerAction() et peuvent surcharger draw() et chargerImages().
+ * Base abstraite pour les boutons UI : position, zone de clic, images, survol/enfoncement.
+ * 
+ * Responsabilités:
+ * - Gérer la positionning et la zone de délimitation du bouton
+ * - Détecter survolage souris et état enfoncé
+ * - Render du bouton avec arrondi et bordure
+ * - Support du focus clavier (pour accessibilité)
+ * - Callback abstrait appliquerAction() pour chaque sous-classe
+ * 
+ * Sous-classes: BoutonChangeurEtat, BoutonAide, BoutonCreation, BoutonParametre, BoutonConnexion, etc.
  */
 public abstract class Bouton {
-    protected int x;
-    protected int y;
-    protected int largeur;
-    protected int hauteur;
-    protected Rectangle delimitation;
-    protected BufferedImage[] img;
-    protected boolean sourisSurvol;
-    protected boolean sourisEnfonce;
-
-    int arc = 15; // 15px de rayon
-    private RoundRectangle2D rect;
-    private static final BasicStroke STROKE_BORDURE = new BasicStroke(2);
-    private static final BasicStroke STROKE_FOCUS   = new BasicStroke(3);
-    private boolean focusClavier = false;
+    // ====== POSITIONNEMENT ======
+    protected int x;               // Coordonnée X (pixels)
+    protected int y;               // Coordonnée Y (pixels)
+    protected int largeur;         // Largeur du bouton (pixels)
+    protected int hauteur;         // Hauteur du bouton (pixels)
+    protected Rectangle delimitation;  // Zone de clic (Rectangle de hit-test)
+    
+    // ====== APPARENCE ======
+    protected BufferedImage[] img;  // Images du bouton (états différents)
+    protected boolean sourisSurvol; // true si souris passe sur le bouton
+    protected boolean sourisEnfonce; // true si bouton actuellement enfoncé
+    
+    // ====== AFFICHAGE ARRONDI ======
+    int arc = 15;  // Rayon d'arrondi des coins (15px)
+    private RoundRectangle2D rect;  // Forme avec coins arrondis pour affichage
+    private static final BasicStroke STROKE_BORDURE = new BasicStroke(2);  // Bordure normal
+    private static final BasicStroke STROKE_FOCUS = new BasicStroke(3);   // Bordure focus clavier
+    
+    // ====== CLAVIER ======
+    private boolean focusClavier = false;  // true si bouton a le focus clavier
 
     public Bouton(int x, int y, int largeur, int hauteur) {
         this.x = x;

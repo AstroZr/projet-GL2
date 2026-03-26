@@ -4,67 +4,80 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 /**
- * Contrat pour tous les fonds d'écran du jeu.
- * Chaque implémentation est un singleton offrant un thème visuel distinct
- * et permettant la navigation vers les autres thèmes via clair(), fonce(), catppuccin().
+ * Interface de contrat pour tous les fonds d'écran/thèmes du jeu.
+ * 
+ * Responsabilités:
+ * - Fournir les couleurs pour chaque élément UI (grille, boutons, inputs, etc.)
+ * - Dessiner l'arrière-plan (gradient, nuages, pattern, etc.)
+ * - Gérer animations (ex: nuages qui se déplacent)
+ * - Offrir navigation entre les 3 thèmes: Clair, Foncé, Catppuccin
+ * 
+ * Singleton Pattern: Chaque thème a une instance unique (getInstance)
+ * 
+ * Implémentations:
+ * - FondClair: Thème clair (fond blanc/bleu ciel, texte foncé)
+ * - FondFonce: Thème sombre (fond gris foncé, texte clair)
+ * - FondCatppuccin: Palette Catppuccin (couleurs harmonieuses)
+ * - AbstractFondDegrade: Base avec gradient horizontale
  */
 public interface Fond {
 
-    /** Dessine le fond à l'écran. */
+    // ====== RENDU ======
+    /** Dessine le fond (gradient, nuages, pattern, etc.) à l'écran. */
     void draw(Graphics g);
 
-    /** Met à jour la logique du fond (animations, nuages, etc.). */
+    /** Met à jour la logique du fond (anim nuages, particules, etc.). */
     void update();
 
-    /** Réinitialise les positions des éléments animés. */
+    /** Réinitialise les positions des éléments animés (après changement état). */
     void reset();
 
-    /** Retourne le singleton du thème clair. */
+    // ====== NAVIGATION THÈMES ======
+    /** Retourne le singleton du thème Clair (FondClair). */
     Fond clair();
 
-    /** Retourne le singleton du thème foncé. */
+    /** Retourne le singleton du thème Foncé (FondFonce). */
     Fond fonce();
 
-    /** Retourne le singleton du thème Catppuccin. */
+    /** Retourne le singleton du thème Catppuccin (FondCatppuccin). */
     Fond catppuccin();
 
-    /** Couleur de fond des cellules de la grille. */
+    // ====== GRILLE & ZONES ======
+    /** Couleur de fond des cellules de la grille (normal, non sélectionné). */
     Color getCouleurFondCellule();
 
-    /** Couleur du texte (valeurs et étiquettes de zone). */
+    /** Couleur du texte (valeurs dans les cellules, étiquettes de zone). */
     Color getCouleurTexte();
 
-    /** Couleur des bordures épaisses délimitant les zones. */
+    /** Couleur des bordures épaisses délimitant les zones (épaisseur 5px). */
     Color getCouleurBordureZone();
 
-    /** Couleur des étiquettes de zone (valeur cible + opérateur). */
+    /** Couleur des étiquettes de zone (valeur cible + opérateur, ex: "6+"). */
     Color getCouleurEtiquetteZone();
 
-    // --- Boutons ---
-
+    // ====== BOUTONS ======
     /** Couleur de fond du bouton à l'état normal. */
     Color getCouleurFondBouton();
 
-    /** Couleur de fond du bouton au survol. */
+    /** Couleur de fond du bouton au survol souris. */
     Color getCouleurFondBoutonSurvol();
 
-    /** Couleur de fond du bouton au clic. */
+    /** Couleur de fond du bouton au clic (enfoncé). */
     Color getCouleurFondBoutonClic();
 
-    /** Couleur de la bordure du bouton. */
+    /** Couleur de la bordure du bouton (contour 2px). */
     Color getCouleurBordreBouton();
 
-    // --- TextInput ---
-
+    // ====== CHAMPS TEXTE (TextInput) ======
     /** Couleur de fond du champ texte non focalisé. */
     Color getCouleurFondInput();
 
-    /** Couleur de fond du champ texte focalisé. */
+    /** Couleur de fond du champ texte focalisé (clavier actif). */
     Color getCouleurFondInputFocus();
 
-    /** Couleur d'accent (bordure focus, éléments d'accentuation). */
+    /** Couleur d'accent (bordure focus, éléments de mise en évidence). */
     Color getCouleurAccent();
 
-    /** Couleur du texte placeholder. */
+    /** Couleur du texte placeholder (indice de saisie). */
     Color getCouleurPlaceholder();
 }

@@ -11,3 +11,5 @@ Semantique.md
 .claude/
 CLAUDE.md
 saveGame/
+.m2/
+bin/

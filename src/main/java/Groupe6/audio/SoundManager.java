@@ -12,22 +12,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Gestionnaire de sons : charge les clips WAV et les joue à la demande.
- * Singleton. Volume indépendant pour effets et musique.
+ * Gestionnaire centralisé des effets sonores du jeu.
+ * 
+ * Responsabilités:
+ * - Charger et cacher les sons WAV en mémoire (byte[])
+ * - Jouer les sons à la demande avec contrôle de volume indépendant
+ * - Gérer deux canaux: effets (clics, transitions) et musique
+ * 
+ * Singleton: Une seule instance partagée dans toute l'application.
+ * 
+ * Exemple:
+ *   SoundManager.getInstance().playClick();     // Clic bouton
+ *   SoundManager.getInstance().playTransition(); // Changement écran
  */
 public class SoundManager {
 
-    private static SoundManager instance;
+    // ====== SINGLETON ======
+    private static SoundManager instance;  // Unique instance
 
-    private static final String CLICK_PATH = "/sounds/click.wav";
-    private static final String TRANSITION_PATH = "/sounds/menu_whosh.wav";
-    private static final String MENU_BACK_PATH = "/sounds/menu_back.wav";
+    // ====== CHEMINS RESSOURCES ======
+    private static final String CLICK_PATH = "/sounds/click.wav";           // Clic bouton
+    private static final String TRANSITION_PATH = "/sounds/menu_whosh.wav";  // Transition écran
+    private static final String MENU_BACK_PATH = "/sounds/menu_back.wav";    // Retour menu
 
-    // Cache les sons en memoire pour accelerer la creation de clips concurrents.
+    // ====== CACHE SONS ======
+    /** Cache les données brutes WAV en mémoire (path -> byte[]) pour création rapide de clips. */
     private final Map<String, byte[]> soundCache = new HashMap<>();
 
-    private float volumeEffets = 0.0f;
-    private float volumeMusique = 0.0f;
+    // ====== VOLUME ======
+    private float volumeEffets = 0.0f;   // Volume des effets sonores (0.0 = muet, 1.0 = max)
+    private float volumeMusique = 0.0f;  // Volume de la musique de fond
 
     private SoundManager() {
         preloadSound(CLICK_PATH);

@@ -12,35 +12,50 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 
 /**
- * Transitions entre états : vague sinusoïdale lumineuse balayant de gauche à droite.
- * L'ancien état reste visible à droite de la vague jusqu'à sortie de l'écran.
- * Bord de vague rendu avec glow multicouche. Aucun écran noir.
+ * Gestionnaire des transitions fluides entre états (écrans) du jeu.
+ * 
+ * Mécanisme:
+ * - À chaque changement d'état, l'ancien frame est capturé et stocké
+ * - Une vague sinusoïdale lumineuse balaye de gauche à droite en 500ms
+ * - Bord de vague: glow blanc multicouche (large → moyen → fin)
+ * - Zone droite: ancien état reste visible (rideau qui se ferme)
+ * - Zone gauche: nouvel état s'affiche immédiatement
+ * 
+ * Optimisations:
+ * - BasicStrokes pré-alloués (immuables, réutilisés)
+ * - GeneralPath réutilisé à chaque frame
+ * - Pas d'allocations mémoire inutiles per-frame
+ * - Easing cubique pour smoothness du mouvement
+ * 
+ * Durée: 500ms par transition
  */
 public class TransitionManager {
 
-    private static final long DUREE_NS = 500_000_000L; // 500 ms
+    // ====== TIMING ======
+    private static final long DUREE_NS = 500_000_000L;  // Durée de la transition: 500 ms
 
-    // Paramètres visuels de la vague
-    private static final float AMPLITUDE = 60f;   // hauteur de la sinusoïde en px
-    private static final float FREQUENCE  = 2.8f;  // nombre de périodes sur la hauteur
+    // ====== PARAMÈTRES VISUELS DE LA VAGUE ======
+    private static final float AMPLITUDE = 60f;   // Hauteur de la sinusoïde (pixels)
+    private static final float FREQUENCE  = 2.8f;  // Nombre de périodes sur toute la hauteur
 
-    // Résolution de la vague : 120 points suffisent pour un rendu fluide
-    private static final int WAVE_STEPS = 120;
+    // ====== RÉSOLUTION & OPTIMISATION ======
+    private static final int WAVE_STEPS = 120;     // 120 points suffisent pour un rendu fluide
 
-    // BasicStrokes pré-allouées (immuables, réutilisées chaque frame)
-    private static final BasicStroke STROKE_HALO   = new BasicStroke(44f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-    private static final BasicStroke STROKE_MEDIUM = new BasicStroke(18f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-    private static final BasicStroke STROKE_FIN    = new BasicStroke(4f,   BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
-    private static final BasicStroke STROKE_LIGNE  = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+    // ====== GRAPHICS PRE-ALLOCATED (immuables, réutilisés) ======
+    private static final BasicStroke STROKE_HALO   = new BasicStroke(44f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);   // Glow large
+    private static final BasicStroke STROKE_MEDIUM = new BasicStroke(18f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);   // Halo moyen
+    private static final BasicStroke STROKE_FIN    = new BasicStroke(4f,   BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);   // Contour fin
+    private static final BasicStroke STROKE_LIGNE  = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);   // Ligne d'arête
 
-    // Tableaux/chemins pré-alloués, réinitialisés à chaque frame
-    private final float[] wx = new float[WAVE_STEPS + 1];
-    private final GeneralPath curtain  = new GeneralPath();
-    private final GeneralPath wavePath = new GeneralPath();
+    // ====== TABLEAUX/CHEMINS RÉUTILISÉS (réinitéalisés chaque frame) ======
+    private final float[] wx = new float[WAVE_STEPS + 1];   // Coordonnées X de la vague
+    private final GeneralPath curtain  = new GeneralPath();  // Forme du rideau (ancien état)
+    private final GeneralPath wavePath = new GeneralPath();   // Chemin de la vague
 
-    private boolean enTransition = false;
-    private long debutNs = 0;
-    private BufferedImage ancienFrame = null;
+    // ====== ÉTAT ======
+    private boolean enTransition = false;   // true si une transition est en cours
+    private long debutNs = 0;               // Timestamp du début (nanosecondes)
+    private BufferedImage ancienFrame = null;  // Image du dernier frame de l'état sortant
 
     /** Enregistre le dernier frame de l'état sortant et démarre la transition. */
     public void notifierChangementEtat(BufferedImage frameAConserver) {

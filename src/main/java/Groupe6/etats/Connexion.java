@@ -15,35 +15,73 @@ import Groupe6.game.Game;
 import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
+import Groupe6.utilz.FontCache;
 import Groupe6.utilz.HelpMethods;
 import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État « connexion » : grille de cartes de profil.
- * Cliquer sur une carte charge le joueur et passe au menu principal.
+ * État « CONNEXION JOUEUR » : grille de cartes de profil existants.
+ * 
+ * Affichage:
+ * - Grille de CarteJoueur (avatars colorés + pseudo)
+ * - 3 colonnes maximum
+ * - Clic sur une carte → setJoueurCourant() → Menu
+ * - Bouton RETOUR pour revenir à Start
+ * 
+ * CarteJoueur: Bouton custom avec couleur de fond différente par joueur
+ * 
+ * Flux:
+ * - Start appelle Connexion si profils existent
+ * - Sélectionner un profil → charger ses paramètres → Menu principal
+ * 
+ * Héritage: Etats
  */
 public class Connexion extends Etats {
 
-    private static final int LARGEUR_BOUTON_RETOUR = 200;
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int LARGEUR_BOUTON_RETOUR = 200;  // Bouton retour
     private static final int HAUTEUR_BOUTON_RETOUR = 44;
-    private static final int CARTE_REF_SIZE = 160;
-    private static final int CARTE_GAP_REF = 24;
-    private static final int COLONNES = 3;
+    private static final int CARTE_REF_SIZE = 160;         // Taille cartes joueurs
+    private static final int CARTE_GAP_REF = 24;           // Espacement entre cartes
+    private static final int COLONNES = 3;                 // Colonnes de cartes par rang
+    private static final Font FONT_AUCUN_PROFIL = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 18);
 
-    /** Carte de profil joueur : avatar coloré + pseudo. */
+    /** Carte de profil joueur : petit carré couleuré avec pseudo en dessous. */
     private class CarteJoueur extends Bouton {
-        private final String pseudo;
+        private final String pseudo;  // Pseudo affiché sur la carte
+        private final String initiale;
+        private final Color avatarCouleur;
+        
+        private int avatarSize;
+        private int avatarX;
+        private int avatarY;
+        private final Font fontInitiale;
+        private final Font fontPseudo;
+        private String pseudoAffiche;
+        private int pseudoAfficheLargeur = -1;
+        private int pseudoAffichePixels = 0;
+        private int initialeLargeur = -1;
+        private int initialeAscent = -1;
 
         CarteJoueur(int x, int y, int size, String pseudo) {
             super(x, y, size, size);
             this.pseudo = pseudo;
+            avatarSize = size * 55 / 100;
+            avatarX = x + (size - avatarSize) / 2;
+            avatarY = y + size / 8;
+            int initialeFontSize = Math.max(12, avatarSize * 45 / 100);
+            int pseudoFontSize = Math.max(10, largeur * 14 / 100);
+            this.fontInitiale = FontCache.get("Berlin Sans FB Demi", Font.BOLD, initialeFontSize);
+            this.fontPseudo = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, pseudoFontSize);
+            this.initiale = pseudo.isEmpty() ? "?" : String.valueOf(Character.toUpperCase(pseudo.charAt(0)));
+            this.avatarCouleur = avatarColor(pseudo);
         }
 
         @Override
         public void appliquerAction() {
-            game.setJoueurCourant(pseudo);
-            EtatJeu.setEtatActuel(EtatJeu.MENU);
+            game.setJoueurCourant(pseudo);  // Charger les paramètres du joueur
+            EtatJeu.setEtatActuel(EtatJeu.MENU);  // Aller au menu principal
         }
 
         @Override
@@ -51,41 +89,47 @@ public class Connexion extends Etats {
             super.draw(g, fond); // fond arrondi avec hover/clic
 
             Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
             // Cercle avatar (55 % de la largeur de la carte)
-            int avatarSize = largeur * 55 / 100;
-            int avatarX = x + (largeur - avatarSize) / 2;
-            int avatarY = y + hauteur / 8;
-
-            g2d.setColor(avatarColor(pseudo));
+            g2d.setColor(avatarCouleur);
             g2d.fillOval(avatarX, avatarY, avatarSize, avatarSize);
 
             // Initiale
-            int fontSize = Math.max(12, avatarSize * 45 / 100);
-            g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, fontSize));
+            g.setFont(fontInitiale);
             g.setColor(Color.WHITE);
-            String initiale = pseudo.isEmpty() ? "?" : String.valueOf(Character.toUpperCase(pseudo.charAt(0)));
-            int iw = g.getFontMetrics().stringWidth(initiale);
-            int ih = g.getFontMetrics().getAscent();
+            if (initialeLargeur < 0 || initialeAscent < 0) {
+                initialeLargeur = g.getFontMetrics().stringWidth(initiale);
+                initialeAscent = g.getFontMetrics().getAscent();
+            }
             g.drawString(initiale,
-                avatarX + (avatarSize - iw) / 2,
-                avatarY + (avatarSize + ih) / 2 - 2);
+                avatarX + (avatarSize - initialeLargeur) / 2,
+                avatarY + (avatarSize + initialeAscent) / 2 - 2);
 
             // Pseudo sous l'avatar (tronqué si trop long)
-            int pseudoFontSize = Math.max(10, largeur * 14 / 100);
-            g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, pseudoFontSize));
+            g.setFont(fontPseudo);
             g.setColor(fond.getCouleurTexte());
-            String nom = pseudo;
-            while (g.getFontMetrics().stringWidth(nom) > largeur - 10 && nom.length() > 1) {
-                nom = nom.substring(0, nom.length() - 1);
-            }
-            if (!nom.equals(pseudo)) nom += "…";
-            int pw = g.getFontMetrics().stringWidth(nom);
+            ensurePseudoAffiche(g);
             int textAreaTop = avatarY + avatarSize;
             int textY = textAreaTop + (y + hauteur - textAreaTop + g.getFontMetrics().getAscent()) / 2 - 2;
-            g.drawString(nom, x + (largeur - pw) / 2, textY);
+            g.drawString(pseudoAffiche, x + (largeur - pseudoAffichePixels) / 2, textY);
+        }
+
+        private void ensurePseudoAffiche(Graphics g) {
+            int largeurDispo = largeur - 10;
+            if (pseudoAffiche != null && pseudoAfficheLargeur == largeurDispo) {
+                return;
+            }
+
+            String nom = pseudo;
+            while (g.getFontMetrics().stringWidth(nom) > largeurDispo && nom.length() > 1) {
+                nom = nom.substring(0, nom.length() - 1);
+            }
+            if (!nom.equals(pseudo)) {
+                nom += "…";
+            }
+            pseudoAffiche = nom;
+            pseudoAfficheLargeur = largeurDispo;
+            pseudoAffichePixels = g.getFontMetrics().stringWidth(pseudoAffiche);
         }
 
         /** Couleur déterministe basée sur le hash du pseudo. */
@@ -100,6 +144,7 @@ public class Connexion extends Etats {
     private int titleY, titleFontSize;
     private int grilleDepartY;
     private int centerX;
+    private Font titleFont;
 
     private LayoutScale layoutScale;
     private List<String> joueurs = new ArrayList<>();
@@ -151,6 +196,7 @@ public class Connexion extends Etats {
 
         // Titre
         titleFontSize = layoutScale.scaleUniform(28);
+        titleFont = FontCache.get("Berlin Sans FB Demi", Font.BOLD, Math.max(12, titleFontSize));
         titleY = nameAppY + nameAppHeight + layoutScale.scaleUniform(20);
 
         // Grille de cartes
@@ -188,19 +234,20 @@ public class Connexion extends Etats {
         getFond().draw(g);
 
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         if (nameAppImage != null) {
             g.drawImage(nameAppImage, nameAppX, nameAppY, nameAppWidth, nameAppHeight, null);
         }
 
-        g.setFont(new Font("Berlin Sans FB Demi", Font.BOLD, Math.max(12, titleFontSize)));
+        g.setFont(titleFont);
         g.setColor(getFond().getCouleurTexte());
         int tw = g.getFontMetrics().stringWidth(labelTitre);
         g.drawString(labelTitre, centerX - tw / 2, titleY + g.getFontMetrics().getAscent());
 
         if (joueurs.isEmpty()) {
-            g.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 18));
+            g.setFont(FONT_AUCUN_PROFIL);
             g.setColor(Color.GRAY);
             int aw = g.getFontMetrics().stringWidth(labelAucunProfil);
             g.drawString(labelAucunProfil, centerX - aw / 2, grilleDepartY + layoutScale.scaleUniform(20));

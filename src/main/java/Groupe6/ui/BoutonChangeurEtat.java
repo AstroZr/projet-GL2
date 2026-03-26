@@ -5,13 +5,14 @@ import java.awt.Graphics;
 
 import Groupe6.etats.EtatJeu;
 import Groupe6.fond.Fond;
+import Groupe6.utilz.FontCache;
 
 
 /**
  * Bouton permettant de changer l'état du jeu.
  */
 public class BoutonChangeurEtat extends Bouton {
-    private static final Font FONT_LABEL = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
+    private static final Font FONT_LABEL = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
     private EtatJeu action;
     protected String label;
 

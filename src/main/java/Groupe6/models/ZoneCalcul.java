@@ -5,13 +5,23 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Représente une zone de calcul contenant plusieurs cellules
- * devant respecter une opération mathématique.
+ * Représente une zone de calcul contenant plusieurs cellules devant respecter une opération mathématique.
+ * 
+ * Responsabilités:
+ * - Gérer un groupe de cellules liées par une contrainte mathématique
+ * - Vérifier que l'opération est satisfaite: valeurCible = op(cell1, cell2, ...)
+ * - Support des 4 opérations: +, -, *, / avec gestion spéciale (ex: soustraction décroissante)
+ * - Accepte zones incomplètes (retourne true) ; valide seulement quand complètes
+ * 
+ * Exemple: Zone avec target=6, operation=+, cells=[2,3,1] => 2+3+1=6 ✓
  */
 public class ZoneCalcul {
-    private final List<Cellule> listeCellules; // Liste des cellules de la zone de calcul
-    private final int valeurCible; // Valeur cible de la zone de calcul
-    private final TypeOperation typeOperation; // Type d'opération de la zone de calcul
+    // ====== CELLULES ======
+    private final List<Cellule> listeCellules;  // Cellules appartenant à cette zone
+    
+    // ====== CONTRAINTE MATHÉMATIQUE ======
+    private final int valeurCible;              // Valeur que l'opération doit atteindre (target sum/product/etc)
+    private final TypeOperation typeOperation;  // Type d'opération (+, -, *, /)
 
     /**
      * Constructeur d'une zone de calcul.

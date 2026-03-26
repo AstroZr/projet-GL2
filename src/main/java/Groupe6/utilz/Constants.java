@@ -1,24 +1,38 @@
 package Groupe6.utilz;
 
 /**
- * Constantes globales du jeu (taille fenêtre, animation, ratios de layout).
+ * Constantes globales du jeu (dimensions, animations, ratios responsive de layout).
+ * 
+ * Points clés:
+ * - REF_WIDTH/REF_HEIGHT (1920x1080): résolution de référence pour le scaling
+ * - game_width/game_height: dimensions ACTUELLES (mises à jour au resize GamePanel)
+ * - Ratios: positions relatives (0.0 à 1.0) pour adaptation responsive
+ * - Chaque écran (Start, Menu, Selection, etc.) a sa classe Ratios interne
+ * 
+ * Usage: Layout calcule les positions finales en: position_pixels = ratio * game_height (ex)
  */
 public class Constants {
-    public static boolean animationBG = false;
+    // ====== ANIMATIONS ======
+    public static boolean animationBG = false;  // Active/désactive animations fond
     
-    public static final int REF_WIDTH = 1920;
-    public static final int REF_HEIGHT = 1080;
+    // ====== RÉSOLUTION DE RÉFÉRENCE ======
+    public static final int REF_WIDTH = 1920;   // Largeur de référence (1080p)
+    public static final int REF_HEIGHT = 1080;  // Hauteur de référence (1080p)
 
-    /** Largeur courante de la fenêtre (mise à jour au resize). */
+    // ====== DIMENSIONS COURANTES (dynamiques) ======
+    /** Largeur courante de la fenêtre (mise à jour au resize du GamePanel). */
     public static int game_width = REF_WIDTH;
-    /** Hauteur courante de la fenêtre (mise à jour au resize). */
+    /** Hauteur courante de la fenêtre (mise à jour au resize du GamePanel). */
     public static int game_height = REF_HEIGHT;
     
+    // ====== RATIOS RESPONSIFS (position relative, 0.0 à 1.0) ======
     public static class Ratios {
-        /** Ratio horizontal pour centrer un élément (centre = 0.5). */
+        /** Ratio horizontal pour centrer un élément horizontalement (0.5 = centre). */
         public static final float RATIO_CENTER_X = 0.5f;
+        
+        /** Ratios pour l'écran START (splash screen / formulaire joueur). */
         public static class Start {
-            /** Ratio vertical pour le formulaire Start / Connexion (≈ 48,1 %). */
+            /** Ratio vertical pour le formulaire Start / Connexion (≈ 48,1 % de la hauteur). */
             public static final float RATIO_START_FORM_Y = 520f / 1080f;
             /** Ratio vertical pour la position du logo (≈ 12 % du haut). */
             public static final float RATIO_LOGO_Y = 140f / 1080f;

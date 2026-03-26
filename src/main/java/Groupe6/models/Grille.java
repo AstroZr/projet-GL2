@@ -10,30 +10,53 @@ import Groupe6.save.SaveManager;
 import Groupe6.aide.AideManager;
 
 /**
- * Modèle logique de la grille de jeu.
- * Gère l'état global, les règles et la validation.
+ * Modèle logique de la grille de jeu CalcuDoku/MathDoku.
+ * 
+ * Responsabilités:
+ * - Gestion de l'état global du jeu (matrice de cellules, zones de calcul)
+ * - Validation des règles: pas de doublons par ligne/colonne, contraintes mathématiques des zones
+ * - Système d'historique pour undo/redo (stocke chaque action)
+ * - Pattern Observer pour notifier les observateurs de chaque changement
+ * - Persistance via SaveManager (chargement/sauvegarde de parties)
+ * 
+ * Architecture:
+ * - matriceCellules[ligne][colonne]: grille N×N de Cellule
+ * - listeZones: List<ZoneCalcul> contenant les contraintes mathématiques
+ * - historique: List<int[]> avec [ligne, colonne, anciennneVal, nouvelleVal, actionType]
+ * - indexActuel: pointeur dans l'historique (pour undo/redo)
+ * - observers: notifiés à chaque modification (VueGrille, SoundManager, etc.)
  */
 public class Grille {
-    public static final int ACTION_MOVE = 0;
-    public static final int ACTION_CANDIDAT = 1;
-    public static final int ACTION_AIDE = 2;
-    public static final int ACTION_AUCUNE = -1;
+    
+    // ====== CONSTANTES D'ACTIONS (pour l'historique) ======
+    public static final int ACTION_MOVE = 0;        // Entrée d'une valeur normale
+    public static final int ACTION_CANDIDAT = 1;    // Ajout/suppression de candidat
+    public static final int ACTION_AIDE = 2;        // Utilisation d'une aide
+    public static final int ACTION_AUCUNE = -1;     // Aucune action
+    
+    // ====== PATTERN OBSERVER ======
+    private List<GrilleObserver> observers = new ArrayList<>();  // Listeners notifiés des changements
 
-    private List<GrilleObserver> observers = new ArrayList<>();
-
-    private final int taille;
-    private final Cellule[][] matriceCellules;
-    private final List<ZoneCalcul> listeZones;
-    private Cellule celluleSelectionnee;
-    private int indexActuel = -1;
-    private List<int[]> historique = new java.util.ArrayList<>();
-    private String nomJoueur;
-    private String idNiveau;
-    private long tempsEcoule;
-    private AideManager aideManager;
-
-    // Etat du jeu
-    private boolean estComplete;
+    // ====== DONNÉES DE LA GRILLE ======
+    private final int taille;                       // Taille N de la grille N×N
+    private volatile Cellule[][] matriceCellules;     // Grille principale
+    private volatile List<ZoneCalcul> listeZones;     // Zones avec contraintes (+, -, *, /)
+    
+    // ====== SÉLECTION ======
+    private Cellule celluleSelectionnee;            // Cellule actuellement sélectionnée (null si aucune)
+    
+    // ====== HISTORIQUE & UNDO/REDO ======
+    private int indexActuel = -1;                   // Index dans l'historique (pour undo/redo)
+    private List<int[]> historique = new java.util.ArrayList<>();  // Enregistre toutes les actions
+    
+    // ====== MÉTADONNÉES ======
+    private String nomJoueur;                       // Nom du joueur
+    private String idNiveau;                        // ID du niveau (ex. "facile1", "moyen2")
+    private long tempsEcoule;                       // Temps écoulé en ms depuis le début
+    private AideManager aideManager;                // Gestionnaire des hints/astuces
+    
+    // ====== ÉTAT ======
+    private boolean estComplete;                    // true si grille complète et valide
 
     /**
      * Constructeur de la grille a partir d'un niveau ou d'une sauvegarde de partie.
@@ -61,42 +84,56 @@ public class Grille {
             return;
         }
 
-        PartieSauvegardee sauvegarde = SaveManager.chargerPartie(nomJoueur, idNiveau);
+        PartieSauvegardee sauvegarde = chargerSauvegarde(nomJoueur, idNiveau, ignorerSauvegarde);
 
         this.aideManager = AideManager.getInstance();
         this.aideManager.setNBUtilisationsZero();
 
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
-            // charge la sauvegarde
-
-            this.matriceCellules = sauvegarde.getMatriceCellules();
-            this.historique = sauvegarde.getHistorique();
-            if (this.historique == null) {
-                this.historique = new ArrayList<>();
-            }
-            this.listeZones = niveauBase.getListeZones();
-            this.aideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees()); 
-            this.tempsEcoule = sauvegarde.getTempsEcoule();
-            this.indexActuel = this.historique.size() - 1;
-
-            // relie les zones de niveauBase aux cellules de la sauvegarde
-            for (ZoneCalcul zone : listeZones) {
-                for (Cellule c : zone.getListeCellules()) {
-                    Cellule celluleSauvegardee = matriceCellules[c.getLigne()][c.getColonne()];
-                    celluleSauvegardee.setZoneCalcul(zone);
-                }
-            }
+            initialiserDepuisSauvegarde(niveauBase, sauvegarde);
         } else {
-            // Pas de sauvegarde
-            this.matriceCellules = niveauBase.getMatriceCellules();
-            this.listeZones = niveauBase.getListeZones();
-            this.historique = new ArrayList<>();
-            this.tempsEcoule = 0L;
+            initialiserDepuisNiveau(niveauBase);
         }
 
         nettoyerSelection();
         validerGrille();
+    }
+
+    private PartieSauvegardee chargerSauvegarde(String nomJoueur, String idNiveau, boolean ignorerSauvegarde) {
+        if (ignorerSauvegarde) {
+            return null;
+        }
+        return SaveManager.chargerPartie(nomJoueur, idNiveau);
+    }
+
+    private void initialiserDepuisSauvegarde(Niveau niveauBase, PartieSauvegardee sauvegarde) {
+        this.matriceCellules = sauvegarde.getMatriceCellules();
+        this.historique = sauvegarde.getHistorique();
+        if (this.historique == null) {
+            this.historique = new ArrayList<>();
+        }
+        this.listeZones = niveauBase.getListeZones();
+        this.aideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees());
+        this.tempsEcoule = sauvegarde.getTempsEcoule();
+        this.indexActuel = this.historique.size() - 1;
+        relierZonesAuxCellulesSauvegardees();
+    }
+
+    private void initialiserDepuisNiveau(Niveau niveauBase) {
+        this.matriceCellules = niveauBase.getMatriceCellules();
+        this.listeZones = niveauBase.getListeZones();
+        this.historique = new ArrayList<>();
+        this.tempsEcoule = 0L;
+    }
+
+    private void relierZonesAuxCellulesSauvegardees() {
+        for (ZoneCalcul zone : listeZones) {
+            for (Cellule celluleZone : zone.getListeCellules()) {
+                Cellule celluleSauvegardee = matriceCellules[celluleZone.getLigne()][celluleZone.getColonne()];
+                celluleSauvegardee.setZoneCalcul(zone);
+            }
+        }
     }
 
     /**
@@ -158,7 +195,10 @@ public class Grille {
         if (estHorsLimites(ligne, colonne))
             return;
 
-        nettoyerSelection();
+        // Deselect only the previously selected cell to avoid an O(N^2) full-grid pass.
+        if (celluleSelectionnee != null) {
+            celluleSelectionnee.setEstSelectionnee(false);
+        }
 
         // Sélectionner la nouvelle
         celluleSelectionnee = matriceCellules[ligne][colonne];
@@ -198,7 +238,8 @@ public class Grille {
             historique.subList(indexActuel + 1, historique.size()).clear();
         }
 
-        historique.add(new int[] { ligne, colonne, ancienneValeur, nouvelleValeur, estCandidat ? ACTION_CANDIDAT : ACTION_MOVE });
+        historique.add(new int[] { ligne, colonne, ancienneValeur, nouvelleValeur,
+                estCandidat ? ACTION_CANDIDAT : ACTION_MOVE });
         indexActuel++;
     }
 
@@ -285,12 +326,13 @@ public class Grille {
         // Vérifier les zones via la méthode verifierMaths()
         for (ZoneCalcul zone : listeZones) {
             boolean estCalculValide = zone.verifierMaths();
+            boolean zoneIncomplete = estZoneIncomplete(zone);
 
             // Si le calcul est faux, on marque les cellules comme invalides
             if (!estCalculValide) {
                 for (Cellule c : zone.getListeCellules()) {
                     // On ne marque invalide que si la zone est remplie
-                    if (!estZoneIncomplete(zone)) {
+                    if (!zoneIncomplete) {
                         c.setEstValide(false);
                         estComplete = false;
                     }
@@ -595,8 +637,7 @@ public class Grille {
         PartieSauvegardee ps = new PartieSauvegardee(
                 this.matriceCellules,
                 this.historique,
-                this.tempsEcoule
-        );
+                this.tempsEcoule);
 
         SaveManager.sauvegarderPartie(nomJoueur, idNiveau, ps);
     }

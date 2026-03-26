@@ -2,7 +2,6 @@ package Groupe6.fond;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Color;
 import java.awt.Composite;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -36,6 +35,8 @@ public abstract class AbstractFondDegrade implements Fond {
     private GradientPaint cachedBottomPaint;
     private int cachedGradientWidth = -1;
     private int cachedGradientHeight = -1;
+    private AlphaComposite cachedOverlayComposite;
+    private float cachedOverlayCompositeAlpha = Float.NaN;
 
     // --- Sprites partagés (chargés une seule fois pour toutes les instances) ---
     private static BufferedImage sharedBigNuage;
@@ -284,8 +285,12 @@ public abstract class AbstractFondDegrade implements Fond {
     }
 
     private void drawOverlay(Graphics2D g2d) {
+        if (cachedOverlayComposite == null || cachedOverlayCompositeAlpha != overlayAlpha) {
+            cachedOverlayComposite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, overlayAlpha);
+            cachedOverlayCompositeAlpha = overlayAlpha;
+        }
         Composite prev = g2d.getComposite();
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, overlayAlpha));
+        g2d.setComposite(cachedOverlayComposite);
         g2d.setColor(overlayColor);
         g2d.fillRect(0, 0, currentWidth, currentHeight);
         g2d.setComposite(prev);

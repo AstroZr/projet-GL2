@@ -13,6 +13,7 @@ import Groupe6.aide.EffetVisuel;
 import Groupe6.aide.TypeEffect;
 import Groupe6.etats.Jeu;
 import Groupe6.fond.Fond;
+import Groupe6.utilz.FontCache;
 import Groupe6.models.Grille;
 
 /**
@@ -20,7 +21,7 @@ import Groupe6.models.Grille;
  */
 public class BoutonAide extends Bouton {
 
-    private static final Font FONT_LABEL = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
+    private static final Font FONT_LABEL = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
 
     private final Jeu jeu;
     private AideManager aideManager;

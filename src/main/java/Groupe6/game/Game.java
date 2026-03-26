@@ -19,29 +19,47 @@ import Groupe6.etats.Connexion;
 import Groupe6.etats.Creation;
 import Groupe6.etats.Selection;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.FontCache;
 import Groupe6.utilz.LangManager;
 
 /**
  * Coeur du jeu : boucle update/render découplée (UPS fixe, FPS limité), délégation aux états (Start, Menu, etc.).
+ * Utilise un pattern State Machine pour gérer les différents écrans (Menu, Jeu, Paramètres, etc.).
+ * 
+ * Architecture:
+ * - Une EnumMap mappe EtatJeu -> MethodesEtats pour accès O(1) aux états
+ * - Boucle asynchrone avec accumulation de temps pour UPS stable
+ * - Rendu découplé (FPS limité) indépendant des updates
+ * - Gestion des transitions fluides entre états avec fade-out/fade-in
  */
 public class Game implements Runnable {
+    private static final Font DEBUG_FONT = FontCache.get("Arial", Font.PLAIN, 14);
 
-    private final GamePanel gamePanel;
-    private final GameWindow gameWindow;
+    // ====== COMPOSANTS GRAPHIQUES ======
+    private final GamePanel gamePanel;      // Panneau Swing contenant le rendu
+    private final GameWindow gameWindow;    // Fenêtre principale
+
+    // ====== BOUCLE DE JEU ======
     private Thread gameLoopThread;
-
-    private static final int TARGET_UPS = 60;
-    private static final int TARGET_FPS = 60;
-
-    private int currentFPS = 0;
-    private int currentUPS = 0;
-    private boolean debug = true;
-    private boolean repeindreFlag = false;
-    private String langueCode = "fr";
+    private static final int TARGET_UPS = 60;  // Updates Par Seconde (logique fixe)
+    private static final int TARGET_FPS = 60;  // Frames Par Seconde (rendu limité)
+    
+    // ====== COMPTEURS & ÉTAT ======
+    private int currentFPS = 0;             // FPS actuel (mis à jour chaque seconde)
+    private int currentUPS = 0;             // UPS actuel (mis à jour chaque seconde)
+    private boolean debug = true;           // Afficher les stats FPS/UPS en haut-gauche
+    private boolean repeindreFlag = false;  // Flag pour demander un repaint du panel
+    
+    // ====== CONFIGURATION GLOBALE ======
+    private String langueCode = "fr";       // Code de la langue ("fr" ou "en")
+    
+    // ====== GESTION DES TRANSITIONS ======
     private final TransitionManager transitionManager = new TransitionManager();
-    private EtatJeu dernierEtat = null;
-    private java.awt.image.BufferedImage frameBuffer = null;
-    private String joueurCourant = "Invité";
+    private EtatJeu dernierEtat = null;     // État précédent (pour détecter changement)
+    private java.awt.image.BufferedImage frameBuffer = null;  // Double-buffer hors-écran
+    
+    // ====== JOUEUR COURANT ======
+    private String joueurCourant = "Invité";  // Nom/pseudo du joueur actif
 
     private Start start;
     private Menu menu;
@@ -180,7 +198,7 @@ public class Game implements Runnable {
         if (debug) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+            g2d.setFont(DEBUG_FONT);
             g2d.drawString("FPS: " + currentFPS + " | UPS: " + currentUPS, 10, 20);
         }
     }

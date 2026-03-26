@@ -16,34 +16,61 @@ import Groupe6.fond.Fond;
 import Groupe6.models.Cellule;
 import Groupe6.models.Grille;
 import Groupe6.models.ZoneCalcul;
+import Groupe6.utilz.FontCache;
 
 /**
- * Vue responsable de l'affichage de la grille de jeu.
+ * Vue (Renderer) responsable du rendu graphique de la grille de jeu CalcuDoku.
+ * 
+ * Responsabilités:
+ * - Dessiner la grille (cellules, valeurs, candidats)
+ * - Afficher les bordures des zones (couleurs différentes par zone)
+ * - Colorer les cellules selon l'état (sélection, erreur, validité)
+ * - Appliquer les thèmes de couleur (via Fond)
+ * - Gérer le positionnement responsive et taille des cellules
+ * 
+ * Optimisations:
+ * - Fonts et Colors pré-alloués (pas de création per-frame)
+ * - BasicStrokes immuables réutilisés
+ * - Rendu en deux passes: fond des cellules → bordures → texte
+ * 
+ * Observer Pattern:
+ * - Enregistrée comme GrilleObserver sur Grille
+ * - Appelée à chaque changement (redessine l'affichage)
  */
 public class VueGrille {
 
-    // Pre-allocated immutable graphical objects to avoid per-frame allocations
-    private static final Color COULEUR_SELECTION = new Color(100, 150, 255, 150);
-    private static final Color COULEUR_ERREUR = new Color(255, 100, 100, 180);
-    private static final Font FONT_VALEUR = new Font("Arial", Font.BOLD, 32);
-    private static final Font FONT_ZONE = new Font("Arial", Font.BOLD, 14);
-    private static final Font FONT_CANDIDAT = new Font("Arial", Font.BOLD, 16);
-    private static final BasicStroke STROKE_CONTOUR_GRILLE = new BasicStroke(4);
-    private static final BasicStroke STROKE_ZONE_SOUS_COUCHE = new BasicStroke(5);
-    private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3);
-    private static final BasicStroke STROKE_FINE = new BasicStroke(1);
-    private static final int MARGE_CASE = 2;
+    // ====== COULEURS PRÉ-ALLOUÉES ======
+    private static final Color COULEUR_SELECTION = new Color(100, 150, 255, 150);  // Bleu semi-transparent pour cellule sélectionnée
+    private static final Color COULEUR_ERREUR = new Color(255, 100, 100, 180);     // Rouge semi-transparent pour erreur
+    
+    // ====== FONTS PRÉ-ALLOUÉES ======
+    private static final Font FONT_VALEUR = FontCache.get("Arial", Font.BOLD, 32);      // Chiffres dans les cellules
+    private static final Font FONT_ZONE = FontCache.get("Arial", Font.BOLD, 14);        // Label zone (target + opération)
+    private static final Font FONT_CANDIDAT = FontCache.get("Arial", Font.BOLD, 16);   // Candidats (petits chiffres)
+    
+    // ====== TRAITS/STROKES PRÉ-ALLOUÉS ======
+    private static final BasicStroke STROKE_CONTOUR_GRILLE = new BasicStroke(4);        // Bordure externe grille
+    private static final BasicStroke STROKE_ZONE_SOUS_COUCHE = new BasicStroke(5);      // Sous-couche zones
+    private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3);               // Bordures épaisses
+    private static final BasicStroke STROKE_FINE = new BasicStroke(1);                  // Lignes fines
+    
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int MARGE_CASE = 2;                                           // Marge entre cellules (pixels)
+    private static final int TAILLE_GRILLE_DEFAULT = (int)(1080 / 1.5f);              // Taille grille par défaut
+    private static final int OFFSET_X_DEFAULT = (1920 - TAILLE_GRILLE_DEFAULT) / 2;    // Centrage horizontal
+    private static final int OFFSET_Y_DEFAULT = (1080 - TAILLE_GRILLE_DEFAULT) / 2;    // Centrage vertical
 
-    private static final int TAILLE_GRILLE_DEFAULT = (int)(1080 / 1.5f);
-    private static final int OFFSET_X_DEFAULT = (1920 - TAILLE_GRILLE_DEFAULT) / 2;
-    private static final int OFFSET_Y_DEFAULT = (1080 - TAILLE_GRILLE_DEFAULT) / 2;
-
-    private final Grille grille;
-    private int tailleCellule;
-    private int tailleGrille;
-    private int offsetX;
-    private int offsetY;
-    private boolean modeCandidat;
+    // ====== INSTANCE ======
+    private final Grille grille;       // Référence au modèle (lecture seule)
+    
+    // ====== LAYOUT COURANT ======
+    private int tailleCellule;         // Taille d'une cellule (pixels)
+    private int tailleGrille;          // Taille totale grille (N×N cellules)
+    private int offsetX;               // Position X de la grille sur l'écran
+    private int offsetY;               // Position Y de la grille sur l'écran
+    private boolean modeCandidat;      // Mode candidat actif (affiche petits chiffres)
+    private Color contourGrilleCache;
+    private Color contourSourceCache;
 
     public VueGrille(Grille grille) {
         this.grille = grille;
@@ -70,8 +97,11 @@ public class VueGrille {
     private void dessinerContourGrille(Graphics2D g2d, Fond fond) {
         g2d.setStroke(STROKE_CONTOUR_GRILLE);
         Color texte = fond.getCouleurTexte();
-        Color contour = new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 220);
-        g2d.setColor(contour);
+        if (!texte.equals(contourSourceCache)) {
+            contourSourceCache = texte;
+            contourGrilleCache = new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 220);
+        }
+        g2d.setColor(contourGrilleCache);
         g2d.drawRect(offsetX - 1, offsetY - 1, tailleGrille + 2, tailleGrille + 2);
     }
 

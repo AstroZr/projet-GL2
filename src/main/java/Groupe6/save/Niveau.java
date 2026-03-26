@@ -5,13 +5,39 @@ import java.util.List;
 import Groupe6.models.Cellule;
 import Groupe6.models.ZoneCalcul;
 
+/**
+ * Modèle de données pour un niveau/puzzle CalcuDoku.
+ * 
+ * Resp onsabilités:
+ * - Mémoriser l'ennoncé du puzzle (zones, cellules poussière, solution)
+ * - Êatre chargé à partir de JSON (saveGame/niveaux/facile1.json, etc.)
+ * - Êatre stocké en mémoire avec référence partagée avec Grille
+ * 
+ * Contenu:
+ * - id: identifiant unique ("facile1", "moyen2", "difficile3", etc.)
+ * - taille: dimension N de la grille N×N (généralement 4, 5 ou 6)
+ * - matriceCellules: grille avec cellules poussière (values = 0 ou pré-remplies)
+ * - listeZones: contraintes mathématiques (zones de calcul)
+ * - matriceCorrection: grille solution (pour vérification)
+ * 
+ * Sérialisation JSON:
+ * - Chargé par SaveManager.chargerNiveau(idNiveau)
+ * - Contient toute l'information de base du puzzle
+ */
 public class Niveau {
 
-    private String id;
-    private int taille;
-    private Cellule[][] matriceCellules;
-    private List<ZoneCalcul> listeZones;
-    private int[][] matriceCorrection;
+    // ====== IDÉNTIFICATION ======
+    private String id;                        // Identifiant unique du niveau ("facile1", "moyen2", etc.)
+    
+    // ====== DIMENSIONS ======
+    private int taille;                       // Dimension N de la grille N×N
+    
+    // ====== ÉNONCÉ ======
+    private Cellule[][] matriceCellules;     // Grille avec cellules poussière (puzzle à résoudre)
+    private List<ZoneCalcul> listeZones;     // Zones de calcul (contraintes mathématiques)
+    
+    // ====== SOLUTION ======
+    private int[][] matriceCorrection;        // Grille solution (pour vérification/correction)
 
     public Niveau() {
     }

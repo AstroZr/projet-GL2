@@ -11,32 +11,55 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import Groupe6.game.Game;
 import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
+import Groupe6.utilz.FontCache;
 import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État « meilleurs temps » : records du joueur courant + classement global par
- * niveau.
+ * État « MEILLEURS TEMPS / RECORDS » : affiche les temps de complétion du joueur.
+ * 
+ * Affichage:
+ * - Titre « Meilleurs temps »
+ * - Tableau avec colonnes:
+ *   • Niveau (facile1, moyen2, etc.)
+ *   • Temps de complétion
+ *   • Nombre d'astuces utilisées
+ * - Bouton RETOUR pour revenir au menu
+ * 
+ * Données:
+ * - Charge depuis SaveManager.chargerMeilleursTemps(joueurCourant)
+ * - Tri par ordre croissant de temps
+ * 
+ * Héritage: Etats
  */
 public class Records extends Etats {
 
-    private static final Font FONT_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 28);
-    private static final Font FONT_SOUS = new Font("Berlin Sans FB Demi", Font.BOLD, 18);
-    private static final Font FONT_TEXTE = new Font("Berlin Sans FB Demi", Font.PLAIN, 15);
+    // ====== FONTS ======
+    private static final Font FONT_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 28);   // Titre
+    private static final Font FONT_SOUS = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 18);    // Sous-titres
+    private static final Font FONT_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 15);  // Contenu tableau
 
-    private static final int LARGEUR_BTN = 200;
+    // ====== DIMENSIONS ======
+    private static final int LARGEUR_BTN = 200;   // Bouton retour
     private static final int HAUTEUR_BTN = 44;
+    private static final Color COLOR_PANEL_SHADOW = new Color(0, 0, 0, 60);
+    private static final Color COLOR_SCROLL_TRANSPARENT = new Color(0, 0, 0, 0);
+    private static final Color COLOR_SCROLL_OPAQUE = new Color(0, 0, 0, 90);
+    private static final Color COLOR_LIGNE_SURBRILLANCE = new Color(70, 130, 180, 80);
 
-    private LayoutScale layoutScale;
+    // ====== SCALING & LAYOUT ======
+    private LayoutScale layoutScale;  // Responsable du redimensionnement
 
     private static final int SCROLL_SPEED = 20;
 
@@ -51,6 +74,12 @@ public class Records extends Etats {
     private String labelAucun;
     private String labelRetour;
     private String labelNiveau;
+
+    private String cachedJoueur;
+    private List<String> cachedNiveaux = new ArrayList<>();
+    private Map<String, Long> cachedMesTemps = Collections.emptyMap();
+    private Map<String, List<Map.Entry<String, Long>>> cachedClassements = new HashMap<>();
+    private boolean dataDirty = true;
 
     public Records(Game game) {
         super(game);
@@ -94,6 +123,7 @@ public class Records extends Etats {
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
         getFond().draw(g);
+        refreshDataIfNeeded();
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -108,8 +138,8 @@ public class Records extends Etats {
         int titreY = layoutScale.ratioY(100f / 1080f) + fmT.getAscent();
         g2d.drawString(labelTitre, (w - fmT.stringWidth(labelTitre)) / 2, titreY);
 
-        List<String> niveaux = SaveManager.listerIdsNiveaux();
-        String joueur = game != null ? game.getJoueurCourant() : null;
+        List<String> niveaux = cachedNiveaux;
+        String joueur = cachedJoueur;
 
         int panelW = layoutScale.scaleX(420);
         int panelH = layoutScale.scaleY(580);
@@ -126,7 +156,7 @@ public class Records extends Etats {
         g2d.setColor(getFond().getCouleurTexte());
         g2d.drawString(labelMesTemps, leftX + 16, panelY + 30);
 
-        Map<String, Long> mesTemps = joueur != null ? SaveManager.chargerMeilleursTemps(joueur) : new HashMap<>();
+        Map<String, Long> mesTemps = cachedMesTemps;
 
         int cLeftH = niveaux.size() * (rowH + 6);
         maxScrollLeft = Math.max(0, cLeftH - visibleH);
@@ -170,11 +200,7 @@ public class Records extends Etats {
         g2d.setColor(getFond().getCouleurTexte());
         g2d.drawString(labelClassement, rightX + 16, panelY + 30);
 
-        // Charger tous les classements une seule fois
-        Map<String, List<Map.Entry<String, Long>>> classements = new HashMap<>();
-        for (String niv : niveaux) {
-            classements.put(niv, SaveManager.chargerClassementGlobal(niv));
-        }
+        Map<String, List<Map.Entry<String, Long>>> classements = cachedClassements;
 
         int cRightH = 0;
         for (String niv : niveaux) {
@@ -235,7 +261,7 @@ public class Records extends Etats {
     }
 
     private void dessinerPanel(Graphics2D g2d, int x, int y, int w, int h) {
-        g2d.setColor(new Color(0, 0, 0, 60));
+        g2d.setColor(COLOR_PANEL_SHADOW);
         g2d.fillRoundRect(x, y, w, h, 18, 18);
         g2d.setColor(getFond().getCouleurBordreBouton());
         g2d.drawRoundRect(x, y, w, h, 18, 18);
@@ -243,12 +269,10 @@ public class Records extends Etats {
 
     private void dessinerIndicateurScroll(Graphics2D g2d, int x, int y, int w, int h, boolean versHaut) {
         GradientPaint gp;
-        Color transparent = new Color(0, 0, 0, 0);
-        Color opaque = new Color(0, 0, 0, 90);
         if (versHaut) {
-            gp = new GradientPaint(x, y, opaque, x, y + h, transparent);
+            gp = new GradientPaint(x, y, COLOR_SCROLL_OPAQUE, x, y + h, COLOR_SCROLL_TRANSPARENT);
         } else {
-            gp = new GradientPaint(x, y, transparent, x, y + h, opaque);
+            gp = new GradientPaint(x, y, COLOR_SCROLL_TRANSPARENT, x, y + h, COLOR_SCROLL_OPAQUE);
         }
         g2d.setPaint(gp);
         g2d.fillRect(x, y, w, h);
@@ -258,7 +282,7 @@ public class Records extends Etats {
     private void dessinerLigne(Graphics2D g2d, int x, int y, int w, int h,
             String gauche, String droite, boolean surbrillance) {
         if (surbrillance) {
-            g2d.setColor(new Color(70, 130, 180, 80));
+            g2d.setColor(COLOR_LIGNE_SURBRILLANCE);
             g2d.fillRoundRect(x, y, w, h, 8, 8);
         }
         g2d.setFont(FONT_TEXTE);
@@ -270,7 +294,37 @@ public class Records extends Etats {
 
     private String formaterTemps(long ms) {
         long s = ms / 1000;
-        return String.format("%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60);
+        long h = s / 3600;
+        long m = (s % 3600) / 60;
+        long sec = s % 60;
+        return twoDigits(h) + ":" + twoDigits(m) + ":" + twoDigits(sec);
+    }
+
+    private String twoDigits(long value) {
+        if (value >= 10) {
+            return Long.toString(value);
+        }
+        return "0" + value;
+    }
+
+    private void refreshDataIfNeeded() {
+        String joueurActuel = game != null ? game.getJoueurCourant() : null;
+        if (!dataDirty && Objects.equals(cachedJoueur, joueurActuel)) {
+            return;
+        }
+
+        cachedJoueur = joueurActuel;
+        cachedNiveaux = SaveManager.listerIdsNiveaux();
+        cachedMesTemps = joueurActuel != null
+                ? SaveManager.chargerMeilleursTemps(joueurActuel)
+                : Collections.emptyMap();
+
+        cachedClassements = new HashMap<>();
+        for (String niveau : cachedNiveaux) {
+            cachedClassements.put(niveau, SaveManager.chargerClassementGlobal(niveau));
+        }
+
+        dataDirty = false;
     }
 
     @Override
@@ -322,6 +376,7 @@ public class Records extends Etats {
     public void onEnter() {
         scrollLeft = 0;
         scrollRight = 0;
+        dataDirty = true;
     }
 
     @Override

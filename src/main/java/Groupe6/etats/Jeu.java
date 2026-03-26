@@ -1,32 +1,30 @@
 package Groupe6.etats;
 
+import Groupe6.aide.AideManager;
+import Groupe6.game.Game;
+import Groupe6.models.Grille;
+import Groupe6.save.SaveManager;
+import Groupe6.ui.Bouton;
+import Groupe6.ui.BoutonAide;
+import Groupe6.utilz.Constants;
+import Groupe6.utilz.FontCache;
+import Groupe6.utilz.LangManager;
+import Groupe6.view.VueGrille;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.RenderingHints;
-import java.awt.Graphics2D;
 
-import Groupe6.game.Game;
-import Groupe6.models.Grille;
-import Groupe6.ui.Bouton;
-import Groupe6.ui.BoutonAide;
-import Groupe6.ui.BoutonChangeurEtat;
-import Groupe6.utilz.Constants;
-import Groupe6.utilz.LangManager;
-import Groupe6.view.VueGrille;
-import Groupe6.aide.AideManager;
-import Groupe6.save.SaveManager;
-
-/**
- * État du jeu en cours : affiche et gère la grille Mathdoku.
- */
+/** État du jeu en cours : affiche et gère la grille Mathdoku. */
 public class Jeu extends Etats {
 
+  /*Variables d'instance*/
   private static final int LARGEUR_BOUTON = 200;
   private static final int HAUTEUR_BOUTON = 44;
   private static final int LARGEUR_BOUTON_UNDO = 140;
@@ -34,46 +32,11 @@ public class Jeu extends Etats {
   private static final int LARGEUR_BOUTON_NUM = 44;
   private static final int HAUTEUR_BOUTON_NUM = 32;
   private static final int ESPACEMENT_NUM = 8;
-  private static final Font FONT_TIMER = new Font("Berlin Sans FB Demi", Font.BOLD, 22);
-  private static final Font FONT_LABEL = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
-  private static final Font FONT_BOUTON = new Font("Berlin Sans FB Demi", Font.BOLD, 16);
-  private static final Font FONT_OVERLAY_TITRE = new Font("Berlin Sans FB Demi", Font.BOLD, 20);
-  private static final Font FONT_OVERLAY_TEXTE = new Font("Berlin Sans FB Demi", Font.PLAIN, 15);
-
-  private static class BoutonJeuAction extends Bouton {
-    private String label;
-    private final Runnable action;
-
-    BoutonJeuAction(int x, int y, int largeur, int hauteur, String label, Runnable action) {
-      super(x, y, largeur, hauteur);
-      this.label = label;
-      this.action = action;
-    }
-
-    @Override
-    public void appliquerAction() {
-      if (action != null) {
-        action.run();
-      }
-    }
-
-    @Override
-    public void draw(Graphics g, Groupe6.fond.Fond fond) {
-      super.draw(g, fond);
-      Graphics2D g2d = (Graphics2D) g;
-      g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-      g.setColor(fond.getCouleurTexte());
-      g.setFont(FONT_BOUTON);
-      int lw = g.getFontMetrics().stringWidth(label);
-      int lx = x + (largeur - lw) / 2;
-      int ly = y + (hauteur + g.getFontMetrics().getAscent()) / 2 - 2;
-      g.drawString(label, lx, ly);
-    }
-
-    void setLabel(String label) {
-      this.label = label;
-    }
-  }
+  private static final Font FONT_TIMER = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 22);
+  private static final Font FONT_LABEL = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
+  private static final Font FONT_BOUTON = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
+  private static final Font FONT_OVERLAY_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 20);
+  private static final Font FONT_OVERLAY_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 15);
 
   private Grille grille;
   private VueGrille vueGrille;
@@ -103,6 +66,44 @@ public class Jeu extends Etats {
   private boolean victoireAnnoncee = false;
   private String labelVictoireTitre;
   private String labelVictoireTexte;
+  private long lastTimerSecond = -1;
+  private String cachedTimerText = "00:00:00";
+
+  private static class BoutonJeuAction extends Bouton {
+    private String label;
+    private final Runnable action;
+
+    BoutonJeuAction(int x, int y, int largeur, int hauteur, String label, Runnable action) {
+      super(x, y, largeur, hauteur);
+      this.label = label;
+      this.action = action;
+    }
+
+    @Override
+    public void appliquerAction() {
+      if (action != null) {
+        action.run();
+      }
+    }
+
+    @Override
+    public void draw(Graphics g, Groupe6.fond.Fond fond) {
+      super.draw(g, fond);
+      Graphics2D g2d = (Graphics2D) g;
+      g2d.setRenderingHint(
+          RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      g.setColor(fond.getCouleurTexte());
+      g.setFont(FONT_BOUTON);
+      int lw = g.getFontMetrics().stringWidth(label);
+      int lx = x + (largeur - lw) / 2;
+      int ly = y + (hauteur + g.getFontMetrics().getAscent()) / 2 - 2;
+      g.drawString(label, lx, ly);
+    }
+
+    void setLabel(String label) {
+      this.label = label;
+    }
+  }
 
   public Jeu(Game game) {
     super(game);
@@ -112,12 +113,11 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
-    
+
     AideManager aideManager = AideManager.getInstance();
 
     String joueurActuel = game.getJoueurCourant();
-    if (joueurActuel == null)
-      joueurActuel = "testUser";
+    if (joueurActuel == null) joueurActuel = "testUser";
     grille = new Grille(joueurActuel, "test");
     victoireAnnoncee = false;
 
@@ -129,72 +129,56 @@ public class Jeu extends Etats {
     // Bouton retour au menu - position initiale
     int cx = 50;
     int cy = 950;
-    boutonRetour = new BoutonJeuAction(
-      cx,
-      cy,
-      LARGEUR_BOUTON,
-      HAUTEUR_BOUTON,
-      labelRetour,
-      this::quitterNiveauVersMenu);
+    boutonRetour =
+        new BoutonJeuAction(
+            cx, cy, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelRetour, this::quitterNiveauVersMenu);
     boutons.add(boutonRetour);
 
-    // Bouton aide 
+    // Bouton aide
     int aideX = cx + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
-    boutonAide = new BoutonAide(
-      aideX,
-      cy,
-      LARGEUR_BOUTON,
-      HAUTEUR_BOUTON,
-      labelAide,
-      this);
+    boutonAide = new BoutonAide(aideX, cy, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelAide, this);
     boutons.add(boutonAide);
 
     // Bouton undo
     int undoX = aideX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
-    boutonUndo = new BoutonJeuAction(
-      undoX,
-      cy,
-      LARGEUR_BOUTON_UNDO,
-      HAUTEUR_BOUTON,
-      labelUndo,
-      this::undoAction);
+    boutonUndo =
+        new BoutonJeuAction(
+            undoX, cy, LARGEUR_BOUTON_UNDO, HAUTEUR_BOUTON, labelUndo, this::undoAction);
     boutons.add(boutonUndo);
 
     // Bouton redo
     int redoX = undoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
-    boutonRedo = new BoutonJeuAction(
-      redoX,
-      cy,
-      LARGEUR_BOUTON_UNDO,
-      HAUTEUR_BOUTON,
-      labelRedo,
-      this::redoAction);
+    boutonRedo =
+        new BoutonJeuAction(
+            redoX, cy, LARGEUR_BOUTON_UNDO, HAUTEUR_BOUTON, labelRedo, this::redoAction);
     boutons.add(boutonRedo);
 
     // Bouton mode candidat
     int candidatX = redoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
-    boutonModeCandidat = new BoutonJeuAction(
-      candidatX,
-      cy,
-      LARGEUR_BOUTON,
-      HAUTEUR_BOUTON,
-      "",
-      () -> {
-        if (vueGrille != null) {
-          vueGrille.toggleModeCandidat();
-          updateLabelModeCandidat();
-        }
-      });
+    boutonModeCandidat =
+        new BoutonJeuAction(
+            candidatX,
+            cy,
+            LARGEUR_BOUTON,
+            HAUTEUR_BOUTON,
+            "",
+            () -> {
+              if (vueGrille != null) {
+                vueGrille.toggleModeCandidat();
+                updateLabelModeCandidat();
+              }
+            });
     boutons.add(boutonModeCandidat);
 
     int paramX = candidatX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
-    boutonParametres = new BoutonJeuAction(
-      paramX,
-      cy,
-      LARGEUR_BOUTON,
-      HAUTEUR_BOUTON,
-      labelParametres,
-      this::ouvrirParametresDepuisJeu);
+    boutonParametres =
+        new BoutonJeuAction(
+            paramX,
+            cy,
+            LARGEUR_BOUTON,
+            HAUTEUR_BOUTON,
+            labelParametres,
+            this::ouvrirParametresDepuisJeu);
     boutons.add(boutonParametres);
 
     initBoutonsNumeriques();
@@ -203,26 +187,76 @@ public class Jeu extends Etats {
 
   public void chargerNiveau(String idNiveau) {
     System.out.println("Chargement du niveau : " + idNiveau);
-    if (grille != null) {
-      sauvegarderEtatNiveauCourant();
+    if (isSameUnfinishedLevel(idNiveau)) {
+      restaurerNiveauEnMemoire();
+      return;
     }
-    String joueurActuel = game.getJoueurCourant();
-    if (joueurActuel == null)
-      joueurActuel = "testUser";
-    grille = new Grille(joueurActuel, idNiveau);
-    if (grille.estComplete()) {
-      long tempsTermine = grille.getTempsEcoule();
-      if (tempsTermine > 0) {
-        SaveManager.enregistrerMeilleurTemps(joueurActuel, idNiveau, tempsTermine);
-      }
-      grille = new Grille(joueurActuel, idNiveau, true);
-    }
+
+    sauvegarderNiveauCourantSiDifferent(idNiveau);
+
+    String joueurActuel = getJoueurActuelOuDefaut();
+    Grille grilleChargee = new Grille(joueurActuel, idNiveau);
+    grille = reinitialiserSiNiveauDejaComplete(joueurActuel, idNiveau, grilleChargee);
+
     victoireAnnoncee = false;
     vueGrille = new VueGrille(grille);
+    resetTimerDepuisGrille();
+    resetUIApresChargement();
+  }
+
+  private boolean isSameUnfinishedLevel(String idNiveau) {
+    if (grille == null) {
+      return false;
+    }
+    if (!idNiveau.equals(grille.getIdNiveau())) {
+      return false;
+    }
+    return !grille.estComplete();
+  }
+
+  private void restaurerNiveauEnMemoire() {
+    resetTimerDepuisGrille();
+    resetUIApresChargement();
+  }
+
+  private void sauvegarderNiveauCourantSiDifferent(String idNiveau) {
+    if (grille == null) {
+      return;
+    }
+    if (idNiveau.equals(grille.getIdNiveau())) {
+      return;
+    }
+    sauvegarderEtatNiveauCourant();
+  }
+
+  private String getJoueurActuelOuDefaut() {
+    String joueurActuel = game.getJoueurCourant();
+    if (joueurActuel == null) {
+      return "testUser";
+    }
+    return joueurActuel;
+  }
+
+  private Grille reinitialiserSiNiveauDejaComplete(String joueurActuel, String idNiveau, Grille grilleChargee) {
+    if (!grilleChargee.estComplete()) {
+      return grilleChargee;
+    }
+
+    long tempsTermine = grilleChargee.getTempsEcoule();
+    if (tempsTermine > 0) {
+      SaveManager.enregistrerMeilleurTemps(joueurActuel, idNiveau, tempsTermine);
+    }
+    return new Grille(joueurActuel, idNiveau, true);
+  }
+
+  private void resetTimerDepuisGrille() {
     timerPaused = false;
     pausedElapsedMillis = 0;
     baseElapsedMillis = grille.getTempsEcoule();
     startTimerMillis = System.currentTimeMillis();
+  }
+
+  private void resetUIApresChargement() {
     if (boutonAide != null) {
       boutonAide.resetProgression();
     }
@@ -482,12 +516,18 @@ public class Jeu extends Etats {
     int max = Math.min(9, Math.max(1, grille.getTaille()));
     for (int i = 1; i <= max; i++) {
       final int valeur = i;
-      BoutonJeuAction btn = new BoutonJeuAction(0, 0, LARGEUR_BOUTON_NUM, HAUTEUR_BOUTON_NUM, String.valueOf(i),
-        () -> {
-          if (vueGrille != null) {
-            vueGrille.saisirValeur(valeur);
-          }
-        });
+      BoutonJeuAction btn =
+          new BoutonJeuAction(
+              0,
+              0,
+              LARGEUR_BOUTON_NUM,
+              HAUTEUR_BOUTON_NUM,
+              String.valueOf(i),
+              () -> {
+                if (vueGrille != null) {
+                  vueGrille.saisirValeur(valeur);
+                }
+              });
       boutonsNumeriques.add(btn);
       boutons.add(btn);
     }
@@ -495,7 +535,8 @@ public class Jeu extends Etats {
 
   private void drawAideOverlay(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     int w = Constants.game_width;
     int h = Constants.game_height;
@@ -551,7 +592,10 @@ public class Jeu extends Etats {
     g2d.setFont(FONT_LABEL);
     FontMetrics fmBtn = g2d.getFontMetrics();
     String labelOk = "OK";
-    g2d.drawString(labelOk, btnX + (btnW - fmBtn.stringWidth(labelOk)) / 2, btnY + (btnH + fmBtn.getAscent()) / 2 - 2);
+    g2d.drawString(
+        labelOk,
+        btnX + (btnW - fmBtn.stringWidth(labelOk)) / 2,
+        btnY + (btnH + fmBtn.getAscent()) / 2 - 2);
   }
 
   private List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
@@ -601,10 +645,25 @@ public class Jeu extends Etats {
   private String formatTimer() {
     long elapsed = getElapsedMillis();
     long totalSeconds = elapsed / 1000;
+    if (totalSeconds != lastTimerSecond) {
+      lastTimerSecond = totalSeconds;
+      cachedTimerText = formatHms(totalSeconds);
+    }
+    return cachedTimerText;
+  }
+
+  private String formatHms(long totalSeconds) {
     long hours = totalSeconds / 3600;
     long minutes = (totalSeconds % 3600) / 60;
     long seconds = totalSeconds % 60;
-    return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    return twoDigits(hours) + ":" + twoDigits(minutes) + ":" + twoDigits(seconds);
+  }
+
+  private String twoDigits(long value) {
+    if (value >= 10) {
+      return Long.toString(value);
+    }
+    return "0" + value;
   }
 
   private long getElapsedMillis() {
@@ -645,11 +704,7 @@ public class Jeu extends Etats {
     grille.setTempsEcoule(tempsFinal);
     grille.saveGrille();
 
-    SaveManager.enregistrerMeilleurTemps(
-      grille.getNomJoueur(),
-      grille.getIdNiveau(),
-      tempsFinal
-    );
+    SaveManager.enregistrerMeilleurTemps(grille.getNomJoueur(), grille.getIdNiveau(), tempsFinal);
 
     showAideOverlay(labelVictoireTitre, labelVictoireTexte + " " + formatTimer());
     victoireAnnoncee = true;

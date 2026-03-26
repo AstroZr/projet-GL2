@@ -17,31 +17,41 @@ import Groupe6.utilz.LayoutScale;
 
 
 /**
- * Base abstraite pour tous les écrans/états du jeu (menu, grille, paramètres, etc.).
- * Fournit l'accès au Game, la liste des boutons et des helpers de hit-test souris.
+ * Base abstraite pour tous les écrans/états du jeu (menu, grille, paramètres, création, etc.).
+ * 
+ * Fournit:
+ * - Accès à la référence Game (pour changements d'état, joueur actif, etc.)
+ * - Gestion centralisée du fond/thème (partage entre tous les états)
+ * - Liste de boutons et détection hit-test souris
+ * - Gestion du layout (recalcul responsive lors resize fenêtre)
+ * 
+ * Tous les états concrets (Start, Menu, Jeu, etc.) héritent de cette classe.
  *
  * @author Lounol72
  * @version 1.0
  * @since 2026-01-28
  */
 public abstract class Etats implements MethodesEtats {
-    protected Game game;
-    protected ArrayList<Bouton> boutons;
+    // ====== RÉFÉRENCES GLOBALES ======
+    protected Game game;                   // Référence au contrôleur central (changements d'état, etc.)
+    protected ArrayList<Bouton> boutons;   // Boutons de cet état (gérés par les sous-classes)
 
-    /** Fond partagé par tous les états ; FondDegrade par défaut. */
+    // ====== THÈME GLOBAL (singleton par défaut) ======
+    /** Fond/thème partagé par TOUS les états ; FondDegrade par défaut. */
     private static Fond fondActuel = FondDegrade.getInstance();
 
-    /** Retourne le fond actif pour tous les états. */
+    /** Retourne le fond actif (thème couleurs + gradient). */
     protected static Fond getFond() {
         return fondActuel;
     }
 
-    /** Change le fond globalement pour tous les états. */
+    /** Change le fond globalement pour TOUS les états (ex: mode clair/foncé). */
     public static void setFondActuel(Fond nouveauFond) {
         fondActuel = nouveauFond;
     }
 
-    /** Dernières dimensions pour lesquelles le layout a été appliqué ; -1 force un layout au premier draw. */
+    // ====== GESTION RESPONSIVE ======
+    /** Dernières dimensions pour lesquelles updateLayout a été appelé. -1 force un layout au premier draw. */
     protected int lastLayoutWidth = -1;
     protected int lastLayoutHeight = -1;
 

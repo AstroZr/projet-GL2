@@ -7,24 +7,46 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 import Groupe6.fond.Fond;
+import Groupe6.utilz.FontCache;
 
 /**
- * Champ de saisie texte : zone rectangulaire, focus, placeholder, limite de caractères.
- * update() prépare les couleurs/texte ; draw() affiche ; handleKeyTyped() gère la saisie.
+ * Champ de saisie texte (input field) pour formulaires.
+ * 
+ * Caractéristiques:
+ * - Zone rectangulaire avec bordure
+ * - Focus clavier avec couleur d'accent
+ * - Placeholder (texte vide par défaut)
+ * - Limite de caractères configurable
+ * - Support complet couleurs thème (fond, texte, bordure, placeholder)
+ * - Cursor: barre verticale animée
+ * 
+ * Flux:
+ * 1. Clic souris: focusPris = true
+ * 2. Clavier: appel handleKeyTyped(char) pour ajout/suppression
+ * 3. update(fond): met à jour couleurs selon thème
+ * 4. draw(g, fond): affichage final
+ * 
+ * Utilisé dans: Creation (pseudo), Connexion (optionnel), etc.
  */
 public class TextInput {
 
-    private static final Font FONT_INPUT = new Font("Berlin Sans FB Demi", Font.PLAIN, 18);
-    private final Rectangle bounds;
-    private final StringBuilder text;
-    private String placeholder;
-    private final int maxLength;
-    private boolean focused;
+    // ====== FONT ======
+    private static final Font FONT_INPUT = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 18);
+    
+    // ====== GÉOMÉTRIE ======
+    private final Rectangle bounds;     // Zone du champ (x, y, width, height)
+    
+    // ====== CONTENU ======
+    private final StringBuilder text;   // Texte saisi (mutable pour efficacité)
+    private String placeholder;         // Texte affiché quand champ vide
+    private final int maxLength;        // Longueur max (0 = illimité)
+    private boolean focused;            // True si clavier attentif à ce champ
    
-    /** Valeurs précalculées par update() pour draw() */
-    private Color borderColor;
-    private Color textColor;
-    private String displayText;
+    // ====== RENDU (mis à jour par update) ======
+    /** Couleurs et texte précalculés par update() pour draw() */
+    private Color borderColor;          // Couleur bordure (accent si focus)
+    private Color textColor;            // Couleur texte (placeholder ou normal)
+    private String displayText;         // Texte affiché (texte ou placeholder)
 
     /**
      * @param x          Position X (pixels)

@@ -16,41 +16,61 @@ import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État d'écran de démarrage : fond en dégradé, logo animé, titre, boutons Création / Connexion.
- *
- * @author Lounol72
- * @version 1.0
- * @since 2026-01-28
+ * État « SPLASH/DÉMARRAGE » : première écran vue (animation logo, sélection joueur).
+ * 
+ * Affichage:
+ * - Fond en dégradé animé
+ * - Logo CalcuDoku (float haut/bas sinusoïdalement)
+ * - Image du titre "MathDoku" / "CalcuDoku"
+ * - Formulaire joueur ou 2 boutons (Créer/Connexion) selon profils existants
+ * 
+ * Animation du logo:
+ * - Float: sinuso amplitude 6% sur période 2.2s
+ * - Lerp: scale de 1.0 à valeur courante sur ~0.25s (smooth in)
+ * 
+ * Flux:
+ * - Si des profils existent: affiche boutons Créer/Connexion
+ * - Si pas de profils: affiche formulaire créer joueur
+ * 
+ * Héritage: Etats
  */
 public class Start extends Etats {
 
-    private static final int LARGEUR_BOUTON = 250;
-    private static final int HAUTEUR_BOUTON = 55;
-    private static final int LOGO_DEFAULT_SIZE = 320;
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int LARGEUR_BOUTON = 250;               // Largeur boutons Créer/Connexion
+    private static final int HAUTEUR_BOUTON = 55;               // Hauteur boutons
+    private static final int LOGO_DEFAULT_SIZE = 320;            // Taille logo par défaut
 
-    private int logoX;
-    private int logoY;
-    private int logoSize;
-    private BufferedImage logo;
+    // ====== ANIMATION LOGO ======
+    private int logoX;                                            // Position X du logo
+    private int logoY;                                            // Position Y du logo (base)
+    private int logoSize;                                         // Taille du logo (pixels)
+    private BufferedImage logo;                                   // Image du logo
+    
+    private static final float LOGO_FLOAT_AMPLITUDE = 0.06f;      // Amplitude float (6% de Y)
+    private static final float LOGO_FLOAT_PERIOD_SEC = 2.2f;      // Période sinuso (2.2 sec)
+    private static final float LOGO_DISPLAY_LERP = 0.25f;         // Durée lerp affichage (0.25 sec)
+    private final long logoAnimStartNanos = System.nanoTime();    // Timestamp démarrage
+    private float logoFloatScale = 1f;                            // Scale current (1.0 = normal)
+    private float displayedLogoScale = 1f;                        // Scale affiché (lerped)
 
-    private static final float LOGO_FLOAT_AMPLITUDE = 0.06f;
-    private static final float LOGO_FLOAT_PERIOD_SEC = 2.2f;
-    private static final float LOGO_DISPLAY_LERP = 0.25f;
-    private final long logoAnimStartNanos = System.nanoTime();
-    private float logoFloatScale = 1f;
-    private float displayedLogoScale = 1f;
+    // ====== IMAGE TITRE ======
+    private BufferedImage nameAppImage;   // Image du nom du jeu
+    private int nameAppX;                 // Position X du titre
+    private int nameAppY;                 // Position Y du titre
+    private int nameAppWidth;             // Largeur titre
+    private int nameAppHeight;            // Hauteur titre
 
-    private BufferedImage nameAppImage;
-    private int nameAppX;
-    private int nameAppY;
-    private int nameAppWidth;
-    private int nameAppHeight;
-
-    private LayoutScale layoutScale;
-    private String labelCreation;
-    private String labelConnexion;
-    private boolean synchroniseDepuisEntree = false;
-    private boolean hasProfiles = false;
+    // ====== SCALING & LAYOUT ======
+    private LayoutScale layoutScale;      // Responsable du redimensionnement responsive
+    
+    // ====== TEXTES LOCALISÉS ======
+    private String labelCreation;         // "Créer joueur"
+    private String labelConnexion;        // "Se connecter"
+    
+    // ====== ÉTAT ======
+    private boolean synchroniseDepuisEntree = false;  // Flag pour sync au premier draw
+    private boolean hasProfiles = false;              // True si des profils existent
 
     public Start(Game game) {
         super(game);

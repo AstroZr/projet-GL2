@@ -14,20 +14,37 @@ import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État « menu principal » : écran d’accueil avec boutons (jouer, paramètres, etc.).
- * Implémentation en cours ; les méthodes déléguent encore à UnsupportedOperationException.
+ * État « MENU PRINCIPAL » : écran d'accueil avec boutons pour naviguer.
+ * 
+ * Affichage:
+ * - Fond animé (dégradé + nuages)
+ * - 4 boutons centrés verticalement:
+ *   1. JOUER → sélection d'un niveau (Selection)
+ *   2. PARAMÈTRES → écran settings (Parametres)
+ *   3. MEILLEURS TEMPS → records (Records)
+ *   4. QUITTER → dialogue fermeture app
+ * 
+ * Interaction:
+ * - Survol/clic sur les boutons (BoutonChangeurEtat triggers EtatJeu transitions)
+ * - Mise à jour du layout à chaque resize fenêtre
+ * 
+ * Héritage: Etats (fourni le fond, la liste boutons, updateLayout)
  */
 public class Menu extends Etats {
 
-    private static final int LARGEUR_BOUTON = 400;
-    private static final int HAUTEUR_BOUTON = 55;
-    private static final int ESPACEMENT_BOUTONS_REF = 64;
+    // ====== DIMENSIONS DE RÉFÉRENCE ======
+    private static final int LARGEUR_BOUTON = 400;              // Largeur des boutons (pixels)
+    private static final int HAUTEUR_BOUTON = 55;               // Hauteur des boutons (pixels)
+    private static final int ESPACEMENT_BOUTONS_REF = 64;       // Espacement vertical entre boutons
 
-    private LayoutScale layoutScale;
-    private String labelJouer;
-    private String labelParametres;
-    private String labelRecords;
-    private String labelQuitter;
+    // ====== SCALING & LAYOUT ======
+    private LayoutScale layoutScale;  // Responsable du redimensionnement responsive
+    
+    // ====== TEXTES LOCALISÉS ======
+    private String labelJouer;        // "Jouer" (chargé depuis langue_XX.properties)
+    private String labelParametres;   // "Paramètres"
+    private String labelRecords;      // "Meilleurs temps"
+    private String labelQuitter;      // "Quitter"
 
     public Menu(Game game) {
         super(game);

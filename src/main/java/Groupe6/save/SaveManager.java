@@ -24,13 +24,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Gestionnaire centralisé de la persistance (save/load) pour CalcuDoku.
+ * 
+ * Utilise GSON pour la sérialisation JSON. Structure fichiers:
+ * saveGame/
+ *   annuaire.json                    (map: nomJoueur -> idJoueur)
+ *   meilleurs_temps.json             (best times tracking)
+ *   001/                             (dossier joueur)
+ *     settings.json                  (ParametresJoueur)
+ *     facile1.json, facile2.json ... (PartieSauvegardee per level)
+ *   002/, 003/, ...
+ * 
+ * Responsabilités:
+ * - Charger/sauvegarder les paramètres joueur (volume, langue, theme, etc.)
+ * - Charger/sauvegarder les parties en cours (grille, historique, temps, etc.)
+ * - Gérer l'annuaire joueur (créer IDs uniques 001, 002, 003...)
+ * - Charger les niveaux depuis resources/ (niveaux/facile1.json, etc.)
+ * - Tracking des meilleurs temps par joueur et niveau
+ * \n * Threading: Les opérations I/O bloquent le thread appelant (pas async)
+ */
 public class SaveManager {
 
-    private static final String SAVE_FOLDER = "saveGame/";
-    private static final String SETTINGS_FILE = "settings.json";
-    private static final String ANNUAIRE_FILE = "annuaire.json";
-    private static final String BEST_TIMES_FILE = "meilleurs_temps.json";
+    // ====== CHEMINS & FICHIERS ======
+    private static final String SAVE_FOLDER = "saveGame/";       // Dossier de sauvegarde
+    private static final String SETTINGS_FILE = "settings.json";  // Fichier paramètres joueur
+    private static final String ANNUAIRE_FILE = "annuaire.json";  // Annuaire joueurs (nom -> ID)
+    private static final String BEST_TIMES_FILE = "meilleurs_temps.json";  // Top times per level
 
+    // ====== GSON (JSON) ======
+    /** Instance GSON avec pretty-printing pour lisibilité JSON. */
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static Map<String, String> chargerAnnuaire() {
@@ -129,13 +152,7 @@ public class SaveManager {
     }
 
     public static void sauvegarderPartie(String nomJoueur, String idSauvegarde, PartieSauvegardee partie) {
-        Map<String, String> annuaire = chargerAnnuaire();
-
-        if (!annuaire.containsKey(nomJoueur)) {
-            return;
-        }
-
-        String idDossier = annuaire.get(nomJoueur);
+        String idDossier = getOuCreerIdJoueur(nomJoueur);
         String dossierJoueur = SAVE_FOLDER + idDossier + "/";
         String cheminFichier = dossierJoueur + idSauvegarde + ".json";
 

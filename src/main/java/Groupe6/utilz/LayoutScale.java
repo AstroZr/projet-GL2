@@ -1,19 +1,39 @@
 package Groupe6.utilz;
 
 /**
- * Facteurs de scaling pour le layout UI (Singleton mutable + Facade).
- * Centralise scaleX, scaleY, scale uniforme et helpers de position.
- * Mise à jour via update(w, h) avant utilisation.
+ * Gestionnaire du scaling responsive pour l'UI (Singleton mutable + Facade).
+ * 
+ * Responsabilités:
+ * - Centraliser tous les facteurs de scale (scaleX, scaleY, scale uniforme)
+ * - Fournir des helpers pour positionner et redimensionner les éléments
+ * - Support des ratios (pourcentage) de layout
+ * 
+ * Workflow:
+ * 1. GamePanel notifie Constants.game_width/height au resize
+ * 2. States appelle layoutScale.update(width, height) dans updateLayout
+ * 3. States utilisent scalex(), scaleY(), scaleUniform() pour calc positions
+ * 
+ * Formules:
+ * - scaleX = game_width / REF_WIDTH (ex: 1920/1920 = 1.0)
+ * - scaleY = game_height / REF_HEIGHT (ex: 1080/1080 = 1.0)
+ * - scale = min(scaleX, scaleY) pour aspect ratio preservé
+ * - position = baseValue * scale
+ * 
+ * Pattern: Singleton thread-safe
  */
 public class LayoutScale {
 
+    // ====== SINGLETON ======
     private volatile static LayoutScale INSTANCE = null;
 
-    private int width;
-    private int height;
-    private float scaleX;
-    private float scaleY;
-    private float scale;
+    // ====== DIMENSIONS ACTUELLES ======
+    private int width;    // game_width courant
+    private int height;   // game_height courant
+    
+    // ====== FACTEURS DE SCALE ======
+    private float scaleX; // Ratio horizontal (1.0 = référence)
+    private float scaleY; // Ratio vertical
+    private float scale;  // Scale uniforme = min(scaleX, scaleY)
 
     private LayoutScale() {
     }
