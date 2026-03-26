@@ -1,6 +1,7 @@
 package Groupe6.etats;
 
 import Groupe6.game.Game;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.BoutonCreation;
 import Groupe6.ui.TextInput;
 import Groupe6.utilz.Constants;
@@ -69,6 +70,10 @@ public class Creation extends Etats {
     private String titreCreation;                // "Création de compte"
     private String placeholderIdentifiant;       // Placeholder champ texte
     private String labelBoutonCreationProfil;    // Label bouton "Créer"
+    private String messageErreurDoublon;         // Message erreur pseudo existant
+
+    // ====== ÉTAT ======
+    private String messageErreur;               // Message d'erreur affiché, null si aucun
 
   public Creation(Game game) {
     super(game);
@@ -175,6 +180,14 @@ public class Creation extends Etats {
 
     textInput.draw(g, getFond());
     bouton.draw(g, getFond());
+
+    if (messageErreur != null) {
+      g.setFont(titleFont);
+      g.setColor(java.awt.Color.RED);
+      int ew = g.getFontMetrics().stringWidth(messageErreur);
+      int errorY = bouton.getY() + bouton.getHauteur() + g.getFontMetrics().getAscent() + 8;
+      g.drawString(messageErreur, centerX - ew / 2, errorY);
+    }
   }
 
   @Override
@@ -216,9 +229,13 @@ public class Creation extends Etats {
     if (bouton.isSourisEnfonce() && isIn(e, bouton)) {
       String pseudo = getPseudoSaisi();
       if (pseudo != null && !pseudo.trim().isEmpty()) {
-
-        bouton.setPseudo(pseudo);
-        bouton.appliquerAction();
+        if (SaveManager.listerJoueurs().contains(pseudo.trim())) {
+          messageErreur = messageErreurDoublon;
+        } else {
+          messageErreur = null;
+          bouton.setPseudo(pseudo);
+          bouton.appliquerAction();
+        }
       }
     }
     bouton.setSourisEnfonce(false);
@@ -229,6 +246,7 @@ public class Creation extends Etats {
     titreCreation = LangManager.get("creation.titre");
     placeholderIdentifiant = LangManager.get("creation.identifiant");
     labelBoutonCreationProfil = LangManager.get("creation.bouton");
+    messageErreurDoublon = LangManager.get("creation.erreur.doublon");
 
     if (textInput != null) {
       textInput.setPlaceholder(placeholderIdentifiant);

@@ -25,16 +25,12 @@ public class FondFonce extends AbstractFondDegrade {
     private static final Color C_ACCENT              = new Color(0x5C, 0xCF, 0xE8);
     private static final Color C_PLACEHOLDER         = new Color(0x48, 0x50, 0x68);
 
-    private static volatile FondFonce instance = null;
+    private static final FondFonce INSTANCE = new FondFonce();
 
     private FondFonce() { super(); }
 
     public static FondFonce getInstance() {
-        if (instance != null) return instance;
-        synchronized (FondFonce.class) {
-            if (instance == null) instance = new FondFonce();
-        }
-        return instance;
+        return INSTANCE;
     }
 
     @Override

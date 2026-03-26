@@ -125,6 +125,7 @@ public class Game implements Runnable {
     }
 
     public void setJoueurCourant(String pseudo) {
+        if (pseudo == null || pseudo.isBlank()) return;
         this.joueurCourant = pseudo;
         if (parametres != null) {
             parametres.chargerParametresJoueur(pseudo);

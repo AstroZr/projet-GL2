@@ -2,6 +2,8 @@ package Groupe6.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import Groupe6.aide.Aide;
 import Groupe6.save.Niveau;
@@ -37,10 +39,14 @@ public class Grille {
     // ====== PATTERN OBSERVER ======
     private List<GrilleObserver> observers = new ArrayList<>();  // Listeners notifiés des changements
 
+    // ====== THREAD SAFETY ======
+    private final ReadWriteLock celluleMatriceLock = new ReentrantReadWriteLock();  // Protège matriceCellules
+    private final ReadWriteLock zonesLock = new ReentrantReadWriteLock();           // Protège listeZones
+
     // ====== DONNÉES DE LA GRILLE ======
     private final int taille;                       // Taille N de la grille N×N
-    private volatile Cellule[][] matriceCellules;     // Grille principale
-    private volatile List<ZoneCalcul> listeZones;     // Zones avec contraintes (+, -, *, /)
+    private Cellule[][] matriceCellules;            // Grille principale (protégée par celluleMatriceLock)
+    private List<ZoneCalcul> listeZones;            // Zones avec contraintes (protégée par zonesLock)
     
     // ====== SÉLECTION ======
     private Cellule celluleSelectionnee;            // Cellule actuellement sélectionnée (null si aucune)
@@ -57,6 +63,56 @@ public class Grille {
     
     // ====== ÉTAT ======
     private boolean estComplete;                    // true si grille complète et valide
+
+    // ====== THREAD-SAFE HELPER METHODS ======
+    
+    /**
+     * Accède à une cellule de façon thread-safe (lecture).
+     */
+    private Cellule getCelluleThreadSafe(int ligne, int colonne) {
+        celluleMatriceLock.readLock().lock();
+        try {
+            return matriceCellules[ligne][colonne];
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
+    }
+    
+    /**
+     * Modifie une cellule de façon thread-safe (écriture).
+     */
+    private void setCelluleThreadSafe(int ligne, int colonne, Cellule cellule) {
+        celluleMatriceLock.writeLock().lock();
+        try {
+            matriceCellules[ligne][colonne] = cellule;
+        } finally {
+            celluleMatriceLock.writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Ajoute une zone de façon thread-safe.
+     */
+    private void addZoneThreadSafe(ZoneCalcul zone) {
+        zonesLock.writeLock().lock();
+        try {
+            listeZones.add(zone);
+        } finally {
+            zonesLock.writeLock().unlock();
+        }
+    }
+    
+    /**
+     * Récupère la liste des zones de façon thread-safe (copie).
+     */
+    private List<ZoneCalcul> getListeZonesThreadSafe() {
+        zonesLock.readLock().lock();
+        try {
+            return new ArrayList<>(listeZones);
+        } finally {
+            zonesLock.readLock().unlock();
+        }
+    }
 
     /**
      * Constructeur de la grille a partir d'un niveau ou d'une sauvegarde de partie.
@@ -128,11 +184,18 @@ public class Grille {
     }
 
     private void relierZonesAuxCellulesSauvegardees() {
-        for (ZoneCalcul zone : listeZones) {
-            for (Cellule celluleZone : zone.getListeCellules()) {
-                Cellule celluleSauvegardee = matriceCellules[celluleZone.getLigne()][celluleZone.getColonne()];
-                celluleSauvegardee.setZoneCalcul(zone);
+        celluleMatriceLock.readLock().lock();
+        zonesLock.readLock().lock();
+        try {
+            for (ZoneCalcul zone : listeZones) {
+                for (Cellule celluleZone : zone.getListeCellules()) {
+                    Cellule celluleSauvegardee = matriceCellules[celluleZone.getLigne()][celluleZone.getColonne()];
+                    celluleSauvegardee.setZoneCalcul(zone);
+                }
             }
+        } finally {
+            zonesLock.readLock().unlock();
+            celluleMatriceLock.readLock().unlock();
         }
     }
 
@@ -180,7 +243,7 @@ public class Grille {
      * @param zone La zone à ajouter
      */
     public void ajouterZone(ZoneCalcul zone) {
-        listeZones.add(zone);
+        addZoneThreadSafe(zone);
     }
 
     // === GESTION DU JEU ===
@@ -261,7 +324,7 @@ public class Grille {
     }
 
     /**
-     * Ajoute un chiffre dans la cellule sélectionnée (ou une cellule spécifique).
+     * Ajoute un chiffre dans la cellule sélectionnée (ou une cellule spécifique) - thread-safe.
      * Vérifie immédiatement les contraintes de base (doublons).
      * 
      * @param ligne   Ligne cible
@@ -272,77 +335,94 @@ public class Grille {
         if (estHorsLimites(ligne, colonne))
             return;
 
-        Cellule cellule = matriceCellules[ligne][colonne];
-        if (!cellule.estModifiable())
-            return; // Si on a des cases pré-remplies (exemple le tuto ?)
+        celluleMatriceLock.readLock().lock();
+        try {
+            Cellule cellule = matriceCellules[ligne][colonne];
+            if (!cellule.estModifiable())
+                return; // Si on a des cases pré-remplies (exemple le tuto ?)
 
-        enregistrerCoup(ligne, colonne, valeur, false); // enregistre la modification
-        cellule.setValeur(valeur);
-        cellule.getListeCandidat().clear();
+            enregistrerCoup(ligne, colonne, valeur, false); // enregistre la modification
+            cellule.setValeur(valeur);
+            cellule.getListeCandidat().clear();
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
         validerGrille();
         notifierObservateurs();
     }
 
     /**
-     * Supprime le chiffre de la cellule spécifiée.
+     * Supprime le chiffre de la cellule spécifiée - thread-safe.
      */
     public void supprimerChiffre(int ligne, int colonne) {
         if (estHorsLimites(ligne, colonne))
             return;
 
-        Cellule cellule = matriceCellules[ligne][colonne];
-        if (!cellule.estModifiable())
-            return;
+        celluleMatriceLock.readLock().lock();
+        try {
+            Cellule cellule = matriceCellules[ligne][colonne];
+            if (!cellule.estModifiable())
+                return;
 
-        enregistrerCoup(ligne, colonne, 0, false); // enregistre la modification
-        cellule.setValeur(0);
+            enregistrerCoup(ligne, colonne, 0, false); // enregistre la modification
+            cellule.setValeur(0);
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
         validerGrille();
         notifierObservateurs();
     }
 
     /**
-     * Valide l'état de la grille (détecte les doublons et valide les zones).
+     * Valide l'état de la grille (détecte les doublons et valide les zones) - thread-safe.
      */
     public void validerGrille() {
-        estComplete = true;
+        celluleMatriceLock.writeLock().lock();
+        zonesLock.readLock().lock();
+        try {
+            estComplete = true;
 
-        // Réinitialiser les erreurs
-        for (int i = 0; i < taille; i++) {
-            for (int j = 0; j < taille; j++) {
-                matriceCellules[i][j].setEstErreurDuplique(false);
-                matriceCellules[i][j].setEstValide(true);
-                if (matriceCellules[i][j].estVide()) {
-                    estComplete = false;
-                }
-            }
-        }
-
-        // Vérifier les doublons (lignes et colonnes)
-        for (int i = 0; i < taille; i++) {
-            verifierDoublonsLigne(i);
-            verifierDoublonsColonne(i);
-        }
-
-        // Vérifier les zones via la méthode verifierMaths()
-        for (ZoneCalcul zone : listeZones) {
-            boolean estCalculValide = zone.verifierMaths();
-            boolean zoneIncomplete = estZoneIncomplete(zone);
-
-            // Si le calcul est faux, on marque les cellules comme invalides
-            if (!estCalculValide) {
-                for (Cellule c : zone.getListeCellules()) {
-                    // On ne marque invalide que si la zone est remplie
-                    if (!zoneIncomplete) {
-                        c.setEstValide(false);
+            // Réinitialiser les erreurs
+            for (int i = 0; i < taille; i++) {
+                for (int j = 0; j < taille; j++) {
+                    matriceCellules[i][j].setEstErreurDuplique(false);
+                    matriceCellules[i][j].setEstValide(true);
+                    if (matriceCellules[i][j].estVide()) {
                         estComplete = false;
                     }
                 }
             }
-        }
 
-        // Dernier contrôle : si on a des erreurs, le jeu n'est pas fini
-        if (aDesErreurs()) {
-            estComplete = false;
+            // Vérifier les doublons (lignes et colonnes)
+            for (int i = 0; i < taille; i++) {
+                verifierDoublonsLigne(i);
+                verifierDoublonsColonne(i);
+            }
+
+            // Vérifier les zones via la méthode verifierMaths()
+            for (ZoneCalcul zone : listeZones) {
+                boolean estCalculValide = zone.verifierMaths();
+                boolean zoneIncomplete = estZoneIncomplete(zone);
+
+                // Si le calcul est faux, on marque les cellules comme invalides
+                if (!estCalculValide) {
+                    for (Cellule c : zone.getListeCellules()) {
+                        // On ne marque invalide que si la zone est remplie
+                        if (!zoneIncomplete) {
+                            c.setEstValide(false);
+                            estComplete = false;
+                        }
+                    }
+                }
+            }
+
+            // Dernier contrôle : si on a des erreurs, le jeu n'est pas fini
+            if (aDesErreurs()) {
+                estComplete = false;
+            }
+        } finally {
+            zonesLock.readLock().unlock();
+            celluleMatriceLock.writeLock().unlock();
         }
     }
 
@@ -366,13 +446,18 @@ public class Grille {
      * @return true si la grille a des erreurs, false sinon
      */
     private boolean aDesErreurs() {
-        for (int i = 0; i < taille; i++) {
-            for (int j = 0; j < taille; j++) {
-                if (matriceCellules[i][j].estErreurDuplique() || !matriceCellules[i][j].estValide())
-                    return true;
+        celluleMatriceLock.readLock().lock();
+        try {
+            for (int i = 0; i < taille; i++) {
+                for (int j = 0; j < taille; j++) {
+                    if (matriceCellules[i][j].estErreurDuplique() || !matriceCellules[i][j].estValide())
+                        return true;
+                }
             }
+            return false;
+        } finally {
+            celluleMatriceLock.readLock().unlock();
         }
-        return false;
     }
 
     /**
@@ -445,7 +530,7 @@ public class Grille {
     }
 
     /**
-     * Retourne la cellule aux coordonnées données
+     * Retourne la cellule aux coordonnées données (thread-safe)
      * 
      * @param ligne   Ligne de la cellule
      * @param colonne Colonne de la cellule
@@ -454,31 +539,45 @@ public class Grille {
     public Cellule getCellule(int ligne, int colonne) {
         if (estHorsLimites(ligne, colonne))
             return null;
-        return matriceCellules[ligne][colonne];
+        return getCelluleThreadSafe(ligne, colonne);
     }
 
     /**
-     * Retourne la matrice complète des cellules.
+     * Retourne la matrice complète des cellules (copie thread-safe).
      * 
-     * @return la matrice des cellules
+     * @return une copie de la matrice des cellules
      */
     public Cellule[][] getMatriceCellules() {
-        return matriceCellules;
+        celluleMatriceLock.readLock().lock();
+        try {
+            Cellule[][] copie = new Cellule[taille][taille];
+            for (int i = 0; i < taille; i++) {
+                System.arraycopy(matriceCellules[i], 0, copie[i], 0, taille);
+            }
+            return copie;
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
     }
 
     /**
-     * Retourne une liste plate de toutes les cellules de la grille.
+     * Retourne une liste plate de toutes les cellules de la grille (thread-safe).
      * 
      * @return la liste de toutes les cellules
      */
     public List<Cellule> getListeCellules() {
-        List<Cellule> liste = new ArrayList<>(taille * taille);
-        for (int i = 0; i < taille; i++) {
-            for (int j = 0; j < taille; j++) {
-                liste.add(matriceCellules[i][j]);
+        celluleMatriceLock.readLock().lock();
+        try {
+            List<Cellule> liste = new ArrayList<>(taille * taille);
+            for (int i = 0; i < taille; i++) {
+                for (int j = 0; j < taille; j++) {
+                    liste.add(matriceCellules[i][j]);
+                }
             }
+            return liste;
+        } finally {
+            celluleMatriceLock.readLock().unlock();
         }
-        return liste;
     }
 
     /**
@@ -491,12 +590,12 @@ public class Grille {
     }
 
     /**
-     * Retourne la liste des zones de calcul
+     * Retourne la liste des zones de calcul (copie thread-safe)
      * 
-     * @return la liste des zones de calcul
+     * @return une copie de la liste des zones de calcul
      */
     public List<ZoneCalcul> getListeZones() {
-        return listeZones;
+        return getListeZonesThreadSafe();
     }
 
     /**

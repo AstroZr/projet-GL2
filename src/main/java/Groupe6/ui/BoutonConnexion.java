@@ -14,7 +14,7 @@ public class BoutonConnexion extends BoutonChangeurEtat {
      * Constructeur du bouton de connexion.
      */
     public BoutonConnexion(int x, int y, int largeur, int hauteur) {
-        super(x, y, largeur, hauteur, EtatJeu.MENU, "Connexion");
+        super(x, y, largeur, hauteur, EtatJeu.CONNEXION, "Connexion");
     }
 
     /** Dessine l’image ou, à défaut, un rectangle avec le libellé « Connexion ». */
@@ -23,9 +23,10 @@ public class BoutonConnexion extends BoutonChangeurEtat {
         super.draw(g, fond);
     }
 
-    /** Déclenche la connexion du joueur puis change l'état vers MENU. */
+    /** Déclenche la connexion du joueur en changeant d'état vers CONNEXION. */
+    @Override
     public void appliquerAction() {
-      // TODO: Ajouter la fonctionnalité de connexion du joueur
+        // Change vers l'écran de sélection des profils
         super.appliquerAction();
     }
 }

@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gestionnaire centralisé de la persistance (save/load) pour CalcuDoku.
@@ -46,6 +48,8 @@ import java.util.Map;
  */
 public class SaveManager {
 
+    private static final Logger logger = LoggerFactory.getLogger(SaveManager.class);
+
     // ====== CHEMINS & FICHIERS ======
     private static final String SAVE_FOLDER = "saveGame/";       // Dossier de sauvegarde
     private static final String SETTINGS_FILE = "settings.json";  // Fichier paramètres joueur
@@ -68,7 +72,7 @@ public class SaveManager {
                     return annuaire;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Erreur lors du chargement de l'annuaire", e);
             }
         }
 
@@ -84,7 +88,7 @@ public class SaveManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur lors de la sauvegarde de l'annuaire", e);
         }
     }
 
@@ -126,7 +130,7 @@ public class SaveManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur lors de la sauvegarde des paramètres pour joueur: {}", parametres.getNomJoueur(), e);
         }
     }
 
@@ -144,7 +148,7 @@ public class SaveManager {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, ParametresJoueur.class);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Erreur lors du chargement des paramètres pour joueur: {}", nomJoueur, e);
             }
         }
 
@@ -164,7 +168,7 @@ public class SaveManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur lors de la sauvegarde de la partie pour joueur: {}, niveau: {}", nomJoueur, idSauvegarde, e);
         }
     }
 
@@ -182,7 +186,7 @@ public class SaveManager {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, PartieSauvegardee.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Erreur lors du chargement de la partie pour joueur: {}, niveau: {}", nomJoueur, idSauvegarde, e);
             }
         }
 
@@ -208,7 +212,7 @@ public class SaveManager {
                     return temps;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Erreur lors du chargement des meilleurs temps pour joueur: {}", nomJoueur, e);
             }
         }
 
@@ -235,7 +239,7 @@ public class SaveManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur lors de la sauvegarde des meilleurs temps pour joueur: {}", nomJoueur, e);
         }
     }
 
@@ -289,7 +293,7 @@ public class SaveManager {
                     ids.add(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Erreur lors du chargement de l'index des niveaux", e);
         }
         return ids;
     }
@@ -345,10 +349,10 @@ public class SaveManager {
                 return new Niveau(id, taille, matrice, listeZones, matriceCorrection);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Erreur lors du chargement du niveau: {}", idNiveau, e);
             }
         } else {
-            System.err.println("Fichier de niveau introuvable : " + cheminRessource);
+            logger.error("Fichier de niveau introuvable: {}", cheminRessource);
         }
 
         return null;

@@ -1,5 +1,7 @@
 package Groupe6.ui;
 
+import Groupe6.etats.EtatJeu;
+
 /**
  * Bouton permettant d'ouvrir le menu des paramètres du jeu.
  * 
@@ -10,7 +12,7 @@ package Groupe6.ui;
  * UTILISATION :
  * Bouton utilisé dans le menu principal pour accéder aux paramètres
  */
-public class BoutonParametre extends Bouton {
+public class BoutonParametre extends BoutonChangeurEtat {
 
     /**
      * Constructeur du bouton paramètre.
@@ -21,15 +23,6 @@ public class BoutonParametre extends Bouton {
      * @param hauteur Hauteur du bouton
      */
     public BoutonParametre(int x, int y, int largeur, int hauteur) {
-        super(x, y, largeur, hauteur);
-    }
-    
-    /**
-     * Action à effectuer lors du clic sur le bouton.
-     * Ouvre le menu des paramètres.
-     */
-    @Override
-    public void appliquerAction() {
-        //TODO
+        super(x, y, largeur, hauteur, EtatJeu.PARAMETRES, "Paramètres");
     }
 }

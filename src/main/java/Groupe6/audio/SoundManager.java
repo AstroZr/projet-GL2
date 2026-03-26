@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gestionnaire centralisé des effets sonores du jeu.
@@ -26,6 +28,8 @@ import java.util.Map;
  *   SoundManager.getInstance().playTransition(); // Changement écran
  */
 public class SoundManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(SoundManager.class);
 
     // ====== SINGLETON ======
     private static SoundManager instance;  // Unique instance
@@ -108,7 +112,7 @@ public class SoundManager {
                 clip.start();
             }
         } catch (Exception e) {
-            // Silencieux : ne pas crasher si le son échoue
+            logger.debug("Impossible de jouer le son (environnement sans audio ?): {}", e.getMessage());
         }
     }
 

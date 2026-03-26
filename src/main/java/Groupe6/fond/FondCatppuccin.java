@@ -26,7 +26,7 @@ public class FondCatppuccin extends AbstractFondDegrade {
     private static final Color C_PLACEHOLDER        = new Color(0xA6, 0xAD, 0xC8);
     private static final Color C_BAS_GRADIENT       = new Color(0x45, 0x47, 0x5A);
 
-    private static volatile FondCatppuccin instance = null;
+    private static final FondCatppuccin INSTANCE = new FondCatppuccin();
     private static BufferedImage wallpaper;
 
     private FondCatppuccin() {
@@ -35,13 +35,7 @@ public class FondCatppuccin extends AbstractFondDegrade {
     }
 
     public static FondCatppuccin getInstance() {
-        if (instance != null) return instance;
-        synchronized (FondCatppuccin.class) {
-            if (instance == null) {
-                instance = new FondCatppuccin();
-            }
-        }
-        return instance;
+        return INSTANCE;
     }
 
     @Override

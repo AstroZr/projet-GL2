@@ -7,6 +7,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gestionnaire centralisé de la localisation (i18n) du jeu.
@@ -26,6 +28,8 @@ import java.util.ResourceBundle;
  *   String titre = LangManager.get("menu.jouer");  // Charger une chaîne
  */
 public final class LangManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(LangManager.class);
 
     // ====== ÉTAT GLOBAL ======
     private static String langueCode = "fr";       // Langue courante ("fr", "en", etc.)
@@ -57,7 +61,7 @@ public final class LangManager {
         try {
             return bundle.getString(key);
         } catch (MissingResourceException e) {
-            System.err.printf("[LangManager] Clé absente : '%s' pour la langue '%s'%n", key, langueCode);
+            logger.warn("Clé absente : '{}' pour la langue '{}'", key, langueCode);
             // Fallback vers le français
             if (!"fr".equals(langueCode)) {
                 try {
@@ -74,7 +78,7 @@ public final class LangManager {
         try {
             return ResourceBundle.getBundle("langue", locale, new Utf8Control());
         } catch (MissingResourceException e) {
-            System.err.printf("[LangManager] Bundle introuvable pour '%s', fallback fr%n", code);
+            logger.warn("Bundle introuvable pour '{}', fallback fr", code);
             try {
                 return ResourceBundle.getBundle("langue", Locale.forLanguageTag("fr"), new Utf8Control());
             } catch (MissingResourceException e2) {

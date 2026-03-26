@@ -38,7 +38,7 @@ public abstract class Etats implements MethodesEtats {
 
     // ====== THÈME GLOBAL (singleton par défaut) ======
     /** Fond/thème partagé par TOUS les états ; FondDegrade par défaut. */
-    private static Fond fondActuel = FondDegrade.getInstance();
+    private static volatile Fond fondActuel = FondDegrade.getInstance();
 
     /** Retourne le fond actif (thème couleurs + gradient). */
     protected static Fond getFond() {

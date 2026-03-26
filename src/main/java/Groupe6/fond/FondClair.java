@@ -25,16 +25,12 @@ public class FondClair extends AbstractFondDegrade {
     private static final Color C_ACCENT              = new Color(0x2A, 0x6E, 0xD6);
     private static final Color C_PLACEHOLDER         = new Color(0x9C, 0xA3, 0xAF);
 
-    private static volatile FondClair instance = null;
+    private static final FondClair INSTANCE = new FondClair();
 
     private FondClair() { super(); }
 
     public static FondClair getInstance() {
-        if (instance != null) return instance;
-        synchronized (FondClair.class) {
-            if (instance == null) instance = new FondClair();
-        }
-        return instance;
+        return INSTANCE;
     }
 
     @Override
