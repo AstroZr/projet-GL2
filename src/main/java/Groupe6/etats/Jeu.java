@@ -68,6 +68,12 @@ public class Jeu extends Etats {
   private String labelVictoireTexte;
   private long lastTimerSecond = -1;
   private String cachedTimerText = "00:00:00";
+  private List<String> overlayAideLinesCache = new ArrayList<>();
+  private String overlayAideTexteCacheKey = "";
+  private int overlayAideMaxWidthCache = -1;
+  private static final String[] TWO_DIGITS = {
+    "00", "01", "02", "03", "04", "05", "06", "07", "08", "09"
+  };
 
   private static class BoutonJeuAction extends Bouton {
     private String label;
@@ -275,6 +281,9 @@ public class Jeu extends Etats {
     this.overlayAideTitre = titre != null ? titre : "";
     this.overlayAideTexte = texte != null ? texte : "";
     this.overlayAideVisible = true;
+    this.overlayAideTexteCacheKey = "";
+    this.overlayAideMaxWidthCache = -1;
+    this.overlayAideLinesCache.clear();
   }
 
   public void hideAideOverlay() {
@@ -574,7 +583,8 @@ public class Jeu extends Etats {
     int textX = boxX + 24;
     int textY = boxY + 80;
     int maxWidth = boxW - 48;
-    for (String line : wrapText(overlayAideTexte, fmTexte, maxWidth)) {
+    List<String> lines = getOverlayLines(fmTexte, maxWidth);
+    for (String line : lines) {
       g2d.drawString(line, textX, textY);
       textY += fmTexte.getHeight() + 2;
     }
@@ -619,6 +629,15 @@ public class Jeu extends Etats {
     return lines;
   }
 
+  private List<String> getOverlayLines(FontMetrics fm, int maxWidth) {
+    if (!overlayAideTexte.equals(overlayAideTexteCacheKey) || maxWidth != overlayAideMaxWidthCache) {
+      overlayAideLinesCache = wrapText(overlayAideTexte, fm, maxWidth);
+      overlayAideTexteCacheKey = overlayAideTexte;
+      overlayAideMaxWidthCache = maxWidth;
+    }
+    return overlayAideLinesCache;
+  }
+
   private void drawPanelDroit(Graphics g) {
     int panelX = Math.max(20, Constants.game_width - 250);
     int panelY = Math.max(130, (Constants.game_height - 360) / 2);
@@ -660,10 +679,13 @@ public class Jeu extends Etats {
   }
 
   private String twoDigits(long value) {
+    if (value >= 0 && value < 10) {
+      return TWO_DIGITS[(int) value];
+    }
     if (value >= 10) {
       return Long.toString(value);
     }
-    return "0" + value;
+    return "00";
   }
 
   private long getElapsedMillis() {

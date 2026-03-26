@@ -2,6 +2,7 @@ package Groupe6.etats;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -97,9 +98,10 @@ public class Connexion extends Etats {
             // Initiale
             g.setFont(fontInitiale);
             g.setColor(Color.WHITE);
+            FontMetrics initialeFm = g.getFontMetrics(fontInitiale);
             if (initialeLargeur < 0 || initialeAscent < 0) {
-                initialeLargeur = g.getFontMetrics().stringWidth(initiale);
-                initialeAscent = g.getFontMetrics().getAscent();
+                initialeLargeur = initialeFm.stringWidth(initiale);
+                initialeAscent = initialeFm.getAscent();
             }
             g.drawString(initiale,
                 avatarX + (avatarSize - initialeLargeur) / 2,
@@ -108,20 +110,21 @@ public class Connexion extends Etats {
             // Pseudo sous l'avatar (tronqué si trop long)
             g.setFont(fontPseudo);
             g.setColor(fond.getCouleurTexte());
-            ensurePseudoAffiche(g);
+            FontMetrics pseudoFm = g.getFontMetrics(fontPseudo);
+            ensurePseudoAffiche(pseudoFm);
             int textAreaTop = avatarY + avatarSize;
-            int textY = textAreaTop + (y + hauteur - textAreaTop + g.getFontMetrics().getAscent()) / 2 - 2;
+            int textY = textAreaTop + (y + hauteur - textAreaTop + pseudoFm.getAscent()) / 2 - 2;
             g.drawString(pseudoAffiche, x + (largeur - pseudoAffichePixels) / 2, textY);
         }
 
-        private void ensurePseudoAffiche(Graphics g) {
+        private void ensurePseudoAffiche(FontMetrics fm) {
             int largeurDispo = largeur - 10;
             if (pseudoAffiche != null && pseudoAfficheLargeur == largeurDispo) {
                 return;
             }
 
             String nom = pseudo;
-            while (g.getFontMetrics().stringWidth(nom) > largeurDispo && nom.length() > 1) {
+            while (fm.stringWidth(nom) > largeurDispo && nom.length() > 1) {
                 nom = nom.substring(0, nom.length() - 1);
             }
             if (!nom.equals(pseudo)) {
@@ -129,7 +132,7 @@ public class Connexion extends Etats {
             }
             pseudoAffiche = nom;
             pseudoAfficheLargeur = largeurDispo;
-            pseudoAffichePixels = g.getFontMetrics().stringWidth(pseudoAffiche);
+            pseudoAffichePixels = fm.stringWidth(pseudoAffiche);
         }
 
         /** Couleur déterministe basée sur le hash du pseudo. */

@@ -129,6 +129,9 @@ public class Game implements Runnable {
         if (parametres != null) {
             parametres.chargerParametresJoueur(pseudo);
         }
+        if (records != null) {
+            records.invaliderDonnees();
+        }
     }
 
     private void notifierChangementLangue() {

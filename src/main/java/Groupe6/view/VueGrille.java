@@ -70,7 +70,7 @@ public class VueGrille {
     private int offsetY;               // Position Y de la grille sur l'écran
     private boolean modeCandidat;      // Mode candidat actif (affiche petits chiffres)
     private Color contourGrilleCache;
-    private Color contourSourceCache;
+    private Fond contourFondCache;
 
     public VueGrille(Grille grille) {
         this.grille = grille;
@@ -96,9 +96,9 @@ public class VueGrille {
 
     private void dessinerContourGrille(Graphics2D g2d, Fond fond) {
         g2d.setStroke(STROKE_CONTOUR_GRILLE);
-        Color texte = fond.getCouleurTexte();
-        if (!texte.equals(contourSourceCache)) {
-            contourSourceCache = texte;
+        if (contourGrilleCache == null || contourFondCache != fond) {
+            Color texte = fond.getCouleurTexte();
+            contourFondCache = fond;
             contourGrilleCache = new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 220);
         }
         g2d.setColor(contourGrilleCache);

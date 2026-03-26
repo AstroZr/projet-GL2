@@ -116,6 +116,9 @@ public class Records extends Etats {
 
     @Override
     public void update() {
+        if (dataDirty) {
+            refreshDataIfNeeded();
+        }
         getFond().update();
     }
 
@@ -123,7 +126,6 @@ public class Records extends Etats {
     public void draw(Graphics g) {
         ensureLayoutUpToDate();
         getFond().draw(g);
-        refreshDataIfNeeded();
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -327,6 +329,10 @@ public class Records extends Etats {
         dataDirty = false;
     }
 
+    public void invaliderDonnees() {
+        dataDirty = true;
+    }
+
     @Override
     public void updateTexts() {
         labelTitre = LangManager.get("records.titre");
@@ -377,6 +383,7 @@ public class Records extends Etats {
         scrollLeft = 0;
         scrollRight = 0;
         dataDirty = true;
+        refreshDataIfNeeded();
     }
 
     @Override
