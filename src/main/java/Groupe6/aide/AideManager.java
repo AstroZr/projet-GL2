@@ -1,6 +1,7 @@
 package Groupe6.aide;
 
-import Groupe6.aide.techniques.*;
+import Groupe6.aide.techniques.Reste;
+import Groupe6.aide.techniques.Singleton;
 import Groupe6.models.Grille;
 
 import java.util.List;
