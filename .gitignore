@@ -13,3 +13,4 @@ CLAUDE.md
 saveGame/
 .m2/
 bin/
+logs/
