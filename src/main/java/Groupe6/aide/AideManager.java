@@ -2,6 +2,8 @@ package Groupe6.aide;
 
 import Groupe6.aide.techniques.Reste;
 import Groupe6.aide.techniques.Singleton;
+import Groupe6.aide.techniques.CandidatUniqueLigne;
+import Groupe6.aide.techniques.CandidatUniqueColonne;
 import Groupe6.models.Grille;
 
 import java.util.List;
@@ -20,6 +22,8 @@ public class AideManager{
         this.aides = new ArrayList<>();
         this.aides.add(new Singleton());
         this.aides.add(new Reste());
+        this.aides.add(new CandidatUniqueLigne());
+        this.aides.add(new CandidatUniqueColonne());
     }
 
     public static  AideManager getInstance(){
@@ -65,8 +69,10 @@ public class AideManager{
     }
 
     public void setNBUtilisations(Map<Integer, Integer> dicoNbUtilisation){
+        if (dicoNbUtilisation == null) return;
         for (Aide aide : this.aides){
-            aide.setNbUtilisation(dicoNbUtilisation.get(aide.getId()));
+            Integer n = dicoNbUtilisation.get(aide.getId());
+            aide.setNbUtilisation(n != null ? n : 0);
         }
     }
 
