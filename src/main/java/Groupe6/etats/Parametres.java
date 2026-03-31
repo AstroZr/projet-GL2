@@ -20,6 +20,7 @@ import Groupe6.fond.FondClair;
 import Groupe6.fond.FondDegrade;
 import Groupe6.fond.FondFonce;
 import Groupe6.game.Game;
+import Groupe6.models.Grille;
 import Groupe6.save.ParametresJoueur;
 import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
@@ -104,6 +105,14 @@ public class Parametres extends Etats {
   private boolean dropdownThemeOuvert = false;
   private int indexSurvolTheme = -1;
 
+  // ====== PARAMÈTRES DE JEU (TOGGLES) ======
+  private boolean afficherPossibilites = true;      // Afficher/masquer les possibilités d'équations
+  private boolean afficherErreurDouble = false;     // Afficher/masquer les erreurs de doublon
+  private int togglePossibilitesX, togglePossibilitesY;
+  private int toggleErreurDoubleX, toggleErreurDoubleY;
+  private String labelPossibilites;
+  private String labelErreurDouble;
+
   // État de drag des sliders
   private boolean draggingEffets = false;
   private boolean draggingMusique = false;
@@ -111,6 +120,8 @@ public class Parametres extends Etats {
   // Hover états
   private boolean hoverDropdown = false;
   private boolean hoverThemeDropdown = false;
+  private boolean hoverTogglePossibilites = false;
+  private boolean hoverToggleErreurDouble = false;
 
   private String titreParametres;
   private String labelEffetsSonores;
@@ -126,6 +137,8 @@ public class Parametres extends Etats {
   private int themeApplique = 0;
   private float volumeEffetsApplique = 0.0f;
   private float volumeMusiqueApplique = 0.0f;
+  private boolean afficherPossibilitesApplique = true;
+  private boolean afficherErreurDoubleApplique = false;
   private boolean synchroniseDepuisEntree = false;
   private Font fontTitre;
   private Font fontLabel;
@@ -187,6 +200,12 @@ public class Parametres extends Etats {
     themeDropdownX = panelX + panelWidth / 2 + layoutScale.scaleX(50);
     themeDropdownY = panelY + layoutScale.scaleY(170);
     themeDropdownWidth = layoutScale.scaleX(260);
+
+    // Toggles pour possibilités et erreurs
+    togglePossibilitesX = themeDropdownX;
+    togglePossibilitesY = themeDropdownY + layoutScale.scaleY(120);
+    toggleErreurDoubleX = themeDropdownX;
+    toggleErreurDoubleY = togglePossibilitesY + layoutScale.scaleY(50);
 
     // Cache des dimensions et polices réutilisées dans draw
     fontTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(36));
@@ -271,6 +290,8 @@ public class Parametres extends Etats {
     dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, labelMusique, "🎵", "🔇", volumeMusique);
     dessinerDropdown(g);
     dessinerDropdownThemes(g);
+    dessinerTogglePossibilites(g);
+    dessinerToggleErreurDouble(g);
 
     // Dessiner les boutons du bas
     for (Bouton b : boutons) {
@@ -391,6 +412,68 @@ public class Parametres extends Etats {
     }
     g2d.setColor(Color.BLACK);
     g2d.fillPolygon(xPoints, yPoints, 3);
+  }
+
+  private void dessinerTogglePossibilites(Graphics g) {
+    Graphics2D g2d = (Graphics2D) g;
+
+    // Label
+    g.setColor(Color.BLACK);
+    g.setFont(fontLabel);
+    g.drawString(labelPossibilites != null ? labelPossibilites : "Possibilités", togglePossibilitesX, togglePossibilitesY + scaledY20);
+
+    // Boîte du toggle
+    int toggleX = togglePossibilitesX + layoutScale.scaleX(200);
+    int toggleY = togglePossibilitesY;
+    int toggleW = layoutScale.scaleX(60);
+    int toggleH = layoutScale.scaleY(30);
+    
+    // Fond du toggle
+    Color toggleBg = afficherPossibilites ? new Color(100, 200, 100) : new Color(200, 200, 200);
+    g2d.setColor(toggleBg);
+    RoundRectangle2D toggle = new RoundRectangle2D.Float(toggleX, toggleY, toggleW, toggleH, 15, 15);
+    g2d.fill(toggle);
+    g2d.setColor(Color.GRAY);
+    g2d.setStroke(STROKE_UI);
+    g2d.draw(toggle);
+    
+    // Cercle du curseur
+    int circleDiam = layoutScale.scaleUniform(24);
+    int circleX = afficherPossibilites ? toggleX + toggleW - circleDiam - 3 : toggleX + 3;
+    int circleY = toggleY + (toggleH - circleDiam) / 2;
+    g2d.setColor(Color.WHITE);
+    g2d.fillOval(circleX, circleY, circleDiam, circleDiam);
+  }
+
+  private void dessinerToggleErreurDouble(Graphics g) {
+    Graphics2D g2d = (Graphics2D) g;
+
+    // Label
+    g.setColor(Color.BLACK);
+    g.setFont(fontLabel);
+    g.drawString(labelErreurDouble != null ? labelErreurDouble : "Erreur doublon", toggleErreurDoubleX, toggleErreurDoubleY + scaledY20);
+
+    // Boîte du toggle
+    int toggleX = toggleErreurDoubleX + layoutScale.scaleX(200);
+    int toggleY = toggleErreurDoubleY;
+    int toggleW = layoutScale.scaleX(60);
+    int toggleH = layoutScale.scaleY(30);
+    
+    // Fond du toggle
+    Color toggleBg = afficherErreurDouble ? new Color(100, 200, 100) : new Color(200, 200, 200);
+    g2d.setColor(toggleBg);
+    RoundRectangle2D toggle = new RoundRectangle2D.Float(toggleX, toggleY, toggleW, toggleH, 15, 15);
+    g2d.fill(toggle);
+    g2d.setColor(Color.GRAY);
+    g2d.setStroke(STROKE_UI);
+    g2d.draw(toggle);
+    
+    // Cercle du curseur
+    int circleDiam = layoutScale.scaleUniform(24);
+    int circleX = afficherErreurDouble ? toggleX + toggleW - circleDiam - 3 : toggleX + 3;
+    int circleY = toggleY + (toggleH - circleDiam) / 2;
+    g2d.setColor(Color.WHITE);
+    g2d.fillOval(circleX, circleY, circleDiam, circleDiam);
   }
 
   private void dessinerDropdownThemes(Graphics g) {
@@ -614,6 +697,21 @@ public class Parametres extends Etats {
         dropdownThemeOuvert = false;
       }
     }
+
+    // Gestion des clics sur les toggles
+    int toggleX = togglePossibilitesX + layoutScale.scaleX(200);
+    int toggleY = togglePossibilitesY;
+    int toggleW = layoutScale.scaleX(60);
+    int toggleH = layoutScale.scaleY(30);
+    if (mx >= toggleX && mx <= toggleX + toggleW && my >= toggleY && my <= toggleY + toggleH) {
+      afficherPossibilites = !afficherPossibilites;
+    }
+
+    toggleX = toggleErreurDoubleX + layoutScale.scaleX(200);
+    toggleY = toggleErreurDoubleY;
+    if (mx >= toggleX && mx <= toggleX + toggleW && my >= toggleY && my <= toggleY + toggleH) {
+      afficherErreurDouble = !afficherErreurDouble;
+    }
   }
 
   @Override
@@ -625,6 +723,8 @@ public class Parametres extends Etats {
           volumeMusique = 0.0f;
           langueSelectionnee = 0;
           themeSelectionne = 0;
+          afficherPossibilites = true;
+          afficherErreurDouble = false;
           appliquerThemeSelectionne();
           dropdownLangueOuvert = false;
           dropdownThemeOuvert = false;
@@ -635,6 +735,18 @@ public class Parametres extends Etats {
           SoundManager.getInstance().setVolumeEffets(volumeEffets);
           SoundManager.getInstance().setVolumeMusique(volumeMusique);
           sauvegarderParametresJoueur(game != null ? game.getJoueurCourant() : null);
+          
+          // Mettre à jour la grille du jeu si elle existe
+          if (game != null) {
+            Jeu jeuState = game.getJeu();
+            if (jeuState != null) {
+              Grille grille = jeuState.getGrille();
+              if (grille != null) {
+                grille.setAfficherPossibilites(afficherPossibilites);
+                grille.setAfficherErreurDouble(afficherErreurDouble);
+              }
+            }
+          }
         } else {
           synchroniseDepuisEntree = false;
           synchroniserEditionAvecValeursAppliquees();
@@ -664,6 +776,8 @@ public class Parametres extends Etats {
     labelMusique = LangManager.get("parametres.musique");
     labelLangue = LangManager.get("parametres.langue");
     labelTheme = LangManager.get("parametres.theme");
+    labelPossibilites = LangManager.get("parametres.possibilites");
+    labelErreurDouble = LangManager.get("parametres.erreur.double");
     suffixeMute = LangManager.get("parametres.mute");
     boutonRetourLabel = LangManager.get("common.retour");
     boutonDefautLabel = LangManager.get("parametres.defaut");
@@ -720,6 +834,8 @@ public class Parametres extends Etats {
     themeApplique = themeSelectionne;
     volumeEffetsApplique = volumeEffets;
     volumeMusiqueApplique = volumeMusique;
+    afficherPossibilitesApplique = afficherPossibilites;
+    afficherErreurDoubleApplique = afficherErreurDouble;
   }
 
   private void synchroniserEditionAvecValeursAppliquees() {
@@ -727,6 +843,8 @@ public class Parametres extends Etats {
     themeSelectionne = themeApplique;
     volumeEffets = volumeEffetsApplique;
     volumeMusique = volumeMusiqueApplique;
+    afficherPossibilites = afficherPossibilitesApplique;
+    afficherErreurDouble = afficherErreurDoubleApplique;
     appliquerThemeSelectionne();
     dropdownLangueOuvert = false;
     dropdownThemeOuvert = false;
@@ -736,6 +854,18 @@ public class Parametres extends Etats {
   public void chargerParametresJoueur(String pseudo) {
     if (pseudo == null || pseudo.trim().isEmpty()) {
       return;
+    }
+
+    // D'abord, charger depuis la grille du jeu si elle existe (paramètres en temps réel)
+    if (game != null && etatSource == EtatJeu.GRILLE) {
+      Jeu jeuState = game.getJeu();
+      if (jeuState != null) {
+        Grille grille = jeuState.getGrille();
+        if (grille != null) {
+          afficherPossibilitesApplique = grille.isAfficherPossibilites();
+          afficherErreurDoubleApplique = grille.isAfficherErreurDouble();
+        }
+      }
     }
 
     ParametresJoueur params = SaveManager.chargerParametres(pseudo);
@@ -749,6 +879,12 @@ public class Parametres extends Etats {
     themeApplique = Math.max(0, Math.min(themes.size() - 1, params.getModeSombre()));
     volumeEffetsApplique = Math.max(0f, Math.min(1f, params.getVolumeEffet() / 100f));
     volumeMusiqueApplique = Math.max(0f, Math.min(1f, params.getVolumeMusique() / 100f));
+    
+    // Ne pas overrider les paramètres s'ils viennent de la grille
+    if (!(game != null && etatSource == EtatJeu.GRILLE)) {
+      afficherPossibilitesApplique = params.isAfficherPossibilites();
+      afficherErreurDoubleApplique = params.isAfficherErreurDouble();
+    }
 
     SoundManager.getInstance().setVolumeEffets(volumeEffetsApplique);
     SoundManager.getInstance().setVolumeMusique(volumeMusiqueApplique);
@@ -772,6 +908,8 @@ public class Parametres extends Etats {
         Math.round(volumeEffets * 100f),
         Math.round(volumeMusique * 100f),
         themeSelectionne);
+    params.setAfficherPossibilites(afficherPossibilites);
+    params.setAfficherErreurDouble(afficherErreurDouble);
     SaveManager.sauvegarderParametres(params);
   }
 
@@ -788,6 +926,8 @@ public class Parametres extends Etats {
         Math.round(volumeEffetsApplique * 100f),
         Math.round(volumeMusiqueApplique * 100f),
         themeApplique);
+    params.setAfficherPossibilites(afficherPossibilitesApplique);
+    params.setAfficherErreurDouble(afficherErreurDoubleApplique);
     SaveManager.sauvegarderParametres(params);
   }
 }

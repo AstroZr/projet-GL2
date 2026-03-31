@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import Groupe6.aide.Aide;
 import Groupe6.save.Niveau;
+import Groupe6.save.ParametresJoueur;
 import Groupe6.save.PartieSauvegardee;
 import Groupe6.save.SaveManager;
 import Groupe6.aide.AideManager;
@@ -60,6 +61,10 @@ public class Grille {
     private String idNiveau;                        // ID du niveau (ex. "facile1", "moyen2")
     private long tempsEcoule;                       // Temps écoulé en ms depuis le début
     private AideManager aideManager;                // Gestionnaire des hints/astuces
+    
+    // ====== PARAMÈTRES DE JEU ======
+    private boolean afficherPossibilites;           // Afficher/masquer les possibilités d'équations au survol
+    private boolean afficherErreurDouble;           // Afficher/masquer les cases rouges en cas de doublon
     
     // ====== ÉTAT ======
     private boolean estComplete;                    // true si grille complète et valide
@@ -127,6 +132,9 @@ public class Grille {
     public Grille(String nomJoueur, String idNiveau, boolean ignorerSauvegarde) {
         this.nomJoueur = nomJoueur;
         this.idNiveau = idNiveau;
+
+        // Charger les paramètres du joueur
+        chargerParametresJoueur();
 
         // chargement de la base du niveau pour les zones de calcul
         Niveau niveauBase = SaveManager.chargerNiveau(idNiveau);
@@ -196,6 +204,22 @@ public class Grille {
         } finally {
             zonesLock.readLock().unlock();
             celluleMatriceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Charge les paramètres du joueur depuis SaveManager.
+     * Initialise les valeurs par défaut si les paramètres n'existent pas.
+     */
+    private void chargerParametresJoueur() {
+        ParametresJoueur params = SaveManager.chargerParametres(nomJoueur);
+        if (params != null) {
+            this.afficherPossibilites = params.isAfficherPossibilites();
+            this.afficherErreurDouble = params.isAfficherErreurDouble();
+        } else {
+            // Valeurs par défaut
+            this.afficherPossibilites = true;
+            this.afficherErreurDouble = false;
         }
     }
 
@@ -466,6 +490,10 @@ public class Grille {
      * @param ligne La ligne à vérifier
      */
     private void verifierDoublonsLigne(int ligne) {
+        if (!afficherErreurDouble) {
+            return; // Ne pas marquer les doublons s'ils sont désactivés
+        }
+        
         int[] comptes = new int[taille + 1];
 
         // Compter les occurrences
@@ -490,6 +518,10 @@ public class Grille {
      * @param col La colonne à vérifier
      */
     private void verifierDoublonsColonne(int col) {
+        if (!afficherErreurDouble) {
+            return; // Ne pas marquer les doublons s'ils sont désactivés
+        }
+        
         int[] comptes = new int[taille + 1];
 
         // Compter les occurrences
@@ -623,6 +655,45 @@ public class Grille {
      */
     public boolean estComplete() {
         return estComplete;
+    }
+
+    /**
+     * Retourne si les possibilités d'équations doivent être affichées
+     * 
+     * @return true si les possibilités doivent être affichées, false sinon
+     */
+    public boolean isAfficherPossibilites() {
+        return afficherPossibilites;
+    }
+
+    /**
+     * Retourne si les erreurs de doublon doivent être affichées
+     * 
+     * @return true si les erreurs de doublon doivent être affichées, false sinon
+     */
+    public boolean isAfficherErreurDouble() {
+        return afficherErreurDouble;
+    }
+
+    /**
+     * Met à jour l'affichage des possibilités d'équations et revalide la grille
+     * 
+     * @param afficher true pour afficher, false pour masquer
+     */
+    public void setAfficherPossibilites(boolean afficher) {
+        this.afficherPossibilites = afficher;
+    }
+
+    /**
+     * Met à jour l'affichage des erreurs de doublon et revalide la grille
+     * 
+     * @param afficher true pour afficher, false pour masquer
+     */
+    public void setAfficherErreurDouble(boolean afficher) {
+        this.afficherErreurDouble = afficher;
+        // Revalider la grille pour recalculer les doublons
+        validerGrille();
+        notifierObservateurs();
     }
 
     /**

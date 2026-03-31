@@ -37,6 +37,10 @@ public class ParametresJoueur {
     
     // ====== THÈME VISUEL ======
     private int modeSombre;           // Choix thème: 0=clair, 1=foncé, 2=catppuccin
+    
+    // ====== AIDE DE JEU ======
+    private boolean afficherPossibilites;  // Afficher/masquer les possibilités d'équations au survol
+    private boolean afficherErreurDouble;  // Afficher/masquer les cases rouge en cas de doublon
 
     public ParametresJoueur() {
     }
@@ -47,6 +51,8 @@ public class ParametresJoueur {
         this.volumeEffet = volumeEffet;
         this.volumeMusique = volumeMusique;
         this.modeSombre = modeSombre;
+        this.afficherPossibilites = true;  // Par défaut, afficher les possibilités
+        this.afficherErreurDouble = false; // Par défaut, ne pas afficher les doublons
     }
 
     public String getNomJoueur() {
@@ -87,5 +93,21 @@ public class ParametresJoueur {
 
     public void setModeSombre(int modeSombre) {
         this.modeSombre = modeSombre;
+    }
+
+    public boolean isAfficherPossibilites() {
+        return afficherPossibilites;
+    }
+
+    public void setAfficherPossibilites(boolean afficherPossibilites) {
+        this.afficherPossibilites = afficherPossibilites;
+    }
+
+    public boolean isAfficherErreurDouble() {
+        return afficherErreurDouble;
+    }
+
+    public void setAfficherErreurDouble(boolean afficherErreurDouble) {
+        this.afficherErreurDouble = afficherErreurDouble;
     }
 }

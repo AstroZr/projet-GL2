@@ -307,6 +307,11 @@ public class VueGrille {
     }
 
     private void drawTipZoneHaut(Graphics2D g2d, Fond fond, ZoneCalcul zone) {
+        // Ne pas afficher les possibilités d'équations si le paramètre est désactivé
+        if (!grille.isAfficherPossibilites()) {
+            return;
+        }
+        
         List<String> lignes = construireLignesPossibilites(zone);
         int nbAff = Math.min(MAX_LIGNES_TOOLTIP, lignes.size());
 
@@ -405,8 +410,11 @@ public class VueGrille {
     private String formaterEquation(List<Integer> vals, TypeOperation op, int cible) {
         List<Integer> v = new ArrayList<>(vals);
 
-        if (op == TypeOperation.SOUSTRACTION || op == TypeOperation.DIVISION) {
-            v.sort(Collections.reverseOrder());
+        // Pour les opérations commutatives (+, *), normaliser l'ordre
+        if (op == TypeOperation.ADDITION || op == TypeOperation.MULTIPLICATION) {
+            v.sort(null);  // Ordre croissant
+        } else if (op == TypeOperation.SOUSTRACTION || op == TypeOperation.DIVISION) {
+            v.sort(Collections.reverseOrder());  // Ordre décroissant
         }
 
         if (op == TypeOperation.AUCUNE) {
