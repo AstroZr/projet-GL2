@@ -372,6 +372,7 @@ public class Grille {
             celluleMatriceLock.readLock().unlock();
         }
         validerGrille();
+        this.aideManager.setNBUtilisationsZero();
         notifierObservateurs();
     }
 
@@ -394,6 +395,7 @@ public class Grille {
             celluleMatriceLock.readLock().unlock();
         }
         validerGrille();
+        this.aideManager.setNBUtilisationsZero();
         notifierObservateurs();
     }
 
