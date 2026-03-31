@@ -10,11 +10,15 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import Groupe6.fond.Fond;
 import Groupe6.models.Cellule;
 import Groupe6.models.Grille;
+import Groupe6.models.TypeOperation;
 import Groupe6.models.ZoneCalcul;
 import Groupe6.utilz.FontCache;
 
@@ -47,12 +51,15 @@ public class VueGrille {
     private static final Font FONT_VALEUR = FontCache.get("Arial", Font.BOLD, 32);      // Chiffres dans les cellules
     private static final Font FONT_ZONE = FontCache.get("Arial", Font.BOLD, 14);        // Label zone (target + opération)
     private static final Font FONT_CANDIDAT = FontCache.get("Arial", Font.BOLD, 16);   // Candidats (petits chiffres)
+    private static final Font FONT_AIDE_ZONE = FontCache.get("Arial", Font.PLAIN, 13);  // Aide tooltip survol
     
     // ====== TRAITS/STROKES PRÉ-ALLOUÉS ======
     private static final BasicStroke STROKE_CONTOUR_GRILLE = new BasicStroke(4);        // Bordure externe grille
     private static final BasicStroke STROKE_ZONE_SOUS_COUCHE = new BasicStroke(5);      // Sous-couche zones
     private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3);               // Bordures épaisses
     private static final BasicStroke STROKE_FINE = new BasicStroke(1);                  // Lignes fines
+
+    private static final int MAX_LIGNES_TOOLTIP = 8;
     
     // ====== DIMENSIONS DE RÉFÉRENCE ======
     private static final int MARGE_CASE = 2;                                           // Marge entre cellules (pixels)
@@ -69,6 +76,8 @@ public class VueGrille {
     private int offsetX;               // Position X de la grille sur l'écran
     private int offsetY;               // Position Y de la grille sur l'écran
     private boolean modeCandidat;      // Mode candidat actif (affiche petits chiffres)
+    private int sourisX = -1;
+    private int sourisY = -1;
     private Color contourGrilleCache;
     private Fond contourFondCache;
 
@@ -92,6 +101,14 @@ public class VueGrille {
         dessinerBorduresZones(g2d, fond);
         dessinerContourGrille(g2d, fond);
         dessinerZones(g2d, fond);
+
+        Cellule hover = cellSousSouris();
+        if (hover != null) {
+            ZoneCalcul zone = hover.getZoneCalcul();
+            if (zone != null) {
+                drawTipZoneHaut(g2d, fond, zone);
+            }
+        }
     }
 
     private void dessinerContourGrille(Graphics2D g2d, Fond fond) {
@@ -262,6 +279,152 @@ public class VueGrille {
         }
     }
 
+    private Cellule cellSousSouris() {
+        if (sourisX < 0 || sourisY < 0) {
+            return null;
+        }
+
+        int col = (sourisX - offsetX) / tailleCellule;
+        int ligne = (sourisY - offsetY) / tailleCellule;
+
+        int t = grille.getTaille();
+        if (ligne < 0 || ligne >= t || col < 0 || col >= t) {
+            return null;
+        }
+
+        return grille.getCellule(ligne, col);
+    }
+
+    private boolean cellAfficheChiffre(Cellule c) {
+        if (c == null) {
+            return false;
+        }
+        if (c.getValeur() != 0) {
+            return true;
+        }
+        List<Integer> cand = c.getListeCandidat();
+        return cand != null && !cand.isEmpty();
+    }
+
+    private void drawTipZoneHaut(Graphics2D g2d, Fond fond, ZoneCalcul zone) {
+        List<String> lignes = construireLignesPossibilites(zone);
+        int nbAff = Math.min(MAX_LIGNES_TOOLTIP, lignes.size());
+
+        g2d.setFont(FONT_AIDE_ZONE);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        String titre = "Possibilites " + zone.getValeurCible() + zone.getTypeOperation().getSymbole();
+
+        int w = fm.stringWidth(titre);
+        for (int i = 0; i < nbAff; i++) {
+            w = Math.max(w, fm.stringWidth(lignes.get(i)));
+        }
+        if (lignes.size() > MAX_LIGNES_TOOLTIP) {
+            w = Math.max(w, fm.stringWidth("..."));
+        }
+
+        int pad = 8;
+        int lineH = fm.getHeight();
+        int nbL = 1 + nbAff + (lignes.size() > MAX_LIGNES_TOOLTIP ? 1 : 0);
+        int h = nbL * lineH + pad * 2;
+        int tipW = w + 2 * pad;
+
+        int x = offsetX + (tailleGrille - tipW) / 2;
+        x = Math.max(offsetX, Math.min(x, offsetX + tailleGrille - tipW));
+        int y = offsetY - h - 8;
+        y = Math.max(0, y);
+
+        Color bg = fond.getCouleurFondCellule();
+        Color bgT = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 240);
+
+        g2d.setColor(bgT);
+        g2d.fillRoundRect(x, y, tipW, h, 12, 12);
+
+        g2d.setColor(fond.getCouleurBordureZone());
+        g2d.setStroke(STROKE_FINE);
+        g2d.drawRoundRect(x, y, tipW, h, 12, 12);
+
+        g2d.setColor(fond.getCouleurTexte());
+        int ty = y + pad + fm.getAscent();
+        g2d.drawString(titre, x + pad, ty);
+
+        for (int i = 0; i < nbAff; i++) {
+            ty += lineH;
+            g2d.drawString(lignes.get(i), x + pad, ty);
+        }
+        if (lignes.size() > MAX_LIGNES_TOOLTIP) {
+            ty += lineH;
+            g2d.drawString("...", x + pad, ty);
+        }
+    }
+
+    private List<String> construireLignesPossibilites(ZoneCalcul zone) {
+        List<Cellule> cells = zone.getListeCellules();
+        List<Cellule> vides = new ArrayList<>();
+        for (Cellule c : cells) {
+            if (c.estVide()) {
+                vides.add(c);
+            }
+        }
+
+        List<String> out = new ArrayList<>();
+        if (vides.isEmpty()) {
+            List<Integer> vals = new ArrayList<>();
+            for (Cellule c : cells) {
+                vals.add(c.getValeur());
+            }
+            out.add(formaterEquation(vals, zone.getTypeOperation(), zone.getValeurCible()));
+            return out;
+        }
+
+        List<List<Integer>> combs = zone.trouverCombinaisons(grille.getTaille());
+        Set<String> uniques = new LinkedHashSet<>();
+
+        for (List<Integer> comb : combs) {
+            List<Integer> vals = new ArrayList<>();
+            int idxVide = 0;
+            for (Cellule c : cells) {
+                if (c.estVide()) {
+                    vals.add(comb.get(idxVide++));
+                } else {
+                    vals.add(c.getValeur());
+                }
+            }
+            uniques.add(formaterEquation(vals, zone.getTypeOperation(), zone.getValeurCible()));
+        }
+
+        if (uniques.isEmpty()) {
+            out.add("Aucune combinaison");
+        } else {
+            out.addAll(uniques);
+        }
+
+        return out;
+    }
+
+    private String formaterEquation(List<Integer> vals, TypeOperation op, int cible) {
+        List<Integer> v = new ArrayList<>(vals);
+
+        if (op == TypeOperation.SOUSTRACTION || op == TypeOperation.DIVISION) {
+            v.sort(Collections.reverseOrder());
+        }
+
+        if (op == TypeOperation.AUCUNE) {
+            return v.get(0) + " = " + cible;
+        }
+
+        String sep = " " + op.getSymbole() + " ";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < v.size(); i++) {
+            if (i > 0) {
+                sb.append(sep);
+            }
+            sb.append(v.get(i));
+        }
+        sb.append(" = ").append(cible);
+        return sb.toString();
+    }
+
     /**
      * Gère le clic de souris sur la grille.
      */
@@ -273,6 +436,11 @@ public class VueGrille {
         if (ligne >= 0 && ligne < taille && col >= 0 && col < taille) {
             grille.selectionnerCellule(ligne, col);
         }
+    }
+
+    public void mouseMoved(MouseEvent e) {
+        sourisX = e.getX();
+        sourisY = e.getY();
     }
 
     /**

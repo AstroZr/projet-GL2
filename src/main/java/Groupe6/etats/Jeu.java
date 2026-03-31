@@ -420,6 +420,9 @@ public class Jeu extends Etats {
     for (Bouton b : boutons) {
       b.setSourisSurvol(isIn(e, b));
     }
+    if (vueGrille != null) {
+      vueGrille.mouseMoved(e);
+    }
   }
 
   @Override
