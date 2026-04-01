@@ -17,7 +17,8 @@ import Groupe6.aide.AideManager;
  * 
  * Responsabilités:
  * - Gestion de l'état global du jeu (matrice de cellules, zones de calcul)
- * - Validation des règles: pas de doublons par ligne/colonne, contraintes mathématiques des zones
+ * - Validation des règles: pas de doublons par ligne/colonne, contraintes
+ * mathématiques des zones
  * - Système d'historique pour undo/redo (stocke chaque action)
  * - Pattern Observer pour notifier les observateurs de chaque changement
  * - Persistance via SaveManager (chargement/sauvegarde de parties)
@@ -25,54 +26,59 @@ import Groupe6.aide.AideManager;
  * Architecture:
  * - matriceCellules[ligne][colonne]: grille N×N de Cellule
  * - listeZones: List<ZoneCalcul> contenant les contraintes mathématiques
- * - historique: List<int[]> avec [ligne, colonne, anciennneVal, nouvelleVal, actionType]
+ * - historique: List<int[]> avec [ligne, colonne, anciennneVal, nouvelleVal,
+ * actionType]
  * - indexActuel: pointeur dans l'historique (pour undo/redo)
  * - observers: notifiés à chaque modification (VueGrille, SoundManager, etc.)
  */
 public class Grille {
-    
+
     // ====== CONSTANTES D'ACTIONS (pour l'historique) ======
-    public static final int ACTION_MOVE = 0;        // Entrée d'une valeur normale
-    public static final int ACTION_CANDIDAT = 1;    // Ajout/suppression de candidat
-    public static final int ACTION_AIDE = 2;        // Utilisation d'une aide
-    public static final int ACTION_AUCUNE = -1;     // Aucune action
-    
+    public static final int ACTION_MOVE = 0; // Entrée d'une valeur normale
+    public static final int ACTION_CANDIDAT = 1; // Ajout/suppression de candidat
+    public static final int ACTION_AIDE = 2; // Utilisation d'une aide
+    public static final int ACTION_AUCUNE = -1; // Aucune action
+
     // ====== PATTERN OBSERVER ======
-    private List<GrilleObserver> observers = new ArrayList<>();  // Listeners notifiés des changements
+    private List<GrilleObserver> observers = new ArrayList<>(); // Listeners notifiés des changements
 
     // ====== THREAD SAFETY ======
-    private final ReadWriteLock celluleMatriceLock = new ReentrantReadWriteLock();  // Protège matriceCellules
-    private final ReadWriteLock zonesLock = new ReentrantReadWriteLock();           // Protège listeZones
+    private final ReadWriteLock celluleMatriceLock = new ReentrantReadWriteLock(); // Protège matriceCellules
+    private final ReadWriteLock zonesLock = new ReentrantReadWriteLock(); // Protège listeZones
 
     // ====== DONNÉES DE LA GRILLE ======
-    private final int taille;                       // Taille N de la grille N×N
-    private Cellule[][] matriceCellules;            // Grille principale (protégée par celluleMatriceLock)
-    private List<ZoneCalcul> listeZones;            // Zones avec contraintes (protégée par zonesLock)
-    
+    private final int taille; // Taille N de la grille N×N
+    private Cellule[][] matriceCellules; // Grille principale (protégée par celluleMatriceLock)
+    private List<ZoneCalcul> listeZones; // Zones avec contraintes (protégée par zonesLock)
+
     // ====== SÉLECTION ======
-    private Cellule celluleSelectionnee;            // Cellule actuellement sélectionnée (null si aucune)
-    
+    private Cellule celluleSelectionnee; // Cellule actuellement sélectionnée (null si aucune)
+
     // ====== HISTORIQUE & UNDO/REDO ======
-    private int indexActuel = -1;                   // Index dans l'historique (pour undo/redo)
-    private List<int[]> historique = new java.util.ArrayList<>();  // Enregistre toutes les actions
-    
+    private int indexActuel = -1; // Index dans l'historique (pour undo/redo)
+    private List<int[]> historique = new java.util.ArrayList<>(); // Enregistre toutes les actions
+
     // ====== MÉTADONNÉES ======
-    private String nomJoueur;                       // Nom du joueur
-    private String idNiveau;                        // ID du niveau (ex. "facile1", "moyen2")
-    private long tempsEcoule;                       // Temps écoulé en ms depuis le début
-    private AideManager aideManager;                // Gestionnaire des hints/astuces
-    
+    private String nomJoueur; // Nom du joueur
+    private String idNiveau; // ID du niveau (ex. "facile1", "moyen2")
+    private long tempsEcoule; // Temps écoulé en ms depuis le début
+    private AideManager aideManager; // Gestionnaire des hints/astuces
+
     // ====== PARAMÈTRES DE JEU ======
-    private boolean afficherPossibilites;           // Afficher/masquer les possibilités d'équations au survol
-    private boolean afficherErreurDouble;           // Afficher/masquer les cases rouges en cas de doublon
-    
+    private boolean afficherPossibilites; // Afficher/masquer les possibilités d'équations au survol
+    private boolean afficherErreurDouble; // Afficher/masquer les cases rouges en cas de doublon
+
     // ====== ÉTAT ======
-    private boolean estComplete;                    // true si grille complète et valide
+    private boolean estComplete; // true si grille complète et valide
 
     // ====== THREAD-SAFE HELPER METHODS ======
-    
+
     /**
      * Accède à une cellule de façon thread-safe (lecture).
+     * 
+     * @param ligne   La ligne de la cellule
+     * @param colonne La colonne de la cellule
+     * @return La cellule à la position donnée
      */
     private Cellule getCelluleThreadSafe(int ligne, int colonne) {
         celluleMatriceLock.readLock().lock();
@@ -82,9 +88,13 @@ public class Grille {
             celluleMatriceLock.readLock().unlock();
         }
     }
-    
+
     /**
      * Modifie une cellule de façon thread-safe (écriture).
+     * 
+     * @param ligne   La ligne de la cellule
+     * @param colonne La colonne de la cellule
+     * @param cellule La cellule à modifier
      */
     private void setCelluleThreadSafe(int ligne, int colonne, Cellule cellule) {
         celluleMatriceLock.writeLock().lock();
@@ -94,9 +104,11 @@ public class Grille {
             celluleMatriceLock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Ajoute une zone de façon thread-safe.
+     * 
+     * @param zone La zone à ajouter
      */
     private void addZoneThreadSafe(ZoneCalcul zone) {
         zonesLock.writeLock().lock();
@@ -106,9 +118,11 @@ public class Grille {
             zonesLock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Récupère la liste des zones de façon thread-safe (copie).
+     * 
+     * @return La liste des zones
      */
     private List<ZoneCalcul> getListeZonesThreadSafe() {
         zonesLock.readLock().lock();
@@ -117,6 +131,39 @@ public class Grille {
         } finally {
             zonesLock.readLock().unlock();
         }
+    }
+
+    /**
+     * Constructeur pour instancier la grille directement à partir d'un
+     * objet Niveau.
+     * Ne gère ni l'utilisateur, ni les sauvegardes (pour le catalogue par exemple).
+     * 
+     * @param niveauBase L'objet niveau de base qui structure la grille.
+     */
+    public Grille(Niveau niveauBase) {
+        this.nomJoueur = null;
+        this.idNiveau = niveauBase != null ? niveauBase.getId() : null;
+
+        // Valeurs par défaut au lieu de charger les paramètres de l'utilisateur
+        this.afficherPossibilites = true;
+        this.afficherErreurDouble = false;
+
+        if (niveauBase == null) {
+            this.taille = 4;
+            this.matriceCellules = new Cellule[4][4];
+            this.listeZones = new ArrayList<>();
+            this.estComplete = false;
+            return;
+        }
+
+        this.aideManager = AideManager.getInstance();
+        this.aideManager.setNBUtilisationsZero();
+
+        this.taille = niveauBase.getTaille();
+        initialiserDepuisNiveau(niveauBase);
+
+        nettoyerSelection();
+        validerGrille();
     }
 
     /**
@@ -129,6 +176,13 @@ public class Grille {
         this(nomJoueur, idNiveau, false);
     }
 
+    /**
+     * Constructeur de la grille a partir d'un niveau ou d'une sauvegarde de partie.
+     * 
+     * @param nomJoueur         Le nom du joueur
+     * @param idNiveau          L'identifiant du niveau à charger
+     * @param ignorerSauvegarde Si true, ignore toute sauvegarde existante
+     */
     public Grille(String nomJoueur, String idNiveau, boolean ignorerSauvegarde) {
         this.nomJoueur = nomJoueur;
         this.idNiveau = idNiveau;
@@ -164,6 +218,15 @@ public class Grille {
         validerGrille();
     }
 
+    /**
+     * Charge une sauvegarde de partie de façon thread-safe.
+     * 
+     * @param nomJoueur         Le nom du joueur
+     * @param idNiveau          L'identifiant du niveau
+     * @param ignorerSauvegarde Si true, ignore toute sauvegarde existante
+     * @return La sauvegarde chargée ou null si aucune sauvegarde trouvée ou si
+     *         ignorerSauvegarde est true
+     */
     private PartieSauvegardee chargerSauvegarde(String nomJoueur, String idNiveau, boolean ignorerSauvegarde) {
         if (ignorerSauvegarde) {
             return null;
@@ -171,6 +234,12 @@ public class Grille {
         return SaveManager.chargerPartie(nomJoueur, idNiveau);
     }
 
+    /**
+     * Initialise la grille à partir d'une sauvegarde de partie.
+     * 
+     * @param niveauBase Le niveau de base contenant la structure des zones
+     * @param sauvegarde La sauvegarde de partie à charger
+     */
     private void initialiserDepuisSauvegarde(Niveau niveauBase, PartieSauvegardee sauvegarde) {
         this.matriceCellules = sauvegarde.getMatriceCellules();
         this.historique = sauvegarde.getHistorique();
@@ -184,6 +253,11 @@ public class Grille {
         relierZonesAuxCellulesSauvegardees();
     }
 
+    /**
+     * Initialise la grille à partir d'un niveau de base.
+     * 
+     * @param niveauBase Le niveau de base contenant la structure de la grille
+     */
     private void initialiserDepuisNiveau(Niveau niveauBase) {
         this.matriceCellules = niveauBase.getMatriceCellules();
         this.listeZones = niveauBase.getListeZones();
@@ -191,6 +265,9 @@ public class Grille {
         this.tempsEcoule = 0L;
     }
 
+    /**
+     * Relie les zones aux cellules sauvegardées.
+     */
     private void relierZonesAuxCellulesSauvegardees() {
         celluleMatriceLock.readLock().lock();
         zonesLock.readLock().lock();
@@ -348,7 +425,8 @@ public class Grille {
     }
 
     /**
-     * Ajoute un chiffre dans la cellule sélectionnée (ou une cellule spécifique) - thread-safe.
+     * Ajoute un chiffre dans la cellule sélectionnée (ou une cellule spécifique) -
+     * thread-safe.
      * Vérifie immédiatement les contraintes de base (doublons).
      * 
      * @param ligne   Ligne cible
@@ -400,7 +478,8 @@ public class Grille {
     }
 
     /**
-     * Valide l'état de la grille (détecte les doublons et valide les zones) - thread-safe.
+     * Valide l'état de la grille (détecte les doublons et valide les zones) -
+     * thread-safe.
      */
     public void validerGrille() {
         celluleMatriceLock.writeLock().lock();
@@ -495,7 +574,7 @@ public class Grille {
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
-        
+
         int[] comptes = new int[taille + 1];
 
         // Compter les occurrences
@@ -523,7 +602,7 @@ public class Grille {
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
-        
+
         int[] comptes = new int[taille + 1];
 
         // Compter les occurrences
@@ -797,14 +876,27 @@ public class Grille {
         }
     }
 
+    /**
+     * Retourne le temps écoulé en millisecondes.
+     * 
+     * @return Le temps écoulé en millisecondes
+     */
     public long getTempsEcoule() {
         return tempsEcoule;
     }
 
+    /**
+     * Définit le temps écoulé en millisecondes.
+     * 
+     * @param tempsEcoule Le temps écoulé en millisecondes
+     */
     public void setTempsEcoule(long tempsEcoule) {
         this.tempsEcoule = Math.max(0L, tempsEcoule);
     }
 
+    /**
+     * Sauvegarde la grille actuelle.
+     */
     public void saveGrille() {
         PartieSauvegardee ps = new PartieSauvegardee(
                 this.matriceCellules,
