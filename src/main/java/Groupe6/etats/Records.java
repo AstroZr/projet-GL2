@@ -79,6 +79,7 @@ public class Records extends Etats {
     private List<String> cachedNiveaux = new ArrayList<>();
     private Map<String, Long> cachedMesTemps = Collections.emptyMap();
     private Map<String, List<Map.Entry<String, Long>>> cachedClassements = new HashMap<>();
+    private Map<String, Integer> cachedNbAides = new HashMap<>();
     private boolean dataDirty = true;
 
     public Records(Game game) {
@@ -173,7 +174,13 @@ public class Records extends Etats {
 
         int rowY = panelY + 60;
         for (String niv : niveaux) {
-            String temps = mesTemps.containsKey(niv) ? formaterTemps(mesTemps.get(niv)) : "\u2014";
+            String temps;
+            if (mesTemps.containsKey(niv)) {
+                int nbAides = cachedNbAides.getOrDefault(niv, 0);
+                temps = formaterTemps(mesTemps.get(niv)) + " (" + nbAides + ")";
+            } else {
+                temps = "\u2014";
+            }
             dessinerLigne(g2d, leftX + 12, rowY, panelW - 24, rowH, niv, temps, false);
             rowY += rowH + 6;
         }
@@ -324,6 +331,13 @@ public class Records extends Etats {
         cachedClassements = new HashMap<>();
         for (String niveau : cachedNiveaux) {
             cachedClassements.put(niveau, SaveManager.chargerClassementGlobal(niveau));
+        }
+
+        cachedNbAides = new HashMap<>();
+        if (joueurActuel != null) {
+            for (String niveau : cachedNiveaux) {
+                cachedNbAides.put(niveau, SaveManager.chargerNbAidesTotalPartie(joueurActuel, niveau));
+            }
         }
 
         dataDirty = false;

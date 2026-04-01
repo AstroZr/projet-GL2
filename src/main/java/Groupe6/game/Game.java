@@ -9,6 +9,7 @@ import java.util.Map;
 
 import Groupe6.audio.SoundManager;
 import Groupe6.etats.MethodesEtats;
+import Groupe6.etats.Astuces;
 import Groupe6.etats.EtatJeu;
 import Groupe6.etats.Jeu;
 import Groupe6.etats.Menu;
@@ -69,6 +70,7 @@ public class Game implements Runnable {
     private Jeu jeu;
     private Selection selection;
     private Records records;
+    private Astuces astuces;
 
     /** Association EtatJeu -> état concret ; évite les switch dans getCurrentState et dans les inputs. */
     private final Map<EtatJeu, MethodesEtats> stateByEnum = new EnumMap<>(EtatJeu.class);
@@ -100,6 +102,8 @@ public class Game implements Runnable {
         stateByEnum.put(EtatJeu.SELECTION, selection);
         records = new Records(this);
         stateByEnum.put(EtatJeu.RECORDS, records);
+        astuces = new Astuces(this);
+        stateByEnum.put(EtatJeu.ASTUCES, astuces);
 
         notifierChangementLangue();
     }

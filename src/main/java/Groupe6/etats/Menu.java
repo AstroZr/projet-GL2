@@ -44,6 +44,7 @@ public class Menu extends Etats {
     private String labelJouer;        // "Jouer" (chargé depuis langue_XX.properties)
     private String labelParametres;   // "Paramètres"
     private String labelRecords;      // "Meilleurs temps"
+    private String labelAstuces;      // "Techniques d'aide"
     private String labelQuitter;      // "Quitter"
 
     public Menu(Game game) {
@@ -66,7 +67,8 @@ public class Menu extends Etats {
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy,            bw, bh, EtatJeu.SELECTION,  labelJouer));
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + gap,      bw, bh, EtatJeu.PARAMETRES, labelParametres));
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 2 * gap,  bw, bh, EtatJeu.RECORDS,    labelRecords));
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 3 * gap,  bw, bh, EtatJeu.QUITTER,    labelQuitter));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 3 * gap,  bw, bh, EtatJeu.ASTUCES,    labelAstuces));
+        boutons.add(new BoutonChangeurEtat(cx - bw / 2, cy + 4 * gap,  bw, bh, EtatJeu.QUITTER,    labelQuitter));
     }
 
     /** Met à jour le fond animé (nuages). */
@@ -160,13 +162,15 @@ public class Menu extends Etats {
         labelJouer      = LangManager.get("menu.jouer");
         labelParametres = LangManager.get("menu.parametres");
         labelRecords    = LangManager.get("menu.records");
+        labelAstuces    = LangManager.get("menu.astuces");
         labelQuitter    = LangManager.get("menu.quitter");
 
-        if (boutons == null || boutons.size() < 4) return;
+        if (boutons == null || boutons.size() < 5) return;
 
         ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelJouer);
         ((BoutonChangeurEtat) boutons.get(1)).setLabel(labelParametres);
         ((BoutonChangeurEtat) boutons.get(2)).setLabel(labelRecords);
-        ((BoutonChangeurEtat) boutons.get(3)).setLabel(labelQuitter);
+        ((BoutonChangeurEtat) boutons.get(3)).setLabel(labelAstuces);
+        ((BoutonChangeurEtat) boutons.get(4)).setLabel(labelQuitter);
     }
 }

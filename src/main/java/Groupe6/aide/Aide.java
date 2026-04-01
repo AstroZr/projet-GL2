@@ -14,4 +14,6 @@ public interface Aide {
 
     // Must be called after check awnser true
     int load(Grille grille, int nbAides);
+
+    default int getMaxUtilisation() { return -1; }
 }

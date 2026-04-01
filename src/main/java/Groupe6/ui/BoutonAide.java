@@ -61,7 +61,9 @@ public class BoutonAide extends Bouton {
 
         boolean aideTrouvee = aideManager.call(grille);
         if (!aideTrouvee) {
-            jeu.showAideOverlay(LangManager.get("aide.overlay.titre"), LangManager.get("aide.overlay.aucune"));
+            jeu.addAideMessage(new AideTextuel(
+                LangManager.get("aide.overlay.titre"),
+                LangManager.get("aide.overlay.aucune")));
             return;
         }
 
@@ -85,7 +87,7 @@ public class BoutonAide extends Bouton {
         if (aideTextuel == null) {
             return;
         }
-        jeu.showAideOverlay(aideTextuel.getTitre(), aideTextuel.getTexte());
+        jeu.addAideMessage(aideTextuel);
     }
 
     private void appliquerAideVisuelle(Grille grille, AideVisuel aideVisuel) {
