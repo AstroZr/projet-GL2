@@ -6,7 +6,10 @@ import Groupe6.aide.AideVisuel;
 import Groupe6.aide.EffetVisuel;
 import Groupe6.aide.TypeEffect;
 import Groupe6.models.Grille;
+import Groupe6.save.Niveau;
+import Groupe6.save.SaveManager;
 import Groupe6.utilz.LangManager;
+
 
 public class Reste extends AideAbstract {
     private boolean isLigne; // if false, isLigne est une colonne
@@ -110,5 +113,27 @@ public class Reste extends AideAbstract {
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
         }
+    }
+
+    /**
+     * Génère une grille d'exemple de taille 4 pour voir la technique du Reste.
+     * 
+     * @return Une grille initialisée d'exemple pour le Reste.
+     */
+    public Grille getGrilleExemple() {
+        Niveau niveauExemple = SaveManager.chargerNiveau("exemple_reste");
+        
+        if (niveauExemple == null) {
+            return new Grille(null);
+        }
+
+        Grille grille = new Grille(niveauExemple);
+
+        // Simulation : 3 cases pleines sur la ligne 0 pour que 'Reste' s'applique
+        grille.getCellule(0, 0).setValeur(1);
+        grille.getCellule(0, 1).setValeur(2);
+        grille.getCellule(0, 2).setValeur(3);
+
+        return grille;
     }
 }
