@@ -280,6 +280,12 @@ public class SaveManager {
         return classement;
     }
 
+    public static int chargerNbAidesTotalPartie(String nomJoueur, String idNiveau) {
+        PartieSauvegardee partie = chargerPartie(nomJoueur, idNiveau);
+        if (partie == null || partie.getNbAidesUtilisees() == null) return 0;
+        return partie.getNbAidesUtilisees().values().stream().mapToInt(Integer::intValue).sum();
+    }
+
     public static List<String> listerIdsNiveaux() {
         List<String> ids = new ArrayList<>();
         InputStream is = SaveManager.class.getResourceAsStream("/niveaux/index.txt");

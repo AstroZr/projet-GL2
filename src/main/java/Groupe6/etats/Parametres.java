@@ -3,6 +3,7 @@ package Groupe6.etats;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -57,16 +58,11 @@ public class Parametres extends Etats {
 
   private static final int LARGEUR_BOUTON = 200;   // Boutons Appliquer/Retour
   private static final int HAUTEUR_BOUTON = 44;
-  private static final BasicStroke STROKE_UI = new BasicStroke(2f);
-  private static final Color COLOR_PANEL_BG = new Color(200, 200, 200, 120);
-  private static final Color COLOR_TRACK_BG = new Color(200, 200, 200);
+  private static final BasicStroke STROKE_UI = new BasicStroke(1.5f);
+  private static final BasicStroke STROKE_CHEVRON = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
   private static final Color COLOR_ACCENT = new Color(70, 130, 180);
-  private static final Color COLOR_DROPDOWN_BG = new Color(200, 200, 200, 180);
-  private static final Color COLOR_DROPDOWN_BG_HOVER = new Color(220, 220, 220, 180);
-  private static final Color COLOR_OPTION_BG = new Color(240, 240, 240, 200);
-  private static final Color COLOR_THEME_SELECTED = new Color(120, 170, 230, 210);
-  private static final Color COLOR_THEME_HOVER = new Color(240, 240, 240, 210);
-  private static final Color COLOR_THEME_NORMAL = new Color(225, 225, 225, 200);
+  private static final Color COLOR_ACCENT_SOFT = new Color(70, 130, 180, 50);
+  private static final Color COLOR_SECTION_LINE = new Color(128, 128, 128, 70);
   
   // ====== GESTION DU RETOUR À L'ÉTAT SOURCE ======
   /** État source : MENU ou GRILLE (depend d'où on appelle Parametres) */
@@ -153,7 +149,11 @@ public class Parametres extends Etats {
   private int scaledY28;
   private int scaledY30;
   private int scaledY35;
+  private int scaledY42;
   private int scaledY2;
+  private int toggleControlX;
+  private int sectionInterfaceY;
+  private int sectionGameplayY;
 
   public Parametres(Game game) {
     super(game);
@@ -178,34 +178,42 @@ public class Parametres extends Etats {
     int cx = layoutScale.ratioX(0.5f);
     int cy = layoutScale.ratioY(0.5f);
 
-    // Panel central
-    panelWidth = layoutScale.scaleX(800);
-    panelHeight = layoutScale.scaleY(450);
+    // Panel central — colonne unique, légèrement plus large et plus haute
+    panelWidth = layoutScale.scaleX(820);
+    panelHeight = layoutScale.scaleY(560);
     panelX = cx - panelWidth / 2;
-    panelY = cy - panelHeight / 2 - layoutScale.scaleY(50);
+    panelY = cy - panelHeight / 2 - layoutScale.scaleY(30);
 
-    // Sliders
-    sliderWidth = layoutScale.scaleX(350);
-    sliderEffetsX = panelX + layoutScale.scaleX(100);
-    sliderEffetsY = panelY + layoutScale.scaleY(100);
+    int leftMargin = layoutScale.scaleX(30);
+    int fullRowW = panelWidth - 2 * leftMargin;
+
+    // ── Section Audio ────────────────────────────────────────────
+    sliderWidth = fullRowW;
+    sliderEffetsX = panelX + leftMargin;
+    sliderEffetsY = panelY + layoutScale.scaleY(60);
     sliderMusiqueX = sliderEffetsX;
-    sliderMusiqueY = sliderEffetsY + layoutScale.scaleY(70);
+    sliderMusiqueY = sliderEffetsY + layoutScale.scaleY(90);
 
-    // Dropdown langue
-    dropdownX = sliderEffetsX;
-    dropdownY = sliderMusiqueY + layoutScale.scaleY(70);
-    dropdownWidth = layoutScale.scaleX(350);
+    // ── Section Interface ─────────────────────────────────────────
+    sectionInterfaceY = sliderMusiqueY + layoutScale.scaleY(80);
+    dropdownX = panelX + leftMargin;
+    dropdownY = sectionInterfaceY + layoutScale.scaleY(30);
+    dropdownWidth = fullRowW;
 
-    // Dropdown thème
-    themeDropdownX = panelX + panelWidth / 2 + layoutScale.scaleX(50);
-    themeDropdownY = panelY + layoutScale.scaleY(170);
-    themeDropdownWidth = layoutScale.scaleX(260);
+    themeDropdownX = panelX + leftMargin;
+    themeDropdownY = dropdownY + layoutScale.scaleY(90);
+    themeDropdownWidth = fullRowW;
 
-    // Toggles pour possibilités et erreurs
-    togglePossibilitesX = themeDropdownX;
-    togglePossibilitesY = themeDropdownY + layoutScale.scaleY(120);
-    toggleErreurDoubleX = themeDropdownX;
-    toggleErreurDoubleY = togglePossibilitesY + layoutScale.scaleY(50);
+    // ── Section Gameplay ──────────────────────────────────────────
+    sectionGameplayY = themeDropdownY + layoutScale.scaleY(80);
+    togglePossibilitesX = panelX + leftMargin;
+    togglePossibilitesY = sectionGameplayY + layoutScale.scaleY(30);
+    toggleErreurDoubleX = panelX + leftMargin;
+    toggleErreurDoubleY = togglePossibilitesY + layoutScale.scaleY(55);
+
+    // Toggle positionné à droite du panneau
+    int toggleW = layoutScale.scaleX(56);
+    toggleControlX = panelX + panelWidth - leftMargin - toggleW;
 
     // Cache des dimensions et polices réutilisées dans draw
     fontTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(36));
@@ -221,11 +229,12 @@ public class Parametres extends Etats {
     scaledY28 = layoutScale.scaleY(28);
     scaledY30 = layoutScale.scaleY(30);
     scaledY35 = layoutScale.scaleY(35);
+    scaledY42 = layoutScale.scaleY(42);
     scaledY2 = layoutScale.scaleY(2);
 
     // Boutons de validation, de réinitialisation ou de retour
     boutons.clear();
-    int by = panelY + panelHeight + layoutScale.scaleY(30);
+    int by = panelY + panelHeight + layoutScale.scaleY(28);
     int bw = layoutScale.scaleX(LARGEUR_BOUTON);
     int bh = layoutScale.scaleY(HAUTEUR_BOUTON);
     int gap = layoutScale.scaleX(20);
@@ -269,34 +278,50 @@ public class Parametres extends Etats {
 
     Graphics2D g2d = (Graphics2D) g;
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-    // Dessiner le titre "Paramètres"
-    g.setColor(Color.BLACK);
+    // Titre — couleur adaptée au thème
+    g.setColor(getFond().getCouleurTexte());
     g.setFont(fontTitre);
     String titre = titreParametres;
     int titreLargeur = g.getFontMetrics().stringWidth(titre);
-    g.drawString(titre, layoutScale.centerX() - titreLargeur / 2, panelY - layoutScale.scaleY(30));
+    g.drawString(titre, layoutScale.centerX() - titreLargeur / 2, panelY - layoutScale.scaleY(18));
 
-    // Dessiner le panel principal
-    g2d.setColor(COLOR_PANEL_BG);
+    // Panneau principal avec couleur thème
+    Color panelBase = getFond().getCouleurFondBouton();
+    g2d.setColor(new Color(panelBase.getRed(), panelBase.getGreen(), panelBase.getBlue(), 210));
     RoundRectangle2D panel = new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20);
     g2d.fill(panel);
-    g2d.setColor(Color.GRAY);
+    g2d.setColor(getFond().getCouleurBordreBouton());
     g2d.setStroke(STROKE_UI);
     g2d.draw(panel);
 
-    // Dessiner les sliders et contrôles
+    // Séparateurs de section
+    int sepMargin = layoutScale.scaleX(30);
+    int sepW = panelWidth - 2 * sepMargin;
+    dessinerSectionLabel(g2d, panelX + sepMargin, sectionInterfaceY, sepW);
+    dessinerSectionLabel(g2d, panelX + sepMargin, sectionGameplayY, sepW);
+
+    // Contrôles
     dessinerSlider(g, sliderEffetsX, sliderEffetsY, sliderWidth, labelEffetsSonores, "🔊", "🔇", volumeEffets);
     dessinerSlider(g, sliderMusiqueX, sliderMusiqueY, sliderWidth, labelMusique, "🎵", "🔇", volumeMusique);
-    dessinerDropdown(g);
-    dessinerDropdownThemes(g);
     dessinerTogglePossibilites(g);
     dessinerToggleErreurDouble(g);
 
-    // Dessiner les boutons du bas
+    // Boutons du bas
     for (Bouton b : boutons) {
       b.draw(g, getFond());
     }
+
+    // Dropdowns en dernier pour qu'ils s'affichent au-dessus de tout
+    dessinerDropdown(g);
+    dessinerDropdownThemes(g);
+  }
+
+  private void dessinerSectionLabel(Graphics2D g2d, int x, int y, int w) {
+    g2d.setStroke(STROKE_UI);
+    g2d.setColor(COLOR_SECTION_LINE);
+    g2d.drawLine(x, y + layoutScale.scaleY(10), x + w, y + layoutScale.scaleY(10));
   }
 
   private void dessinerSlider(Graphics g, int x, int y, int largeur, String label, String icon, String muteIcon,
@@ -306,8 +331,8 @@ public class Parametres extends Etats {
     String iconAffiche = mute ? muteIcon : icon;
     String labelAffiche = mute ? label + suffixeMute : label;
 
-    // Label et icône
-    g.setColor(Color.BLACK);
+    // Icône et label
+    g.setColor(getFond().getCouleurTexte());
     g.setFont(fontEmoji);
     g.drawString(iconAffiche, x, y + scaledY20);
 
@@ -317,13 +342,13 @@ public class Parametres extends Etats {
     // Piste du slider
     int sliderY = y + scaledY30;
     int sliderX = x + scaledX40;
-    int sliderH = layoutScale.scaleY(8);
+    int sliderH = layoutScale.scaleY(7);
     int trackWidth = largeur - scaledX40;
 
-    // Fond de la piste
-    g2d.setColor(COLOR_TRACK_BG);
-    RoundRectangle2D piste = new RoundRectangle2D.Float(sliderX, sliderY, trackWidth, sliderH,
-        sliderH, sliderH);
+    // Fond de la piste (couleur thème)
+    Color trackBg = getFond().getCouleurFondCellule();
+    g2d.setColor(trackBg);
+    RoundRectangle2D piste = new RoundRectangle2D.Float(sliderX, sliderY, trackWidth, sliderH, sliderH, sliderH);
     g2d.fill(piste);
 
     // Partie remplie
@@ -335,7 +360,7 @@ public class Parametres extends Etats {
     }
 
     // Curseur
-    int thumbSize = layoutScale.scaleUniform(20);
+    int thumbSize = layoutScale.scaleUniform(18);
     int thumbX = sliderX + (int) (trackWidth * valeur) - thumbSize / 2;
     int thumbY = sliderY + sliderH / 2 - thumbSize / 2;
 
@@ -349,187 +374,314 @@ public class Parametres extends Etats {
   private void dessinerDropdown(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
 
-    // Label et icône
-    g.setColor(Color.BLACK);
+    // Icône et label
+    g.setColor(getFond().getCouleurTexte());
     g.setFont(fontEmoji);
     g.drawString("🌐", dropdownX, dropdownY + scaledY20);
-
     g.setFont(fontLabel);
     g.drawString(labelLangue, dropdownX + scaledX40, dropdownY + scaledY18);
 
-    // Boîte du dropdown
     int dropY = dropdownY + scaledY28;
     int dropX = dropdownX + scaledX40;
     int dropW = dropdownWidth - scaledX40;
-    int dropH = scaledY35;
+    int dropH = scaledY42;
 
-    g2d.setColor(hoverDropdown ? COLOR_DROPDOWN_BG_HOVER : COLOR_DROPDOWN_BG);
-    RoundRectangle2D box = new RoundRectangle2D.Float(dropX, dropY, dropW, dropH, 10, 10);
-    g2d.fill(box);
-    g2d.setColor(Color.GRAY);
-    g2d.setStroke(STROKE_UI);
-    g2d.draw(box);
+    dessinerBoiteDropdown(g2d, dropX, dropY, dropW, dropH,
+        languesAffichees.get(langueSelectionnee), hoverDropdown, dropdownLangueOuvert);
 
-    // Texte sélectionné
-    g.setColor(Color.BLACK);
-    g.setFont(fontLabel);
-    g.drawString(languesAffichees.get(langueSelectionnee), dropX + scaledX10,
-      dropY + scaledY22);
-
-    // Flèche
-    int arrowX = dropX + dropW - scaledX20;
-    int arrowY = dropY + dropH / 2;
-    dessinerFleche(g2d, arrowX, arrowY, dropdownLangueOuvert);
-
-    // Options si ouvert
     if (dropdownLangueOuvert) {
-      int optionY = dropY + dropH;
+      int optionStartY = dropY + dropH + scaledY2;
+      int nbOptions = languesAffichees.size() - 1;
+      int listH = nbOptions * (dropH + scaledY2) - scaledY2;
+
+      // Ombre portée (multi-couche pour effet doux)
+      g2d.setColor(new Color(0, 0, 0, 10));
+      g2d.fillRoundRect(dropX + 6, optionStartY + 6, dropW, listH, 14, 14);
+      g2d.setColor(new Color(0, 0, 0, 20));
+      g2d.fillRoundRect(dropX + 4, optionStartY + 4, dropW, listH, 12, 12);
+      g2d.setColor(new Color(0, 0, 0, 32));
+      g2d.fillRoundRect(dropX + 2, optionStartY + 2, dropW, listH, 10, 10);
+
+      // Fond solide de la liste (évite la transparence entre/sous les items)
+      Color listBg = getFond().getCouleurFondCellule();
+      g2d.setColor(new Color(listBg.getRed(), listBg.getGreen(), listBg.getBlue()));
+      g2d.fillRoundRect(dropX, optionStartY, dropW, listH, 10, 10);
+
+      // Items
+      int optionY = optionStartY;
       for (int i = 0; i < languesAffichees.size(); i++) {
         if (i != langueSelectionnee) {
-          g2d.setColor(COLOR_OPTION_BG);
-          RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + scaledY2, dropW, dropH,
-              10, 10);
-          g2d.fill(optionBox);
-          g2d.setColor(Color.GRAY);
-          g2d.draw(optionBox);
-
-          g.setColor(Color.BLACK);
-          g.drawString(languesAffichees.get(i), dropX + scaledX10, optionY + scaledY24);
+          dessinerOptionDropdown(g2d, dropX, optionY, dropW, dropH,
+              languesAffichees.get(i), false, false);
           optionY += dropH + scaledY2;
         }
       }
+
+      // Contour du conteneur (dessiné après les items pour superposition propre)
+      g2d.setColor(getFond().getCouleurAccent());
+      g2d.setStroke(new BasicStroke(1.5f));
+      g2d.drawRoundRect(dropX, optionStartY, dropW, listH, 10, 10);
     }
-  }
-
-  private void dessinerFleche(Graphics2D g2d, int x, int y, boolean up) {
-    int size = layoutScale.scaleUniform(5);
-    int[] xPoints = { x - size, x + size, x };
-    int[] yPoints;
-    if (up) {
-      yPoints = new int[] { y + size / 2, y + size / 2, y - size / 2 };
-    } else {
-      yPoints = new int[] { y - size / 2, y - size / 2, y + size / 2 };
-    }
-    g2d.setColor(Color.BLACK);
-    g2d.fillPolygon(xPoints, yPoints, 3);
-  }
-
-  private void dessinerTogglePossibilites(Graphics g) {
-    Graphics2D g2d = (Graphics2D) g;
-
-    // Label
-    g.setColor(Color.BLACK);
-    g.setFont(fontLabel);
-    g.drawString(labelPossibilites != null ? labelPossibilites : "Possibilités", togglePossibilitesX, togglePossibilitesY + scaledY20);
-
-    // Boîte du toggle
-    int toggleX = togglePossibilitesX + layoutScale.scaleX(200);
-    int toggleY = togglePossibilitesY;
-    int toggleW = layoutScale.scaleX(60);
-    int toggleH = layoutScale.scaleY(30);
-    
-    // Fond du toggle
-    Color toggleBg = afficherPossibilites ? new Color(100, 200, 100) : new Color(200, 200, 200);
-    g2d.setColor(toggleBg);
-    RoundRectangle2D toggle = new RoundRectangle2D.Float(toggleX, toggleY, toggleW, toggleH, 15, 15);
-    g2d.fill(toggle);
-    g2d.setColor(Color.GRAY);
-    g2d.setStroke(STROKE_UI);
-    g2d.draw(toggle);
-    
-    // Cercle du curseur
-    int circleDiam = layoutScale.scaleUniform(24);
-    int circleX = afficherPossibilites ? toggleX + toggleW - circleDiam - 3 : toggleX + 3;
-    int circleY = toggleY + (toggleH - circleDiam) / 2;
-    g2d.setColor(Color.WHITE);
-    g2d.fillOval(circleX, circleY, circleDiam, circleDiam);
-  }
-
-  private void dessinerToggleErreurDouble(Graphics g) {
-    Graphics2D g2d = (Graphics2D) g;
-
-    // Label
-    g.setColor(Color.BLACK);
-    g.setFont(fontLabel);
-    g.drawString(labelErreurDouble != null ? labelErreurDouble : "Erreur doublon", toggleErreurDoubleX, toggleErreurDoubleY + scaledY20);
-
-    // Boîte du toggle
-    int toggleX = toggleErreurDoubleX + layoutScale.scaleX(200);
-    int toggleY = toggleErreurDoubleY;
-    int toggleW = layoutScale.scaleX(60);
-    int toggleH = layoutScale.scaleY(30);
-    
-    // Fond du toggle
-    Color toggleBg = afficherErreurDouble ? new Color(100, 200, 100) : new Color(200, 200, 200);
-    g2d.setColor(toggleBg);
-    RoundRectangle2D toggle = new RoundRectangle2D.Float(toggleX, toggleY, toggleW, toggleH, 15, 15);
-    g2d.fill(toggle);
-    g2d.setColor(Color.GRAY);
-    g2d.setStroke(STROKE_UI);
-    g2d.draw(toggle);
-    
-    // Cercle du curseur
-    int circleDiam = layoutScale.scaleUniform(24);
-    int circleX = afficherErreurDouble ? toggleX + toggleW - circleDiam - 3 : toggleX + 3;
-    int circleY = toggleY + (toggleH - circleDiam) / 2;
-    g2d.setColor(Color.WHITE);
-    g2d.fillOval(circleX, circleY, circleDiam, circleDiam);
   }
 
   private void dessinerDropdownThemes(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
 
-    g.setColor(Color.BLACK);
+    g.setColor(getFond().getCouleurTexte());
     g.setFont(fontEmoji);
     g.drawString("🎨", themeDropdownX, themeDropdownY + scaledY20);
-
     g.setFont(fontLabel);
     g.drawString(labelTheme, themeDropdownX + scaledX40, themeDropdownY + scaledY18);
 
     int dropY = themeDropdownY + scaledY28;
     int dropX = themeDropdownX + scaledX40;
     int dropW = themeDropdownWidth - scaledX40;
-    int dropH = scaledY35;
+    int dropH = scaledY42;
 
-    g2d.setColor(hoverThemeDropdown ? COLOR_DROPDOWN_BG_HOVER : COLOR_DROPDOWN_BG);
-    RoundRectangle2D box = new RoundRectangle2D.Float(dropX, dropY, dropW, dropH, 10, 10);
-    g2d.fill(box);
-    g2d.setColor(Color.GRAY);
-    g2d.setStroke(STROKE_UI);
-    g2d.draw(box);
-
-    g.setColor(Color.BLACK);
-    g.setFont(fontLabel);
-    g.drawString(themesAffiches.get(themeSelectionne), dropX + scaledX10, dropY + scaledY22);
-
-    int arrowX = dropX + dropW - scaledX20;
-    int arrowY = dropY + dropH / 2;
-    dessinerFleche(g2d, arrowX, arrowY, dropdownThemeOuvert);
+    dessinerBoiteDropdown(g2d, dropX, dropY, dropW, dropH,
+        themesAffiches.get(themeSelectionne), hoverThemeDropdown, dropdownThemeOuvert);
 
     if (dropdownThemeOuvert) {
-      int optionY = dropY + dropH;
+      int optionStartY = dropY + dropH + scaledY2;
+      int nbOptions = themes.size();
+      int listH = nbOptions * (dropH + scaledY2) - scaledY2;
+
+      // Ombre portée (multi-couche pour effet doux)
+      g2d.setColor(new Color(0, 0, 0, 10));
+      g2d.fillRoundRect(dropX + 6, optionStartY + 6, dropW, listH, 14, 14);
+      g2d.setColor(new Color(0, 0, 0, 20));
+      g2d.fillRoundRect(dropX + 4, optionStartY + 4, dropW, listH, 12, 12);
+      g2d.setColor(new Color(0, 0, 0, 32));
+      g2d.fillRoundRect(dropX + 2, optionStartY + 2, dropW, listH, 10, 10);
+
+      // Fond solide de la liste (évite la transparence entre/sous les items)
+      Color listBg = getFond().getCouleurFondCellule();
+      g2d.setColor(new Color(listBg.getRed(), listBg.getGreen(), listBg.getBlue()));
+      g2d.fillRoundRect(dropX, optionStartY, dropW, listH, 10, 10);
+
+      // Items
+      int optionY = optionStartY;
       for (int i = 0; i < themes.size(); i++) {
-        Color fond;
-        if (i == themeSelectionne) {
-          fond = COLOR_THEME_SELECTED;
-        } else if (i == indexSurvolTheme) {
-          fond = COLOR_THEME_HOVER;
-        } else {
-          fond = COLOR_THEME_NORMAL;
-        }
-
-        RoundRectangle2D optionBox = new RoundRectangle2D.Float(dropX, optionY + scaledY2, dropW,
-            dropH, 10, 10);
-        g2d.setColor(fond);
-        g2d.fill(optionBox);
-        g2d.setColor(Color.GRAY);
-        g2d.draw(optionBox);
-
-        g.setColor(Color.BLACK);
-        g.drawString(themesAffiches.get(i), dropX + scaledX10, optionY + scaledY24);
+        boolean selected = (i == themeSelectionne);
+        boolean hovered = (i == indexSurvolTheme);
+        dessinerOptionDropdown(g2d, dropX, optionY, dropW, dropH,
+            themesAffiches.get(i), hovered, selected);
         optionY += dropH + scaledY2;
       }
+
+      // Pastilles de couleur pour les thèmes
+      Color[] swatchCouleurs = {
+          new Color(135, 190, 220),   // Dégradé - bleu ciel
+          new Color(45, 45, 65),      // Mode Sombre - bleu nuit
+          new Color(240, 240, 245),   // Mode Clair - blanc cassé
+          new Color(203, 166, 247)    // Catppuccin - lavande
+      };
+      int swatchOptY = optionStartY;
+      for (int i = 0; i < themes.size(); i++) {
+        int swatchSize = layoutScale.scaleUniform(14);
+        int swatchX = dropX + dropW - layoutScale.scaleX(50);
+        int swatchY = swatchOptY + (dropH - swatchSize) / 2;
+        g2d.setColor(swatchCouleurs[i]);
+        g2d.fillOval(swatchX, swatchY, swatchSize, swatchSize);
+        g2d.setColor(getFond().getCouleurBordreBouton());
+        g2d.setStroke(new BasicStroke(1f));
+        g2d.drawOval(swatchX, swatchY, swatchSize, swatchSize);
+        swatchOptY += dropH + scaledY2;
+      }
+
+      // Contour du conteneur (dessiné après les items pour superposition propre)
+      g2d.setColor(getFond().getCouleurAccent());
+      g2d.setStroke(new BasicStroke(1.5f));
+      g2d.drawRoundRect(dropX, optionStartY, dropW, listH, 10, 10);
     }
+  }
+
+  /** Boîte principale du dropdown (valeur sélectionnée + chevron). */
+  private void dessinerBoiteDropdown(Graphics2D g2d, int x, int y, int w, int h,
+      String texte, boolean hover, boolean ouvert) {
+    Color accent = getFond().getCouleurAccent();
+    Color bgBase = hover ? getFond().getCouleurFondBoutonSurvol() : getFond().getCouleurFondCellule();
+
+    // Fond avec gradient vertical subtil
+    Color bgTop = bgBase;
+    Color bgBot = new Color(
+        Math.max(0, bgBase.getRed() - 14),
+        Math.max(0, bgBase.getGreen() - 14),
+        Math.max(0, bgBase.getBlue() - 14),
+        bgBase.getAlpha()
+    );
+    RoundRectangle2D box = new RoundRectangle2D.Float(x, y, w, h, 10, 10);
+    g2d.setPaint(new GradientPaint(x, y, bgTop, x, y + h, bgBot));
+    g2d.fill(box);
+
+    // Reflet verre (dégradé blanc→transparent sur la moitié haute)
+    g2d.setPaint(new GradientPaint(x, y, new Color(255, 255, 255, hover ? 55 : 30),
+        x, y + h / 2, new Color(255, 255, 255, 0)));
+    g2d.fill(box);
+    g2d.setPaint(null);
+
+    // Lueur intérieure quand ouvert
+    if (ouvert) {
+      g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 18));
+      g2d.fill(box);
+    }
+
+    // Barre d'accent à gauche quand ouvert
+    if (ouvert) {
+      int barW = layoutScale.scaleX(3);
+      g2d.setColor(accent);
+      g2d.fillRoundRect(x + 1, y + layoutScale.scaleY(5), barW, h - layoutScale.scaleY(10), barW, barW);
+    }
+
+    // Bordure (accentuée quand ouvert, mi-teinte sur survol)
+    Color borderColor = ouvert ? accent
+        : hover ? new Color(
+            (getFond().getCouleurBordreBouton().getRed() + accent.getRed()) / 2,
+            (getFond().getCouleurBordreBouton().getGreen() + accent.getGreen()) / 2,
+            (getFond().getCouleurBordreBouton().getBlue() + accent.getBlue()) / 2)
+        : getFond().getCouleurBordreBouton();
+    g2d.setColor(borderColor);
+    g2d.setStroke(ouvert ? new BasicStroke(2f) : STROKE_UI);
+    g2d.draw(box);
+
+    // Texte sélectionné (couleur accent sur survol ou ouvert)
+    g2d.setColor(hover || ouvert ? accent : getFond().getCouleurTexte());
+    g2d.setFont(fontLabel);
+    int ty = y + (h + g2d.getFontMetrics().getAscent()) / 2 - layoutScale.scaleY(2);
+    int textX = ouvert ? x + scaledX10 + layoutScale.scaleX(6) : x + scaledX10;
+    g2d.drawString(texte, textX, ty);
+
+    // Chevron
+    int chevX = x + w - scaledX20 - layoutScale.scaleX(4);
+    int chevMidY = y + h / 2;
+    dessinerChevron(g2d, chevX, chevMidY, ouvert);
+  }
+
+  /** Option dans la liste déroulée. */
+  private void dessinerOptionDropdown(Graphics2D g2d, int x, int y, int w, int h,
+      String texte, boolean surligne, boolean estSelectionne) {
+    Color accent = getFond().getCouleurAccent();
+
+    // Fond : hover > sélectionné légèrement teinté > neutre
+    Color bg;
+    if (surligne) {
+      bg = getFond().getCouleurFondBoutonSurvol();
+    } else if (estSelectionne) {
+      Color base = getFond().getCouleurFondCellule();
+      bg = new Color(
+          (int) (base.getRed() * 0.88 + accent.getRed() * 0.12),
+          (int) (base.getGreen() * 0.88 + accent.getGreen() * 0.12),
+          (int) (base.getBlue() * 0.88 + accent.getBlue() * 0.12)
+      );
+    } else {
+      bg = getFond().getCouleurFondCellule();
+    }
+    g2d.setColor(bg);
+    RoundRectangle2D opt = new RoundRectangle2D.Float(x, y, w, h, 8, 8);
+    g2d.fill(opt);
+
+    // Barre d'accent à gauche pour hover ou sélectionné
+    if (surligne || estSelectionne) {
+      int barW = layoutScale.scaleX(3);
+      g2d.setColor(accent);
+      g2d.fillRoundRect(x + 1, y + layoutScale.scaleY(5), barW, h - layoutScale.scaleY(10), barW, barW);
+    }
+
+    // Bordure
+    Color borderOpt = estSelectionne ? accent
+        : surligne ? new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 130)
+        : getFond().getCouleurBordreBouton();
+    g2d.setColor(borderOpt);
+    g2d.setStroke(estSelectionne ? new BasicStroke(1.5f) : STROKE_UI);
+    g2d.draw(opt);
+
+    // Texte (légèrement indenté quand actif, couleur accent sur survol/sélection)
+    g2d.setColor(surligne || estSelectionne ? accent : getFond().getCouleurTexte());
+    g2d.setFont(fontLabel);
+    int ty = y + (h + g2d.getFontMetrics().getAscent()) / 2 - layoutScale.scaleY(2);
+    int textX = (surligne || estSelectionne) ? x + scaledX10 + layoutScale.scaleX(5) : x + scaledX10;
+    g2d.drawString(texte, textX, ty);
+
+    // Coche pour l'élément sélectionné
+    if (estSelectionne) {
+      g2d.setColor(accent);
+      g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+      int s = layoutScale.scaleUniform(5);
+      int checkX = x + w - layoutScale.scaleX(24);
+      int checkY = y + h / 2;
+      g2d.drawLine(checkX - s, checkY, checkX - s / 3, checkY + s * 2 / 3);
+      g2d.drawLine(checkX - s / 3, checkY + s * 2 / 3, checkX + s, checkY - s * 2 / 3);
+    }
+  }
+
+  /** Chevron ˅ / ˄ dessiné avec deux segments (moderne, non rempli). */
+  private void dessinerChevron(Graphics2D g2d, int cx, int cy, boolean up) {
+    int s = layoutScale.scaleUniform(6);
+    int circleR = layoutScale.scaleUniform(11);
+    Color accentColor = getFond().getCouleurAccent();
+
+    // Fond circulaire subtil derrière le chevron
+    Color pillBg = up
+        ? new Color(accentColor.getRed(), accentColor.getGreen(), accentColor.getBlue(), 40)
+        : new Color(128, 128, 128, 22);
+    g2d.setColor(pillBg);
+    g2d.fillOval(cx - circleR, cy - circleR, circleR * 2, circleR * 2);
+
+    g2d.setColor(up ? accentColor : getFond().getCouleurTexte());
+    g2d.setStroke(STROKE_CHEVRON);
+    if (up) {
+      g2d.drawLine(cx - s, cy + s / 2, cx, cy - s / 2);
+      g2d.drawLine(cx, cy - s / 2, cx + s, cy + s / 2);
+    } else {
+      g2d.drawLine(cx - s, cy - s / 2, cx, cy + s / 2);
+      g2d.drawLine(cx, cy + s / 2, cx + s, cy - s / 2);
+    }
+  }
+
+  private void dessinerTogglePossibilites(Graphics g) {
+    dessinerToggle(g, togglePossibilitesX, togglePossibilitesY,
+        labelPossibilites != null ? labelPossibilites : "Possibilités",
+        afficherPossibilites);
+  }
+
+  private void dessinerToggleErreurDouble(Graphics g) {
+    dessinerToggle(g, toggleErreurDoubleX, toggleErreurDoubleY,
+        labelErreurDouble != null ? labelErreurDouble : "Erreur doublon",
+        afficherErreurDouble);
+  }
+
+  private void dessinerToggle(Graphics g, int rowX, int rowY, String label, boolean actif) {
+    Graphics2D g2d = (Graphics2D) g;
+
+    // Label aligné à gauche de la ligne
+    g.setColor(getFond().getCouleurTexte());
+    g.setFont(fontLabel);
+    int labelY = rowY + (layoutScale.scaleY(30) + g.getFontMetrics().getAscent()) / 2 - layoutScale.scaleY(2);
+    g.drawString(label, rowX, labelY);
+
+    // Toggle aligné à droite
+    int toggleW = layoutScale.scaleX(56);
+    int toggleH = layoutScale.scaleY(30);
+    int toggleX = toggleControlX;
+    int toggleY = rowY;
+
+    Color toggleBg = actif ? COLOR_ACCENT : getFond().getCouleurFondCellule();
+    g2d.setColor(toggleBg);
+    RoundRectangle2D toggle = new RoundRectangle2D.Float(toggleX, toggleY, toggleW, toggleH, toggleH, toggleH);
+    g2d.fill(toggle);
+    g2d.setColor(actif ? COLOR_ACCENT.darker() : getFond().getCouleurBordreBouton());
+    g2d.setStroke(STROKE_UI);
+    g2d.draw(toggle);
+
+    // Curseur
+    int circleDiam = layoutScale.scaleUniform(22);
+    int circleX = actif ? toggleX + toggleW - circleDiam - 4 : toggleX + 4;
+    int circleY = toggleY + (toggleH - circleDiam) / 2;
+    g2d.setColor(Color.WHITE);
+    g2d.fillOval(circleX, circleY, circleDiam, circleDiam);
+    g2d.setColor(new Color(0, 0, 0, 40));
+    g2d.setStroke(STROKE_UI);
+    g2d.drawOval(circleX, circleY, circleDiam, circleDiam);
   }
 
   @Override
@@ -557,27 +709,26 @@ public class Parametres extends Etats {
     int mx = e.getX();
     int my = e.getY();
 
-    // Vérifier hover dropdown
+    // Hover dropdown langue
     int dropY = dropdownY + layoutScale.scaleY(28);
     int dropX = dropdownX + layoutScale.scaleX(40);
     int dropW = dropdownWidth - layoutScale.scaleX(40);
-    int dropH = layoutScale.scaleY(35);
+    int dropH = layoutScale.scaleY(42);
     hoverDropdown = mx >= dropX && mx <= dropX + dropW && my >= dropY && my <= dropY + dropH;
 
-    // Vérifier hover dropdown thème
+    // Hover dropdown thème
     int themeDropY = themeDropdownY + layoutScale.scaleY(28);
     int themeDropX = themeDropdownX + layoutScale.scaleX(40);
     int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
-    int themeDropH = layoutScale.scaleY(35);
+    int themeDropH = layoutScale.scaleY(42);
     hoverThemeDropdown = mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY
         && my <= themeDropY + themeDropH;
 
     indexSurvolTheme = -1;
     if (dropdownThemeOuvert) {
-      int optionY = themeDropY + themeDropH;
+      int optionY = themeDropY + themeDropH + layoutScale.scaleY(2);
       for (int i = 0; i < themes.size(); i++) {
-        int optY = optionY + layoutScale.scaleY(2);
-        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
+        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optionY && my <= optionY + themeDropH) {
           indexSurvolTheme = i;
           break;
         }
@@ -614,48 +765,51 @@ public class Parametres extends Etats {
 
   @Override
   public void mousePressed(MouseEvent e) {
-    for (Bouton b : boutons) {
-      if (isIn(e, b)) {
-        b.setSourisEnfonce(true);
+    int mx = e.getX();
+    int my = e.getY();
+    boolean dropdownActif = dropdownLangueOuvert || dropdownThemeOuvert;
+
+    if (!dropdownActif) {
+      for (Bouton b : boutons) {
+        if (isIn(e, b)) {
+          b.setSourisEnfonce(true);
+        }
       }
     }
 
-    int mx = e.getX();
-    int my = e.getY();
+    if (!dropdownActif) {
+      int sliderY = sliderEffetsY + layoutScale.scaleY(20);
+      int sliderX = sliderEffetsX + layoutScale.scaleX(40);
+      int sliderW = sliderWidth - layoutScale.scaleX(40);
+      if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
+        draggingEffets = true;
+        float newVal = (float) (mx - sliderX) / sliderW;
+        volumeEffets = Math.max(0, Math.min(1, newVal));
+      }
 
-    int sliderY = sliderEffetsY + layoutScale.scaleY(20);
-    int sliderX = sliderEffetsX + layoutScale.scaleX(40);
-    int sliderW = sliderWidth - layoutScale.scaleX(40);
-    if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
-      draggingEffets = true;
-      float newVal = (float) (mx - sliderX) / sliderW;
-      volumeEffets = Math.max(0, Math.min(1, newVal));
+      sliderY = sliderMusiqueY + layoutScale.scaleY(20);
+      sliderX = sliderMusiqueX + layoutScale.scaleX(40);
+      if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
+        draggingMusique = true;
+        float newVal = (float) (mx - sliderX) / sliderW;
+        volumeMusique = Math.max(0, Math.min(1, newVal));
+      }
     }
 
-    sliderY = sliderMusiqueY + layoutScale.scaleY(20);
-    sliderX = sliderMusiqueX + layoutScale.scaleX(40);
-    if (mx >= sliderX && mx <= sliderX + sliderW && my >= sliderY && my <= sliderY + layoutScale.scaleY(30)) {
-      draggingMusique = true;
-      float newVal = (float) (mx - sliderX) / sliderW;
-      volumeMusique = Math.max(0, Math.min(1, newVal));
-    }
-
+    // ── Dropdown langue ──────────────────────────────────────────
     int dropY = dropdownY + layoutScale.scaleY(28);
     int dropX = dropdownX + layoutScale.scaleX(40);
     int dropW = dropdownWidth - layoutScale.scaleX(40);
-    int dropH = layoutScale.scaleY(35);
+    int dropH = layoutScale.scaleY(42);
     if (mx >= dropX && mx <= dropX + dropW && my >= dropY && my <= dropY + dropH) {
       dropdownLangueOuvert = !dropdownLangueOuvert;
-      if (dropdownLangueOuvert) {
-        dropdownThemeOuvert = false;
-      }
+      if (dropdownLangueOuvert) dropdownThemeOuvert = false;
     } else if (dropdownLangueOuvert) {
-      int optionY = dropY + dropH;
+      int optionY = dropY + dropH + layoutScale.scaleY(2);
       boolean langueChoisie = false;
       for (int i = 0; i < languesAffichees.size(); i++) {
         if (i != langueSelectionnee) {
-          int optY = optionY + layoutScale.scaleY(2);
-          if (mx >= dropX && mx <= dropX + dropW && my >= optY && my <= optY + dropH) {
+          if (mx >= dropX && mx <= dropX + dropW && my >= optionY && my <= optionY + dropH) {
             langueSelectionnee = i;
             dropdownLangueOuvert = false;
             langueChoisie = true;
@@ -664,27 +818,23 @@ public class Parametres extends Etats {
           optionY += dropH + layoutScale.scaleY(2);
         }
       }
-      if (!langueChoisie) {
-        dropdownLangueOuvert = false;
-      }
+      if (!langueChoisie) dropdownLangueOuvert = false;
     }
 
+    // ── Dropdown thème ───────────────────────────────────────────
     int themeDropY = themeDropdownY + layoutScale.scaleY(28);
     int themeDropX = themeDropdownX + layoutScale.scaleX(40);
     int themeDropW = themeDropdownWidth - layoutScale.scaleX(40);
-    int themeDropH = layoutScale.scaleY(35);
+    int themeDropH = layoutScale.scaleY(42);
 
     if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= themeDropY && my <= themeDropY + themeDropH) {
       dropdownThemeOuvert = !dropdownThemeOuvert;
-      if (dropdownThemeOuvert) {
-        dropdownLangueOuvert = false;
-      }
+      if (dropdownThemeOuvert) dropdownLangueOuvert = false;
     } else if (dropdownThemeOuvert) {
-      int optionY = themeDropY + themeDropH;
+      int optionY = themeDropY + themeDropH + layoutScale.scaleY(2);
       boolean themeChoisi = false;
       for (int i = 0; i < themes.size(); i++) {
-        int optY = optionY + layoutScale.scaleY(2);
-        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optY && my <= optY + themeDropH) {
+        if (mx >= themeDropX && mx <= themeDropX + themeDropW && my >= optionY && my <= optionY + themeDropH) {
           themeSelectionne = i;
           appliquerThemeSelectionne();
           dropdownThemeOuvert = false;
@@ -693,24 +843,21 @@ public class Parametres extends Etats {
         }
         optionY += themeDropH + layoutScale.scaleY(2);
       }
-      if (!themeChoisi) {
-        dropdownThemeOuvert = false;
+      if (!themeChoisi) dropdownThemeOuvert = false;
+    }
+
+    // ── Toggles (positionnés à droite) ───────────────────────────
+    if (!dropdownActif) {
+      int toggleW = layoutScale.scaleX(56);
+      int toggleH = layoutScale.scaleY(30);
+      if (mx >= toggleControlX && mx <= toggleControlX + toggleW
+          && my >= togglePossibilitesY && my <= togglePossibilitesY + toggleH) {
+        afficherPossibilites = !afficherPossibilites;
       }
-    }
-
-    // Gestion des clics sur les toggles
-    int toggleX = togglePossibilitesX + layoutScale.scaleX(200);
-    int toggleY = togglePossibilitesY;
-    int toggleW = layoutScale.scaleX(60);
-    int toggleH = layoutScale.scaleY(30);
-    if (mx >= toggleX && mx <= toggleX + toggleW && my >= toggleY && my <= toggleY + toggleH) {
-      afficherPossibilites = !afficherPossibilites;
-    }
-
-    toggleX = toggleErreurDoubleX + layoutScale.scaleX(200);
-    toggleY = toggleErreurDoubleY;
-    if (mx >= toggleX && mx <= toggleX + toggleW && my >= toggleY && my <= toggleY + toggleH) {
-      afficherErreurDouble = !afficherErreurDouble;
+      if (mx >= toggleControlX && mx <= toggleControlX + toggleW
+          && my >= toggleErreurDoubleY && my <= toggleErreurDoubleY + toggleH) {
+        afficherErreurDouble = !afficherErreurDouble;
+      }
     }
   }
 
