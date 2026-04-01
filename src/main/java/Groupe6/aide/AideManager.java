@@ -60,6 +60,10 @@ public class AideManager{
         return this.aides.size();
     }
 
+    public List<Aide> getAides(){
+        return java.util.Collections.unmodifiableList(this.aides);
+    }
+
     public Map<Integer, Integer> getNBUtilisations(){
         Map<Integer, Integer> dicoNbUtilisation = new HashMap<>();
         for (Aide aide : this.aides){

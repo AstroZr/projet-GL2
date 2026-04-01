@@ -1,6 +1,7 @@
 package Groupe6.etats;
 
 import Groupe6.aide.AideManager;
+import Groupe6.aide.AideTextuel;
 import Groupe6.game.Game;
 import Groupe6.models.Grille;
 import Groupe6.save.SaveManager;
@@ -16,8 +17,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,8 @@ public class Jeu extends Etats {
   private static final Font FONT_BOUTON = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
   private static final Font FONT_OVERLAY_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 20);
   private static final Font FONT_OVERLAY_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 15);
+  private static final Font FONT_MSG_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 14);
+  private static final Font FONT_MSG_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 13);
 
   private Grille grille;
   private VueGrille vueGrille;
@@ -63,6 +68,8 @@ public class Jeu extends Etats {
   private boolean overlayAideVisible = false;
   private String overlayAideTitre = "";
   private String overlayAideTexte = "";
+  private final List<AideTextuel> messagesAide = new ArrayList<>();
+  private int messagesScrollOffset = 0;
   private boolean victoireAnnoncee = false;
   private String labelVictoireTitre;
   private String labelVictoireTexte;
@@ -266,6 +273,8 @@ public class Jeu extends Etats {
     if (boutonAide != null) {
       boutonAide.resetProgression();
     }
+    messagesAide.clear();
+    messagesScrollOffset = 0;
     initBoutonsNumeriques();
     updateLabelModeCandidat();
     lastLayoutWidth = -1;
@@ -288,6 +297,13 @@ public class Jeu extends Etats {
 
   public void hideAideOverlay() {
     this.overlayAideVisible = false;
+  }
+
+  public void addAideMessage(AideTextuel msg) {
+    if (msg != null) {
+      messagesAide.add(new AideTextuel(msg));
+      messagesScrollOffset = Integer.MAX_VALUE; // sera clampé au prochain dessin
+    }
   }
 
   @Override
@@ -372,6 +388,7 @@ public class Jeu extends Etats {
     vueGrille.draw(g, getFond());
 
     drawPanelDroit(g);
+    drawAideMessages(g);
 
     // Dessiner les boutons
     for (Bouton b : boutons) {
@@ -461,6 +478,24 @@ public class Jeu extends Etats {
   @Override
   public void mouseDragged(MouseEvent e) {
     // Pas d'action spécifique pour le moment
+  }
+
+  @Override
+  public void mouseWheelMoved(MouseWheelEvent e) {
+    int w = Constants.game_width;
+    int h = Constants.game_height;
+    int tailleGrille = (int) (h / 1.5f);
+    int gridOffsetX = (w - tailleGrille) / 2;
+    int panelW = Math.min(280, gridOffsetX - 40);
+    if (panelW < 80) return;
+    int panelX = 20;
+    int panelY = 100;
+    int panelH = h - 200;
+    int mx = e.getX();
+    int my = e.getY();
+    if (mx >= panelX && mx <= panelX + panelW && my >= panelY && my <= panelY + panelH) {
+      messagesScrollOffset += e.getWheelRotation() * 30;
+    }
   }
 
   @Override
@@ -639,6 +674,120 @@ public class Jeu extends Etats {
       overlayAideMaxWidthCache = maxWidth;
     }
     return overlayAideLinesCache;
+  }
+
+  private void drawAideMessages(Graphics g) {
+    int w = Constants.game_width;
+    int h = Constants.game_height;
+    int tailleGrille = (int) (h / 1.5f);
+    int gridOffsetX = (w - tailleGrille) / 2;
+    int panelW = Math.min(280, gridOffsetX - 40);
+    if (panelW < 80 || messagesAide.isEmpty()) return;
+
+    int panelX = 20;
+    int panelY = 100;
+    int panelH = h - 200;
+
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+    // Fond du panneau
+    g2d.setColor(getFond().getCouleurFondBouton());
+    g2d.fillRoundRect(panelX, panelY, panelW, panelH, 16, 16);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(panelX, panelY, panelW, panelH, 16, 16);
+
+    // En-tête du panneau
+    g2d.setFont(FONT_MSG_TITRE);
+    FontMetrics fmTitre = g2d.getFontMetrics();
+    g2d.setColor(getFond().getCouleurTexte());
+    String panelLabel = LangManager.get("jeu.aide");
+    g2d.drawString(panelLabel, panelX + (panelW - fmTitre.stringWidth(panelLabel)) / 2,
+        panelY + 10 + fmTitre.getAscent());
+    int headerH = 10 + fmTitre.getHeight() + 6;
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawLine(panelX + 8, panelY + headerH, panelX + panelW - 8, panelY + headerH);
+
+    int contentY = panelY + headerH + 4;
+    int contentH = panelH - headerH - 8;
+
+    // Pré-calculer les hauteurs de chaque carte
+    g2d.setFont(FONT_MSG_TEXTE);
+    FontMetrics fmTexte = g2d.getFontMetrics();
+    int cardPad = 8;
+    int cardMargin = 6;
+    int maxTextW = panelW - 2 * cardPad - 8;
+    int titreLineH = fmTitre.getHeight();
+
+    int[] cardHeights = new int[messagesAide.size()];
+    int totalH = 0;
+    for (int i = 0; i < messagesAide.size(); i++) {
+      List<String> lines = wrapText(messagesAide.get(i).getTexte(), fmTexte, maxTextW);
+      cardHeights[i] = cardPad + titreLineH + 4 + 1 + 4
+          + lines.size() * (fmTexte.getHeight() + 2) + cardPad;
+      if (i > 0) totalH += cardMargin;
+      totalH += cardHeights[i];
+    }
+
+    // Clamp du scroll
+    int maxScroll = Math.max(0, totalH - contentH);
+    if (messagesScrollOffset > maxScroll) messagesScrollOffset = maxScroll;
+    if (messagesScrollOffset < 0) messagesScrollOffset = 0;
+
+    // Clip sur la zone de contenu
+    Shape oldClip = g2d.getClip();
+    g2d.setClip(panelX + 2, contentY, panelW - 4, contentH);
+
+    int cardX = panelX + 4;
+    int cardW = panelW - 8;
+    int drawY = contentY - messagesScrollOffset;
+
+    for (int i = 0; i < messagesAide.size(); i++) {
+      if (i > 0) drawY += cardMargin;
+      int cardH = cardHeights[i];
+
+      if (drawY + cardH >= contentY && drawY <= contentY + contentH) {
+        // Fond de la carte
+        g2d.setColor(getFond().getCouleurFondCellule());
+        g2d.fillRoundRect(cardX, drawY, cardW, cardH, 10, 10);
+        g2d.setColor(getFond().getCouleurBordreBouton());
+        g2d.drawRoundRect(cardX, drawY, cardW, cardH, 10, 10);
+
+        // Titre de la carte
+        g2d.setFont(FONT_MSG_TITRE);
+        fmTitre = g2d.getFontMetrics();
+        g2d.setColor(getFond().getCouleurTexte());
+        g2d.drawString(messagesAide.get(i).getTitre(), cardX + cardPad,
+            drawY + cardPad + fmTitre.getAscent());
+
+        // Séparateur
+        int sepY = drawY + cardPad + titreLineH + 4;
+        g2d.setColor(getFond().getCouleurBordreBouton());
+        g2d.drawLine(cardX + 4, sepY, cardX + cardW - 4, sepY);
+
+        // Texte de la carte
+        g2d.setFont(FONT_MSG_TEXTE);
+        fmTexte = g2d.getFontMetrics();
+        g2d.setColor(getFond().getCouleurTexte());
+        List<String> lines = wrapText(messagesAide.get(i).getTexte(), fmTexte, maxTextW);
+        int textY = sepY + 4 + fmTexte.getAscent();
+        for (String line : lines) {
+          g2d.drawString(line, cardX + cardPad, textY);
+          textY += fmTexte.getHeight() + 2;
+        }
+      }
+      drawY += cardH;
+    }
+
+    g2d.setClip(oldClip);
+
+    // Barre de défilement
+    if (totalH > contentH && maxScroll > 0) {
+      int thumbH = Math.max(20, contentH * contentH / totalH);
+      int thumbY = contentY + (int) ((long) (contentH - thumbH) * messagesScrollOffset / maxScroll);
+      g2d.setColor(getFond().getCouleurBordreBouton());
+      g2d.fillRoundRect(panelX + panelW - 6, thumbY, 4, thumbH, 4, 4);
+    }
   }
 
   private void drawPanelDroit(Graphics g) {

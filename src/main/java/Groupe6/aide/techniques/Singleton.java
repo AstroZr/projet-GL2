@@ -27,6 +27,12 @@ public class Singleton extends AideAbstract {
     }
 
     @Override
+    public int getMaxUtilisation() { return 3; }
+
+    @Override
+    public int getMaxUtilisation() { return 3; }
+
+    @Override
     public boolean check(Grille grille) {
         if (this.nbUtilisation >= 3) {
             return false;
