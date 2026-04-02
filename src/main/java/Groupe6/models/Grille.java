@@ -50,6 +50,7 @@ public class Grille {
     private final int taille; // Taille N de la grille N×N
     private Cellule[][] matriceCellules; // Grille principale (protégée par celluleMatriceLock)
     private List<ZoneCalcul> listeZones; // Zones avec contraintes (protégée par zonesLock)
+    private int[][] matriceCorrection; // Grille solution pour vérification
 
     // ====== SÉLECTION ======
     private Cellule celluleSelectionnee; // Cellule actuellement sélectionnée (null si aucune)
@@ -152,6 +153,7 @@ public class Grille {
             this.taille = 4;
             this.matriceCellules = new Cellule[4][4];
             this.listeZones = new ArrayList<>();
+            this.matriceCorrection = new int[4][4];
             this.estComplete = false;
             return;
         }
@@ -198,6 +200,7 @@ public class Grille {
             this.taille = 4;
             this.matriceCellules = new Cellule[4][4];
             this.listeZones = new ArrayList<>();
+            this.matriceCorrection = new int[4][4];
             this.estComplete = false;
             return;
         }
@@ -247,6 +250,7 @@ public class Grille {
             this.historique = new ArrayList<>();
         }
         this.listeZones = niveauBase.getListeZones();
+        this.matriceCorrection = niveauBase.getMatriceCorrection();
         this.aideManager.setNBUtilisations(sauvegarde.getNbAidesUtilisees());
         this.tempsEcoule = sauvegarde.getTempsEcoule();
         this.indexActuel = this.historique.size() - 1;
@@ -261,6 +265,7 @@ public class Grille {
     private void initialiserDepuisNiveau(Niveau niveauBase) {
         this.matriceCellules = niveauBase.getMatriceCellules();
         this.listeZones = niveauBase.getListeZones();
+        this.matriceCorrection = niveauBase.getMatriceCorrection();
         this.historique = new ArrayList<>();
         this.tempsEcoule = 0L;
     }
@@ -735,7 +740,20 @@ public class Grille {
      * @return true si la grille est complète, false sinon
      */
     public boolean estComplete() {
-        return estComplete;
+        celluleMatriceLock.readLock().lock();
+        try {
+            if (matriceCorrection == null) return estComplete;
+            for (int i = 0; i < taille; i++) {
+                for (int j = 0; j < taille; j++) {
+                    if (matriceCellules[i][j].getValeur() != matriceCorrection[i][j]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
     }
 
     /**
