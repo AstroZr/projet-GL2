@@ -16,7 +16,8 @@ import Groupe6.models.ZoneCalcul;
  * Contenu:
  * - id: identifiant unique ("facile1", "moyen2", "difficile3", etc.)
  * - taille: dimension N de la grille N×N (généralement 4, 5 ou 6)
- * - matriceCellules: grille avec cellules poussière (values = 0 ou pré-remplies)
+ * - matriceCellules: grille avec cellules poussière (values = 0 ou
+ * pré-remplies)
  * - listeZones: contraintes mathématiques (zones de calcul)
  * - matriceCorrection: grille solution (pour vérification)
  * 
@@ -27,27 +28,30 @@ import Groupe6.models.ZoneCalcul;
 public class Niveau {
 
     // ====== IDÉNTIFICATION ======
-    private String id;                        // Identifiant unique du niveau ("facile1", "moyen2", etc.)
-    
+    private String id; // Identifiant unique du niveau ("facile1", "moyen2", etc.)
+
     // ====== DIMENSIONS ======
-    private int taille;                       // Dimension N de la grille N×N
-    
+    private int taille; // Dimension N de la grille N×N
+
     // ====== ÉNONCÉ ======
-    private Cellule[][] matriceCellules;     // Grille avec cellules poussière (puzzle à résoudre)
-    private List<ZoneCalcul> listeZones;     // Zones de calcul (contraintes mathématiques)
-    
+    private Cellule[][] matriceCellules; // Grille avec cellules poussière (puzzle à résoudre)
+    private List<ZoneCalcul> listeZones; // Zones de calcul (contraintes mathématiques)
+
     // ====== SOLUTION ======
-    private int[][] matriceCorrection;        // Grille solution (pour vérification/correction)
+    private int[][] matriceCorrection; // Grille solution (pour vérification/correction)
+    private int[][] matricePreRemplie; // Grille pré-remplie (pour aide/ajouter automatiquement des chiffres)
 
     public Niveau() {
     }
 
-    public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones, int[][] matriceCorrection) {
+    public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones,
+            int[][] matriceCorrection, int[][] matricePreRemplie) {
         this.id = id;
         this.taille = taille;
         this.matriceCellules = matriceCellules;
         this.listeZones = listeZones;
         this.matriceCorrection = matriceCorrection;
+        this.matricePreRemplie = matricePreRemplie;
     }
 
     public String getId() {
@@ -86,4 +90,7 @@ public class Niveau {
         return matriceCorrection;
     }
 
+    public int[][] getMatricePreRemplie() {
+        return matricePreRemplie;
+    }
 }
