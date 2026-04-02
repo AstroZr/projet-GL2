@@ -132,24 +132,24 @@ public class Reste extends AideAbstract {
     }
   }
 
-  /**
-   * Génère une grille d'exemple de taille 4 pour voir la technique du Reste.
-   *
-   * @return Une grille initialisée d'exemple pour le Reste.
-   */
-  public Grille getGrilleExemple() {
-    Niveau niveauExemple = SaveManager.chargerNiveau("exemple_reste");
-
-    if (niveauExemple == null) {
-      return new Grille(null);
-    }
+    /**
+     * Génère une grille d'exemple de taille 4 pour voir la technique du Reste.
+     * 
+     * @return Une grille initialisée d'exemple pour le Reste.
+     */
+    public Grille getGrilleExemple() {
+        Niveau niveauExemple = SaveManager.chargerNiveau("exemple_reste");
+        
+        if (niveauExemple == null) {
+            return new Grille(null);
+        }
 
     Grille grille = new Grille(niveauExemple);
 
-    // Simulation : 3 cases pleines sur la ligne 0 pour que 'Reste' s'applique
-    grille.getCellule(0, 0).setValeur(1);
-    grille.getCellule(0, 1).setValeur(2);
-    grille.getCellule(0, 2).setValeur(3);
+        // Simulation : 3 cases pleines sur la ligne 0 pour que 'Reste' s'applique
+        grille.getCellule(0, 0).setValeur(1);
+        grille.getCellule(0, 1).setValeur(2);
+        grille.getCellule(0, 2).setValeur(3);
 
     return grille;
   }
