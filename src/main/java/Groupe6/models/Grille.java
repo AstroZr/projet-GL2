@@ -571,9 +571,11 @@ public class Grille {
      * @param ligne La ligne à vérifier
      */
     private void verifierDoublonsLigne(int ligne) {
+        /*
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
+        */
 
         int[] comptes = new int[taille + 1];
 
@@ -599,9 +601,12 @@ public class Grille {
      * @param col La colonne à vérifier
      */
     private void verifierDoublonsColonne(int col) {
+        
+        /*
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
+        */
 
         int[] comptes = new int[taille + 1];
 
