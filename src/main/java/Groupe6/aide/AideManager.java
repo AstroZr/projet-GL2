@@ -4,6 +4,7 @@ import Groupe6.aide.techniques.Reste;
 import Groupe6.aide.techniques.Singleton;
 import Groupe6.aide.techniques.UniqueCacheeLigne;
 import Groupe6.aide.techniques.UniqueCacheeColonne;
+import Groupe6.aide.techniques.BlocageUnique;
 import Groupe6.models.Grille;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class AideManager {
         this.aides.add(new Reste());
         this.aides.add(new UniqueCacheeLigne());
         this.aides.add(new UniqueCacheeColonne());
+        this.aides.add(new BlocageUnique());
     }
 
     public static AideManager getInstance() {
