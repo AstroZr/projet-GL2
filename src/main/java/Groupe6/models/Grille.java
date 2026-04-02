@@ -145,7 +145,7 @@ public class Grille {
         this.idNiveau = niveauBase != null ? niveauBase.getId() : null;
 
         // Valeurs par défaut au lieu de charger les paramètres de l'utilisateur
-        this.afficherPossibilites = true;
+        this.afficherPossibilites = false;
         this.afficherErreurDouble = false;
 
         if (niveauBase == null) {
@@ -295,7 +295,7 @@ public class Grille {
             this.afficherErreurDouble = params.isAfficherErreurDouble();
         } else {
             // Valeurs par défaut
-            this.afficherPossibilites = true;
+            this.afficherPossibilites = false;
             this.afficherErreurDouble = false;
         }
     }

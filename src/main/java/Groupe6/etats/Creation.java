@@ -89,6 +89,7 @@ public class Creation extends Etats {
     textInput =
         new TextInput(0, 0, LARGEUR_CHAMP, HAUTEUR_CHAMP, placeholderIdentifiant, MAX_PSEUDO);
     bouton = new BoutonCreation(0, 0, LARGEUR_BOUTON, HAUTEUR_BOUTON);
+    bouton.setGame(game);  // Passer la Game instance au bouton
     bouton.setLabel(labelBoutonCreationProfil);
   }
 

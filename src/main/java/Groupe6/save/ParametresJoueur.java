@@ -51,7 +51,7 @@ public class ParametresJoueur {
         this.volumeEffet = volumeEffet;
         this.volumeMusique = volumeMusique;
         this.modeSombre = modeSombre;
-        this.afficherPossibilites = true;  // Par défaut, afficher les possibilités
+        this.afficherPossibilites = false;  // Par défaut, afficher les possibilités
         this.afficherErreurDouble = false; // Par défaut, ne pas afficher les doublons
     }
 
