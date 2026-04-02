@@ -134,6 +134,8 @@ public class Reste extends AideAbstract {
         grille.getCellule(0, 1).setValeur(2);
         grille.getCellule(0, 2).setValeur(3);
 
+        load(grille, 0);
+
         return grille;
     }
 }
