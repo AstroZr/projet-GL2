@@ -455,11 +455,17 @@ public class VueGrille {
      * Gère la saisie de caractères (chiffres).
      */
     public void keyTyped(KeyEvent e) {
+        // keyTyped mit sous commentaire pour régler le problème du undo
+        // à cause d'une redondance de l'appel saisirValeur(valeur) déjà fait dans keyPressed
+        // ce qui provoque un double enregistrement à chaque fois (d'o`u le double undo)
+        
+        /*
         char c = e.getKeyChar();
         if (Character.isDigit(c)) {
             int valeur = Character.getNumericValue(c);
             saisirValeur(valeur);
         }
+        */
     }
 
     /**
