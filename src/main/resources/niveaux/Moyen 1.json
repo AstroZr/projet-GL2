@@ -1,0 +1,74 @@
+{
+  "id": "Moyen1",
+  "taille": 5,
+  "matriceCorrection": [
+    [5, 4, 3, 2, 1],
+    [1, 5, 4, 3, 2],
+    [2, 1, 5, 4, 3],
+    [3, 2, 1, 5, 4],
+    [4, 3, 2, 1, 5]
+  ],
+  "listeZones": [
+    { "valeurCible": 5, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 0, "colonne": 0}] },
+    { "valeurCible": 5, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 4, "colonne": 4}] },
+    {
+      "valeurCible": 7,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 0, "colonne": 1}, {"ligne": 0, "colonne": 2}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 0, "colonne": 3}, {"ligne": 1, "colonne": 3}]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 0, "colonne": 4}, {"ligne": 1, "colonne": 4}]
+    },
+    {
+      "valeurCible": 4,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 1, "colonne": 0}, {"ligne": 1, "colonne": 1}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 1, "colonne": 2}, {"ligne": 2, "colonne": 2}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 2, "colonne": 0}, {"ligne": 2, "colonne": 1}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 2, "colonne": 3}, {"ligne": 3, "colonne": 3}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 2, "colonne": 4}, {"ligne": 3, "colonne": 4}]
+    },
+    {
+      "valeurCible": 6,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        {"ligne": 3, "colonne": 0},
+        {"ligne": 3, "colonne": 1},
+        {"ligne": 3, "colonne": 2}
+      ]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 4, "colonne": 0}, {"ligne": 4, "colonne": 1}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne": 4, "colonne": 2}, {"ligne": 4, "colonne": 3}]
+    }
+  ]
+}
