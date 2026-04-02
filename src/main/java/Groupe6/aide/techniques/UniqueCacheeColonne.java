@@ -9,22 +9,24 @@ import Groupe6.models.Grille;
 import Groupe6.models.Cellule;
 import Groupe6.utilz.LangManager;
 
-public class CandidatUniqueLigne extends AideAbstract {
+public class UniqueCacheeColonne extends AideAbstract {
     private int cibleLigne = -1;
     private int cibleColonne = -1;
 
-    public CandidatUniqueLigne() {
-        super(4);
+    public UniqueCacheeColonne() {
+        super(5);
         refreshTexts();
     }
 
     private void refreshTexts() {
-        this.titre = LangManager.get("aide.candidatuniqueligne.titre");
-        this.description = LangManager.get("aide.candidatuniqueligne.description");
+        this.titre = LangManager.get("aide.uniquecacheecolonne.titre");
+        this.description = LangManager.get("aide.uniquecacheecolonne.description");
     }
 
     @Override
-    public int getMaxUtilisation() { return 3; }
+    public int getMaxUtilisation() {
+        return 3;
+    }
 
     @Override
     public boolean check(Grille grille) {
@@ -34,42 +36,40 @@ public class CandidatUniqueLigne extends AideAbstract {
         this.cibleColonne = -1;
         int taille = grille.getTaille();
 
-        for (int i = 0; i < taille; i++) {
-            boolean[] presentsLigne = new boolean[taille + 1];
-            for (int j = 0; j < taille; j++) {
+        for (int j = 0; j < taille; j++) {
+            boolean[] presentsColonne = new boolean[taille + 1];
+            for (int i = 0; i < taille; i++) {
                 int val = grille.getCellule(i, j).getValeur();
                 if (val != 0) {
-                    presentsLigne[val] = true;
+                    presentsColonne[val] = true;
                 }
             }
 
             for (int valeur = 1; valeur <= taille; valeur++) {
-                if (!presentsLigne[valeur]) {
-                    // C'est un chiffre manquant. Combien de cases peuvent l'accueillir ?
+                if (!presentsColonne[valeur]) {
                     int posPossibles = 0;
                     int dernierePos = -1;
 
-                    for (int j = 0; j < taille; j++) {
+                    for (int i = 0; i < taille; i++) {
                         Cellule cell = grille.getCellule(i, j);
                         if (cell.estVide()) {
-                            // Vérifier si la colonne j contient déjà cette valeur
-                            boolean presentColonne = false;
+                            boolean presentLigne = false;
                             for (int k = 0; k < taille; k++) {
-                                if (grille.getCellule(k, j).getValeur() == valeur) {
-                                    presentColonne = true;
+                                if (grille.getCellule(i, k).getValeur() == valeur) {
+                                    presentLigne = true;
                                     break;
                                 }
                             }
-                            if (!presentColonne) {
+                            if (!presentLigne) {
                                 posPossibles++;
-                                dernierePos = j;
+                                dernierePos = i;
                             }
                         }
                     }
 
                     if (posPossibles == 1) {
-                        this.cibleLigne = i;
-                        this.cibleColonne = dernierePos;
+                        this.cibleLigne = dernierePos;
+                        this.cibleColonne = j;
                         return true;
                     }
                 }
@@ -91,14 +91,14 @@ public class CandidatUniqueLigne extends AideAbstract {
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.candidatuniqueligne.position") + " "
-                                + String.valueOf(this.cibleLigne + 1));
+                        this.description + " " + LangManager.get("aide.candidatuniquecolonne.position") + " "
+                                + String.valueOf(this.cibleColonne + 1));
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             default:
                 this.aideTextuel = new AideTextuel(this.titre, this.description + "\n"
-                        + LangManager.get("aide.candidatuniqueligne.position") + " " + (this.cibleLigne + 1));
+                        + LangManager.get("aide.candidatuniquecolonne.position") + " " + (this.cibleColonne + 1));
                 this.aideVisuel.add(
                         new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.cibleLigne, this.cibleColonne, new String()));
                 this.nbUtilisation++;
