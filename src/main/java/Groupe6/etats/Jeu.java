@@ -1,6 +1,5 @@
 package Groupe6.etats;
 
-import Groupe6.aide.AideManager;
 import Groupe6.aide.AideTextuel;
 import Groupe6.game.Game;
 import Groupe6.models.Grille;
@@ -54,7 +53,6 @@ public class Jeu extends Etats {
   private BoutonJeuAction boutonParametres;
   private BoutonAide boutonAide;
   private final ArrayList<BoutonJeuAction> boutonsNumeriques = new ArrayList<>();
-  private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
   private String labelRetour;
   private String labelAide;
   private String labelUndo;
@@ -128,19 +126,24 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
-
-    AideManager aideManager = AideManager.getInstance();
-
+    
+    /*
     String joueurActuel = game.getJoueurCourant();
     if (joueurActuel == null) joueurActuel = "testUser";
     grille = new Grille(joueurActuel, "test");
     victoireAnnoncee = false;
-
+   
     // Créer la vue
     vueGrille = new VueGrille(grille);
     baseElapsedMillis = grille.getTempsEcoule();
     startTimerMillis = System.currentTimeMillis();
-
+    */
+    
+    
+    grille = null;
+    //grille = new Grille(game.getJoueurCourant(), "Facile 1");
+    vueGrille = null;
+    
     // Bouton retour au menu - position initiale
     int cx = 50;
     int cy = 950;
@@ -378,7 +381,9 @@ public class Jeu extends Etats {
       b.setHauteur(HAUTEUR_BOUTON_NUM);
     }
 
-    vueGrille.applyLayout(w, h);
+    if (vueGrille != null) {
+      vueGrille.applyLayout(w, h);
+    }
   }
 
   @Override
@@ -388,7 +393,9 @@ public class Jeu extends Etats {
     getFond().draw(g);
 
     // Déléguer l'affichage à la vue grille
-    vueGrille.draw(g, getFond());
+    if (vueGrille != null) {
+      vueGrille.draw(g, getFond());
+    }
 
     drawPanelDroit(g);
     drawAideMessages(g);
@@ -406,7 +413,9 @@ public class Jeu extends Etats {
   @Override
   public void mouseClicked(MouseEvent e) {
     // Déléguer le clic à la vue grille
-    vueGrille.mouseClicked(e);
+    if (vueGrille != null) {
+      vueGrille.mouseClicked(e);
+    }
   }
 
   @Override
@@ -562,6 +571,8 @@ public class Jeu extends Etats {
       boutons.remove(b);
     }
     boutonsNumeriques.clear();
+
+    if (grille == null) return;
 
     int max = Math.min(9, Math.max(1, grille.getTaille()));
     for (int i = 1; i <= max; i++) {

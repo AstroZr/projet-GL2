@@ -190,6 +190,7 @@ public class Creation extends Etats {
       g.drawString(messageErreur, centerX - ew / 2, errorY);
     }
   }
+    String joueurActuel = game.getJoueurCourant();
 
   @Override
   public void keyTyped(KeyEvent e) {
@@ -236,6 +237,7 @@ public class Creation extends Etats {
           messageErreur = null;
           bouton.setPseudo(pseudo);
           bouton.appliquerAction();
+          game.setJoueurCourant(pseudo);
         }
       }
     }

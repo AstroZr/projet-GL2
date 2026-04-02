@@ -1062,7 +1062,7 @@ public class Parametres extends Etats {
 
   public void sauvegarderProfilActuel() {
     String pseudo = game != null ? game.getJoueurCourant() : null;
-    if (pseudo == null || pseudo.trim().isEmpty()) {
+    if (pseudo == null || pseudo.trim().isEmpty() || pseudo == "Default") {
       return;
     }
 
