@@ -17,9 +17,9 @@
       "listeCellules": [{"ligne": 0, "colonne": 1}, {"ligne": 0, "colonne": 2}]
     },
     {
-      "valeurCible": 20,
+      "valeurCible": 40,
       "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 0, "colonne": 3}, {"ligne": 0, "colonne": 4}]
+      "listeCellules": [{"ligne": 0, "colonne": 3}, {"ligne": 0, "colonne": 4}, {"ligne": 1, "colonne": 4}]
     },
     {
       "valeurCible": 15,
@@ -29,12 +29,7 @@
     {
       "valeurCible": 8,
       "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 1, "colonne": 2}, {"ligne": 2, "colonne": 2}]
-    },
-    {
-      "valeurCible": 2,
-      "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 1, "colonne": 3}, {"ligne": 1, "colonne": 4}]
+      "listeCellules": [{"ligne": 1, "colonne": 2}, {"ligne": 2, "colonne": 2}, {"ligne": 1, "colonne": 3}]
     },
     {
       "valeurCible": 20,
