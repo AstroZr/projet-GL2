@@ -10,7 +10,6 @@ import Groupe6.save.Niveau;
 import Groupe6.save.SaveManager;
 import Groupe6.utilz.LangManager;
 
-
 public class Reste extends AideAbstract {
     private boolean isLigne; // if false, isLigne est une colonne
     private int index = -1; // indice de la ligne ou colonne
@@ -122,17 +121,15 @@ public class Reste extends AideAbstract {
      */
     public Grille getGrilleExemple() {
         Niveau niveauExemple = SaveManager.chargerNiveau("exemple_reste");
-        
+
         if (niveauExemple == null) {
             return new Grille(null);
         }
 
         Grille grille = new Grille(niveauExemple);
 
-        // Simulation : 3 cases pleines sur la ligne 0 pour que 'Reste' s'applique
-        grille.getCellule(0, 0).setValeur(1);
-        grille.getCellule(0, 1).setValeur(2);
-        grille.getCellule(0, 2).setValeur(3);
+        // On utilise le pre-remplissage pour avoir des chiffres
+        grille.autoRemplissage();
 
         this.nbUtilisation = -1;
         load(grille, 0);

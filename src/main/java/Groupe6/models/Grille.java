@@ -51,6 +51,7 @@ public class Grille {
     private Cellule[][] matriceCellules; // Grille principale (protégée par celluleMatriceLock)
     private List<ZoneCalcul> listeZones; // Zones avec contraintes (protégée par zonesLock)
     private int[][] matriceCorrection; // Grille solution pour vérification
+    private int[][] matricePreRemplie; // Grille pré-remplie (pour aide/ajouter automatiquement des chiffres)
 
     // ====== SÉLECTION ======
     private Cellule celluleSelectionnee; // Cellule actuellement sélectionnée (null si aucune)
@@ -163,6 +164,8 @@ public class Grille {
 
         this.taille = niveauBase.getTaille();
         initialiserDepuisNiveau(niveauBase);
+
+        this.matricePreRemplie = niveauBase.getMatricePreRemplie();
 
         nettoyerSelection();
         validerGrille();
@@ -726,12 +729,35 @@ public class Grille {
     }
 
     /**
+     * Retourne la matrice pré-remplie
+     * 
+     * @return la matrice pré-remplie
+     */
+    public int[][] getMatricePreRemplie() {
+        return matricePreRemplie;
+    }
+
+    /**
      * Retourne l'identifiant du niveau
      * 
      * @return l'identifiant du niveau
      */
     public String getIdNiveau() {
         return idNiveau;
+    }
+
+    /**
+     * Remplit automatiquement les cases vides avec les valeurs de la matrice
+     * pré-remplie
+     */
+    public void autoRemplissage() {
+        for (int i = 0; i < taille; i++) {
+            for (int j = 0; j < taille; j++) {
+                if (matriceCellules[i][j].getValeur() == 0) {
+                    matriceCellules[i][j].setValeur(matricePreRemplie[i][j]);
+                }
+            }
+        }
     }
 
     /**
@@ -742,7 +768,8 @@ public class Grille {
     public boolean estComplete() {
         celluleMatriceLock.readLock().lock();
         try {
-            if (matriceCorrection == null) return estComplete;
+            if (matriceCorrection == null)
+                return estComplete;
             for (int i = 0; i < taille; i++) {
                 for (int j = 0; j < taille; j++) {
                     if (matriceCellules[i][j].getValeur() != matriceCorrection[i][j]) {

@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
  * 
  * Utilise GSON pour la sérialisation JSON. Structure fichiers:
  * saveGame/
- *   annuaire.json                    (map: nomJoueur -> idJoueur)
- *   meilleurs_temps.json             (best times tracking)
- *   001/                             (dossier joueur)
- *     settings.json                  (ParametresJoueur)
- *     facile1.json, facile2.json ... (PartieSauvegardee per level)
- *   002/, 003/, ...
+ * annuaire.json (map: nomJoueur -> idJoueur)
+ * meilleurs_temps.json (best times tracking)
+ * 001/ (dossier joueur)
+ * settings.json (ParametresJoueur)
+ * facile1.json, facile2.json ... (PartieSauvegardee per level)
+ * 002/, 003/, ...
  * 
  * Responsabilités:
  * - Charger/sauvegarder les paramètres joueur (volume, langue, theme, etc.)
@@ -51,10 +51,10 @@ public class SaveManager {
     private static final Logger logger = LoggerFactory.getLogger(SaveManager.class);
 
     // ====== CHEMINS & FICHIERS ======
-    private static final String SAVE_FOLDER = "saveGame/";       // Dossier de sauvegarde
-    private static final String SETTINGS_FILE = "settings.json";  // Fichier paramètres joueur
-    private static final String ANNUAIRE_FILE = "annuaire.json";  // Annuaire joueurs (nom -> ID)
-    private static final String BEST_TIMES_FILE = "meilleurs_temps.json";  // Top times per level
+    private static final String SAVE_FOLDER = "saveGame/"; // Dossier de sauvegarde
+    private static final String SETTINGS_FILE = "settings.json"; // Fichier paramètres joueur
+    private static final String ANNUAIRE_FILE = "annuaire.json"; // Annuaire joueurs (nom -> ID)
+    private static final String BEST_TIMES_FILE = "meilleurs_temps.json"; // Top times per level
 
     // ====== GSON (JSON) ======
     /** Instance GSON avec pretty-printing pour lisibilité JSON. */
@@ -168,7 +168,8 @@ public class SaveManager {
             }
 
         } catch (Exception e) {
-            logger.error("Erreur lors de la sauvegarde de la partie pour joueur: {}, niveau: {}", nomJoueur, idSauvegarde, e);
+            logger.error("Erreur lors de la sauvegarde de la partie pour joueur: {}, niveau: {}", nomJoueur,
+                    idSauvegarde, e);
         }
     }
 
@@ -186,7 +187,8 @@ public class SaveManager {
             try (FileReader reader = new FileReader(cheminFichier)) {
                 return gson.fromJson(reader, PartieSauvegardee.class);
             } catch (Exception e) {
-                logger.error("Erreur lors du chargement de la partie pour joueur: {}, niveau: {}", nomJoueur, idSauvegarde, e);
+                logger.error("Erreur lors du chargement de la partie pour joueur: {}, niveau: {}", nomJoueur,
+                        idSauvegarde, e);
             }
         }
 
@@ -282,7 +284,8 @@ public class SaveManager {
 
     public static int chargerNbAidesTotalPartie(String nomJoueur, String idNiveau) {
         PartieSauvegardee partie = chargerPartie(nomJoueur, idNiveau);
-        if (partie == null || partie.getNbAidesUtilisees() == null) return 0;
+        if (partie == null || partie.getNbAidesUtilisees() == null)
+            return 0;
         return partie.getNbAidesUtilisees().values().stream().mapToInt(Integer::intValue).sum();
     }
 
@@ -352,7 +355,18 @@ public class SaveManager {
                     }
                 }
 
-                return new Niveau(id, taille, matrice, listeZones, matriceCorrection);
+                int[][] matricePreRemplie = new int[taille][taille];
+                if (jsonObject.has("matricePreRemplie")) {
+                    JsonArray jsonPreRemplie = jsonObject.getAsJsonArray("matricePreRemplie");
+                    for (int i = 0; i < taille; i++) {
+                        JsonArray ligneJson = jsonPreRemplie.get(i).getAsJsonArray();
+                        for (int j = 0; j < taille; j++) {
+                            matricePreRemplie[i][j] = ligneJson.get(j).getAsInt();
+                        }
+                    }
+                }
+
+                return new Niveau(id, taille, matrice, listeZones, matriceCorrection, matricePreRemplie);
 
             } catch (Exception e) {
                 logger.error("Erreur lors du chargement du niveau: {}", idNiveau, e);
