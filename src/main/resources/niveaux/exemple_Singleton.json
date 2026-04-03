@@ -1,29 +1,25 @@
 {
-    "id": "exemple_CandidatUnique",
-    "taille": 5,
+    "id": "exemple_Singleton",
+    "taille": 4,
     "listeZones": [
         {
-            "valeurCible": 8,
-            "typeOperation": "ADDITION",
+            "valeurCible": 1,
+            "typeOperation": "FIXE",
             "listeCellules": [
                 {
                     "ligne": 0,
                     "colonne": 0
-                },
-                {
-                    "ligne": 0,
-                    "colonne": 1
-                },
-                {
-                    "ligne": 1,
-                    "colonne": 1
                 }
             ]
         },
         {
-            "valeurCible": 8,
+            "valeurCible": 9,
             "typeOperation": "ADDITION",
             "listeCellules": [
+                {
+                    "ligne": 0,
+                    "colonne": 1
+                },
                 {
                     "ligne": 0,
                     "colonne": 2
@@ -35,17 +31,7 @@
             ]
         },
         {
-            "valeurCible": 1,
-            "typeOperation": "ADDITION",
-            "listeCellules": [
-                {
-                    "ligne": 0,
-                    "colonne": 4
-                }
-            ]
-        },
-        {
-            "valeurCible": 14,
+            "valeurCible": 5,
             "typeOperation": "ADDITION",
             "listeCellules": [
                 {
@@ -53,11 +39,49 @@
                     "colonne": 0
                 },
                 {
+                    "ligne": 1,
+                    "colonne": 1
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 1,
+                    "colonne": 2
+                },
+                {
+                    "ligne": 1,
+                    "colonne": 3
+                }
+            ]
+        },
+        {
+            "valeurCible": 7,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
                     "ligne": 2,
                     "colonne": 0
                 },
                 {
+                    "ligne": 3,
+                    "colonne": 0
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
                     "ligne": 2,
+                    "colonne": 1
+                },
+                {
+                    "ligne": 3,
                     "colonne": 1
                 }
             ]
@@ -67,44 +91,12 @@
             "typeOperation": "ADDITION",
             "listeCellules": [
                 {
-                    "ligne": 1,
-                    "colonne": 2
-                },
-                {
                     "ligne": 2,
                     "colonne": 2
-                }
-            ]
-        },
-        {
-            "valeurCible": 4,
-            "typeOperation": "ADDITION",
-            "listeCellules": [
-                {
-                    "ligne": 1,
-                    "colonne": 3
-                },
-                {
-                    "ligne": 2,
-                    "colonne": 3
-                }
-            ]
-        },
-        {
-            "valeurCible": 12,
-            "typeOperation": "ADDITION",
-            "listeCellules": [
-                {
-                    "ligne": 1,
-                    "colonne": 4
-                },
-                {
-                    "ligne": 2,
-                    "colonne": 4
                 },
                 {
                     "ligne": 3,
-                    "colonne": 4
+                    "colonne": 2
                 }
             ]
         },
@@ -113,67 +105,25 @@
             "typeOperation": "ADDITION",
             "listeCellules": [
                 {
-                    "ligne": 3,
-                    "colonne": 0
-                },
-                {
-                    "ligne": 4,
-                    "colonne": 0
-                },
-                {
-                    "ligne": 4,
-                    "colonne": 1
-                }
-            ]
-        },
-        {
-            "valeurCible": 9,
-            "typeOperation": "ADDITION",
-            "listeCellules": [
-                {
-                    "ligne": 3,
-                    "colonne": 1
-                },
-                {
-                    "ligne": 3,
-                    "colonne": 2
+                    "ligne": 2,
+                    "colonne": 3
                 },
                 {
                     "ligne": 3,
                     "colonne": 3
-                }
-            ]
-        },
-        {
-            "valeurCible": 11,
-            "typeOperation": "ADDITION",
-            "listeCellules": [
-                {
-                    "ligne": 4,
-                    "colonne": 2
-                },
-                {
-                    "ligne": 4,
-                    "colonne": 3
-                },
-                {
-                    "ligne": 4,
-                    "colonne": 4
                 }
             ]
         }
     ],
     "matricePreRemplie": [
         [
-            2,
-            4,
             null,
             null,
-            1
+            null,
+            null
         ],
         [
             null,
-            2,
             null,
             null,
             null
@@ -182,18 +132,9 @@
             null,
             null,
             null,
-            null,
             null
         ],
         [
-            1,
-            null,
-            null,
-            null,
-            5
-        ],
-        [
-            null,
             null,
             null,
             null,
@@ -202,39 +143,28 @@
     ],
     "matriceCorrection": [
         [
-            2,
-            4,
-            3,
-            5,
-            1
-        ],
-        [
-            5,
-            2,
             1,
+            2,
             3,
             4
         ],
         [
-            4,
-            5,
             2,
-            1,
-            3
-        ],
-        [
-            1,
             3,
             4,
-            2,
-            5
+            1
         ],
         [
             3,
-            1,
-            5,
             4,
+            1,
             2
+        ],
+        [
+            4,
+            1,
+            2,
+            3
         ]
     ]
 }

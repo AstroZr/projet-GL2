@@ -1,6 +1,6 @@
 {
     "id": "exemple_UniqueCacheeColonne",
-    "taille": 4,
+    "taille": 5,
     "listeZones": [
         {
             "valeurCible": 1,
@@ -76,7 +76,7 @@
         },
         {
             "valeurCible": 2,
-            "typeOperation": "SOUSTRACTION",
+            "typeOperation": "DIVISION",
             "listeCellules": [
                 {
                     "ligne": 2,
@@ -90,7 +90,7 @@
         },
         {
             "valeurCible": 14,
-            "typeOperation": "SOUSTRACTION",
+            "typeOperation": "ADDITION",
             "listeCellules": [
                 {
                     "ligne": 2,
@@ -98,7 +98,7 @@
                 },
                 {
                     "ligne": 3,
-                    "colonne": 2
+                    "colonne": 3
                 },
                 {
                     "ligne": 4,
@@ -175,14 +175,14 @@
         ],
         [
             5,
-            null,
+            4,
             null,
             null,
             null
         ],
         [
-            5,
-            4,
+            null,
+            null,
             null,
             null,
             null
@@ -190,39 +190,39 @@
     ],
     "matriceCorrection": [
         [
-            1,
             2,
             3,
+            5,
             4,
-            5
-        ],
-        [
-            2,
-            3,
-            4,
-            1,
-            5
+            1
         ],
         [
             3,
-            4,
+            5,
             1,
             2,
-            5
+            4
         ],
         [
             4,
             1,
             2,
-            3,
-            5
+            5,
+            3
         ],
         [
             5,
-            2,
-            3,
             4,
-            1
+            3,
+            1,
+            2
+        ],
+        [
+            1,
+            2,
+            4,
+            3,
+            5
         ]
     ]
 }
