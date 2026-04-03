@@ -25,7 +25,7 @@ public class Reste extends AideAbstract {
     }
 
     @Override
-    public boolean isOverUsed(){
+    public boolean isOverUsed() {
         return (this.nbUtilisation >= 3);
     }
 
@@ -123,7 +123,7 @@ public class Reste extends AideAbstract {
      * @return Une grille initialisée d'exemple pour le Reste.
      */
     public Grille getGrilleExemple() {
-        Niveau niveauExemple = SaveManager.chargerNiveau("exemple_reste");
+        Niveau niveauExemple = SaveManager.chargerNiveau("exemple_Reste");
 
         if (niveauExemple == null) {
             return new Grille(null);
