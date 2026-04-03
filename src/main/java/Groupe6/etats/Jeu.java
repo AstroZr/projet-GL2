@@ -53,6 +53,7 @@ public class Jeu extends Etats {
   private BoutonJeuAction boutonParametres;
   private BoutonJeuAction boutonTechniques;
   private BoutonAide boutonAide;
+  private BoutonJeuAction boutonAbandon;
   private final ArrayList<BoutonJeuAction> boutonsNumeriques = new ArrayList<>();
   private String labelRetour;
   private String labelAide;
@@ -83,6 +84,14 @@ public class Jeu extends Etats {
   private static final String[] TWO_DIGITS = {
     "00", "01", "02", "03", "04", "05", "06", "07", "08", "09"
   };
+  // Pour bouton abandon
+  private boolean overlayAbandonVisible = false;
+  private String labelAbandon;
+  private String labelRecommencer;
+  // Rectangles des 3 boutons du popup du bouton abandon
+  private java.awt.Rectangle rectBtnSolution;
+  private java.awt.Rectangle rectBtnRecommencer;
+  private java.awt.Rectangle rectBtnAnnuler;
 
   private static class BoutonJeuAction extends Bouton {
     private String label;
@@ -187,6 +196,9 @@ public class Jeu extends Etats {
             this::ouvrirParametresDepuisJeu);
     boutons.add(boutonParametres);
 
+    int abandonX = paramX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
+    boutonAbandon = new BoutonJeuAction(abandonX, cy, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelAbandon, this::abandonnerAction);
+    boutons.add(boutonAbandon);
     // Bouton Techniques d'aides (positionné dans le panel droit)
     boutonTechniques =
         new BoutonJeuAction(
@@ -410,6 +422,10 @@ public class Jeu extends Etats {
     if (overlayAideVisible) {
       drawAideOverlay(g);
     }
+
+    if(overlayAbandonVisible){
+      drawAbandonOverlay(g);
+    }
   }
 
   @Override
@@ -431,6 +447,16 @@ public class Jeu extends Etats {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    if(overlayAbandonVisible){
+      int mx = e.getX(), my = e.getY();
+      if(rectBtnSolution != null && rectBtnSolution.contains(mx, my)) voirSolutionAction();
+      else if(rectBtnRecommencer != null && rectBtnRecommencer.contains(mx, my)) recommencerPartie();
+      else if(rectBtnAnnuler != null && rectBtnAnnuler.contains(mx, my)){
+        overlayAbandonVisible = false;
+        resumeTimer();
+      }
+      return;
+    }
     if (overlayAideVisible) {
       hideAideOverlay();
       if (victoireAnnoncee) {
@@ -525,6 +551,8 @@ public class Jeu extends Etats {
     labelTimer = LangManager.get("jeu.timer");
     labelVictoireTitre = LangManager.get("jeu.victoire.titre");
     labelVictoireTexte = LangManager.get("jeu.victoire.texte");
+    labelAbandon = LangManager.get("jeu.abandon");
+    labelRecommencer = LangManager.get("jeu.recommencer");
 
     if (boutons == null || boutons.isEmpty()) {
       return;
@@ -562,6 +590,40 @@ public class Jeu extends Etats {
     if (typeAction == Grille.ACTION_AIDE && boutonAide != null) {
       boutonAide.redoAide();
     }
+  }
+
+  private void abandonnerAction(){
+    if(grille == null) return;
+    if(grille.isSolutionAffichee()){
+      recommencerPartie();
+      return;
+    }
+    pauseTimer();
+    overlayAbandonVisible = true;
+  }
+
+  private void voirSolutionAction(){
+    overlayAbandonVisible = false;
+    Groupe6.save.Niveau niveau = SaveManager.chargerNiveau(grille.getIdNiveau());
+    if(niveau == null) return;
+    grille.afficherSolution(niveau.getMatriceCorrection());
+    boutonAbandon.setLabel(labelRecommencer);
+  }
+
+  private void recommencerPartie(){
+    overlayAbandonVisible = false;
+    String idNiveau = grille.getIdNiveau();
+    String joueur = getJoueurActuelOuDefaut();
+
+    grille = new Grille(joueur, idNiveau, true);
+    victoireAnnoncee = false;
+    vueGrille = new VueGrille(grille);
+    baseElapsedMillis = 0;
+    startTimerMillis = System.currentTimeMillis();
+    timerPaused = false;
+    pausedElapsedMillis = 0;
+    resetUIApresChargement();
+    boutonAbandon.setLabel(labelAbandon);
   }
 
   private void updateLabelModeCandidat() {
@@ -671,6 +733,60 @@ public class Jeu extends Etats {
         labelOk,
         btnX + (btnW - fmBtn.stringWidth(labelOk)) / 2,
         btnY + (btnH + fmBtn.getAscent()) / 2 - 2);
+  }
+
+  private void drawAbandonOverlay(Graphics g){
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+    int w = Constants.game_width;
+    int h = Constants.game_height;
+
+    g2d.setColor(new Color(0, 0, 0, 160));
+    g2d.fillRect(0, 0, w, h);
+
+    int boxW = Math.min(480, w - 80);
+    int boxH = 160;
+    int boxX = (w - boxW) / 2;
+    int boxY = (h - boxH) / 2;
+
+    g2d.setColor(getFond().getCouleurFondBouton());
+    g2d.fillRoundRect(boxX, boxY, boxW, boxH, 20, 20);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(boxX, boxY, boxW, boxH, 20, 20);
+
+    g2d.setFont(FONT_OVERLAY_TITRE);
+    g2d.setColor(getFond().getCouleurTexte());
+    String titre = LangManager.get("jeu.abandon.titre");
+    FontMetrics fm = g2d.getFontMetrics();
+    g2d.drawString(titre, boxX + (boxW - fm.stringWidth(titre)) / 2, boxY + 42);
+
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawLine(boxX + 20, boxY + 55, boxX + boxW - 20, boxY + 55);
+
+    int btnW = 130, btnH = 36, gap = 16;
+    int totalW = 3 * btnW + 2 * gap;
+    int bx = boxX + (boxW - totalW) / 2;
+    int by = boxY + boxH - 52;
+
+    rectBtnSolution = new java.awt.Rectangle(bx, by, btnW, btnH);
+    rectBtnRecommencer = new java.awt.Rectangle(bx + btnW + gap, by, btnW, btnH);
+    rectBtnAnnuler = new java.awt.Rectangle(bx + 2 * (btnW+gap), by, btnW, btnH);
+
+    dessinerBoutonPopup(g2d, rectBtnSolution, LangManager.get("jeu.abandon.solution"));
+    dessinerBoutonPopup(g2d, rectBtnRecommencer, LangManager.get("jeu.recommencer"));
+    dessinerBoutonPopup(g2d, rectBtnAnnuler, LangManager.get("common.annuler"));
+  }
+
+  private void dessinerBoutonPopup(Graphics2D g2d, java.awt.Rectangle r, String label){
+    g2d.setColor(getFond().getCouleurFondCellule());
+    g2d.fillRoundRect(r.x, r.y, r.width, r.height, 10, 10);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(r.x, r.y, r.width, r.height, 10, 10);
+    g2d.setColor(getFond().getCouleurTexte());
+    g2d.setFont(FONT_LABEL);
+    FontMetrics fm = g2d.getFontMetrics();
+    g2d.drawString(label, r.x + (r.width - fm.stringWidth(label)) / 2, r.y + (r.height + fm.getAscent()) / 2 - 2);
   }
 
   private List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
@@ -935,6 +1051,7 @@ public class Jeu extends Etats {
     if (grille == null || victoireAnnoncee || !grille.estComplete()) {
       return;
     }
+    if(grille.isSolutionAffichee()) return;
 
     pauseTimer();
     long tempsFinal = getElapsedMillis();
