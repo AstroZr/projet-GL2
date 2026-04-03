@@ -15,7 +15,22 @@ import java.util.List;
 
 import Groupe6.aide.Aide;
 import Groupe6.aide.AideManager;
+import Groupe6.aide.AideVisuel;
+import Groupe6.aide.EffetVisuel;
+import Groupe6.aide.TypeEffect;
+import Groupe6.aide.techniques.BlocageUnique;
+import Groupe6.aide.techniques.CandidatUnique;
+import Groupe6.aide.techniques.Reste;
+import Groupe6.aide.techniques.Singleton;
+import Groupe6.aide.techniques.UniqueCacheeColonne;
+import Groupe6.aide.techniques.UniqueCacheeLigne;
 import Groupe6.game.Game;
+import Groupe6.models.Cellule;
+import Groupe6.models.Grille;
+import Groupe6.models.TypeOperation;
+import Groupe6.models.ZoneCalcul;
+import Groupe6.save.Niveau;
+import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
 import Groupe6.ui.BoutonChangeurEtat;
 import Groupe6.utilz.Constants;
@@ -34,6 +49,20 @@ public class Astuces extends Etats {
     private static final int LARGEUR_BTN = 200;
     private static final int HAUTEUR_BTN = 44;
     private static final BasicStroke STROKE_UI = new BasicStroke(1.5f);
+    private static final BasicStroke STROKE_MINI_FINE = new BasicStroke(0.8f);
+    private static final BasicStroke STROKE_MINI_ZONE = new BasicStroke(2f);
+
+    private static final String[] EXEMPLE_IDS = {
+        "exemple_Singleton",
+        "exemple_reste",
+        "exemple_UniqueCacheeLigne",
+        "exemple_UniqueCacheeColonne",
+        "exemple_BlocageUnique",
+        "exemple_CandidatUnique"
+    };
+
+    private List<Niveau> exemplesNiveaux;
+    private List<AideVisuel> exemplesVisuels;
 
     private LayoutScale layoutScale;
 
@@ -65,9 +94,37 @@ public class Astuces extends Etats {
         instance = this;
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
+        chargerExemples();
         updateTexts();
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
+    }
+
+    private void chargerExemples() {
+        exemplesNiveaux = new ArrayList<>();
+        exemplesVisuels = new ArrayList<>();
+        Aide[] freshTechniques = {
+            new Singleton(), new Reste(), new UniqueCacheeLigne(),
+            new UniqueCacheeColonne(), new BlocageUnique(), new CandidatUnique()
+        };
+        for (int i = 0; i < EXEMPLE_IDS.length; i++) {
+            Niveau n = SaveManager.chargerNiveau(EXEMPLE_IDS[i]);
+            exemplesNiveaux.add(n);
+            if (n == null) {
+                exemplesVisuels.add(null);
+                continue;
+            }
+            Grille g = new Grille(n);
+            g.autoRemplissage();
+            AideVisuel visuel = null;
+            Aide tech = freshTechniques[i];
+            if (tech.check(g)) {
+                tech.setNbUtilisation(2);
+                tech.load(g, freshTechniques.length);
+                visuel = tech.getAideVisuel();
+            }
+            exemplesVisuels.add(visuel);
+        }
     }
 
     private void calculerPositions() {
@@ -191,6 +248,15 @@ public class Astuces extends Etats {
         g2d.setStroke(STROKE_UI);
         g2d.draw(new RoundRectangle2D.Float(x, y, w, h, 12, 12));
 
+        // Mini-grille exemple (côté droit)
+        int miniPadding = layoutScale.scaleY(8);
+        int miniSize = h - 2 * miniPadding;
+        int miniX = x + w - layoutScale.scaleX(12) - miniSize;
+        int miniY = y + miniPadding;
+        Niveau niveau = (index < exemplesNiveaux.size()) ? exemplesNiveaux.get(index) : null;
+        AideVisuel visuel = (index < exemplesVisuels.size()) ? exemplesVisuels.get(index) : null;
+        dessinerMiniGrille(g2d, niveau, visuel, miniX, miniY, miniSize);
+
         // Badge numéroté (cercle accent)
         int badgeX = x + layoutScale.scaleX(18);
         int badgeY = y + (h - badgeSize) / 2;
@@ -204,9 +270,9 @@ public class Astuces extends Etats {
             badgeX + (badgeSize - fmBadge.stringWidth(num)) / 2,
             badgeY + (badgeSize + fmBadge.getAscent() - fmBadge.getDescent()) / 2);
 
-        // Zone texte à droite du badge
+        // Zone texte entre badge et mini-grille
         int textX = badgeX + badgeSize + layoutScale.scaleX(16);
-        int textW = w - (textX - x) - layoutScale.scaleX(16);
+        int textW = miniX - textX - layoutScale.scaleX(12);
 
         // Titre de la technique
         g2d.setFont(fontCardTitre);
@@ -220,7 +286,7 @@ public class Astuces extends Etats {
         g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 180));
         dessinerTexteEnveloppe(g2d, aide.getDescription(), textX, titleY + layoutScale.scaleY(20), textW, layoutScale.scaleY(18));
 
-        // Badge de limite d'utilisation (coin bas-droite)
+        // Badge de limite d'utilisation (coin bas-gauche de la zone texte)
         int padding = layoutScale.scaleX(12);
         g2d.setFont(fontCardDesc);
         FontMetrics fmLimit = g2d.getFontMetrics();
@@ -228,22 +294,115 @@ public class Astuces extends Etats {
             String labelLimite = LangManager.get("astuces.limite") + " " + aide.getMaxUtilisation();
             int pillW = fmLimit.stringWidth(labelLimite) + layoutScale.scaleX(16);
             int pillH = fmLimit.getHeight() + layoutScale.scaleY(4);
-            int pillX = x + w - padding - pillW;
+            int pillX = textX;
             int pillY = y + h - padding - pillH;
-            // Fond du pill (20% de la couleur accent)
             g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 51));
             g2d.fillRoundRect(pillX, pillY, pillW, pillH, 8, 8);
-            // Texte du pill
             g2d.setColor(accent);
             g2d.drawString(labelLimite,
                 pillX + layoutScale.scaleX(8),
                 pillY + fmLimit.getAscent() + layoutScale.scaleY(2));
         } else {
             String labelIllimite = LangManager.get("astuces.illimite");
-            int textLimiteX = x + w - padding - fmLimit.stringWidth(labelIllimite);
             int textLimiteY = y + h - padding - fmLimit.getDescent();
             g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 120));
-            g2d.drawString(labelIllimite, textLimiteX, textLimiteY);
+            g2d.drawString(labelIllimite, textX, textLimiteY);
+        }
+    }
+
+    private static final Color COULEUR_MINI_ROUGE = new Color(220, 60, 60, 200);
+
+    private void dessinerMiniGrille(Graphics2D g2d, Niveau niveau, AideVisuel visuel, int gx, int gy, int gsize) {
+        if (niveau == null) return;
+        int n = niveau.getTaille();
+        int cellSize = Math.max(4, gsize / n);
+        int totalSize = cellSize * n;
+
+        Cellule[][] cells = niveau.getMatriceCellules();
+        int[][] preRemplie = niveau.getMatricePreRemplie();
+
+        // Construire la carte des cases à surligner en rouge
+        boolean[][] rouge = new boolean[n][n];
+        if (visuel != null) {
+            for (EffetVisuel effet : visuel) {
+                if (effet.getType() == TypeEffect.CASE_NEGATIVE) {
+                    int r = effet.getX(), c = effet.getY();
+                    if (r >= 0 && r < n && c >= 0 && c < n)
+                        rouge[r][c] = true;
+                }
+            }
+        }
+
+        // Fond global de la mini-grille
+        g2d.setColor(getFond().getCouleurFondCellule());
+        g2d.fillRect(gx, gy, totalSize, totalSize);
+
+        // Fond des cellules et valeurs pré-remplies
+        int fontSize = Math.max(6, cellSize * 2 / 3);
+        Font fontVal = FontCache.get("Arial", Font.BOLD, fontSize);
+        g2d.setFont(fontVal);
+        FontMetrics fmVal = g2d.getFontMetrics();
+
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                int cx = gx + col * cellSize;
+                int cy = gy + row * cellSize;
+
+                if (rouge[row][col]) {
+                    g2d.setColor(COULEUR_MINI_ROUGE);
+                    g2d.fillRect(cx, cy, cellSize, cellSize);
+                }
+
+                g2d.setColor(getFond().getCouleurTexte());
+                g2d.setStroke(STROKE_MINI_FINE);
+                g2d.drawRect(cx, cy, cellSize, cellSize);
+
+                if (preRemplie != null && preRemplie[row][col] != 0) {
+                    String v = String.valueOf(preRemplie[row][col]);
+                    int vw = fmVal.stringWidth(v);
+                    g2d.setColor(rouge[row][col] ? Color.WHITE : getFond().getCouleurTexte());
+                    g2d.drawString(v,
+                        cx + (cellSize - vw) / 2,
+                        cy + (cellSize + fmVal.getAscent() - fmVal.getDescent()) / 2);
+                }
+            }
+        }
+
+        // Bordures de zones (traits épais)
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                ZoneCalcul zone = cells[row][col].getZoneCalcul();
+                int cx = gx + col * cellSize;
+                int cy = gy + row * cellSize;
+                g2d.setStroke(STROKE_MINI_ZONE);
+                g2d.setColor(getFond().getCouleurBordureZone());
+                if (row == 0 || cells[row - 1][col].getZoneCalcul() != zone)
+                    g2d.drawLine(cx, cy, cx + cellSize, cy);
+                if (row == n - 1 || cells[row + 1][col].getZoneCalcul() != zone)
+                    g2d.drawLine(cx, cy + cellSize, cx + cellSize, cy + cellSize);
+                if (col == 0 || cells[row][col - 1].getZoneCalcul() != zone)
+                    g2d.drawLine(cx, cy, cx, cy + cellSize);
+                if (col == n - 1 || cells[row][col + 1].getZoneCalcul() != zone)
+                    g2d.drawLine(cx + cellSize, cy, cx + cellSize, cy + cellSize);
+            }
+        }
+
+        // Étiquettes des zones (valeur + opération) dans la première cellule de chaque zone
+        int labelSize = Math.max(5, cellSize / 3);
+        Font fontLabel = FontCache.get("Arial", Font.BOLD, labelSize);
+        g2d.setFont(fontLabel);
+        FontMetrics fmLabel = g2d.getFontMetrics();
+        Color etiquette = getFond().getCouleurEtiquetteZone();
+        for (ZoneCalcul zone : niveau.getListeZones()) {
+            Cellule premiere = zone.getListeCellules().get(0);
+            int cx = gx + premiere.getColonne() * cellSize;
+            int cy = gy + premiere.getLigne() * cellSize;
+            TypeOperation op = zone.getTypeOperation();
+            String label = (op == TypeOperation.AUCUNE)
+                ? String.valueOf(zone.getValeurCible())
+                : zone.getValeurCible() + op.getSymbole();
+            g2d.setColor(etiquette);
+            g2d.drawString(label, cx + 1, cy + fmLabel.getAscent() + 1);
         }
     }
 

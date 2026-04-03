@@ -4,7 +4,7 @@
     "listeZones": [
         {
             "valeurCible": 1,
-            "typeOperation": "FIXE",
+            "typeOperation": "AUCUNE",
             "listeCellules": [
                 {
                     "ligne": 0,
