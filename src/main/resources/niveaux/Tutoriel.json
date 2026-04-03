@@ -1,0 +1,36 @@
+{
+  "id": "Tutoriel",
+  "taille": 3,
+  "matriceCorrection": [
+    [1, 2, 3],
+    [3, 1, 2],
+    [2, 3, 1]
+  ],
+  "listeZones": [
+    {
+      "valeurCible": 4,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 0, "colonne": 0}, {"ligne": 1, "colonne": 0}]
+    },
+    {
+      "valeurCible": 5,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 0, "colonne": 1}, {"ligne": 0, "colonne": 2}]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 1, "colonne": 1}, {"ligne": 1, "colonne": 2}]
+    },
+    {
+      "valeurCible": 5,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne": 2, "colonne": 0}, {"ligne": 2, "colonne": 1}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "AUCUNE",
+      "listeCellules": [{"ligne": 2, "colonne": 2}]
+    }
+  ]
+}
