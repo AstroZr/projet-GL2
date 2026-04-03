@@ -24,50 +24,53 @@ import java.util.Set;
 /**
  * Vue (Renderer) responsable du rendu graphique de la grille de jeu CalcuDoku.
  *
- * <p>Responsabilités: - Dessiner la grille (cellules, valeurs, candidats) - Afficher les bordures
- * des zones (couleurs différentes par zone) - Colorer les cellules selon l'état (sélection, erreur,
- * validité) - Appliquer les thèmes de couleur (via Fond) - Gérer le positionnement responsive et
+ * <p>
+ * Responsabilités: - Dessiner la grille (cellules, valeurs, candidats) -
+ * Afficher les bordures
+ * des zones (couleurs différentes par zone) - Colorer les cellules selon l'état
+ * (sélection, erreur,
+ * validité) - Appliquer les thèmes de couleur (via Fond) - Gérer le
+ * positionnement responsive et
  * taille des cellules
  *
- * <p>Optimisations: - Fonts et Colors pré-alloués (pas de création per-frame) - BasicStrokes
- * immuables réutilisés - Rendu en deux passes: fond des cellules → bordures → texte
+ * <p>
+ * Optimisations: - Fonts et Colors pré-alloués (pas de création per-frame) -
+ * BasicStrokes
+ * immuables réutilisés - Rendu en deux passes: fond des cellules → bordures →
+ * texte
  *
- * <p>Observer Pattern: - Enregistrée comme GrilleObserver sur Grille - Appelée à chaque changement
+ * <p>
+ * Observer Pattern: - Enregistrée comme GrilleObserver sur Grille - Appelée à
+ * chaque changement
  * (redessine l'affichage)
  */
 public class VueGrille {
 
   // ====== COULEURS PRÉ-ALLOUÉES ======
-  private static final Color COULEUR_SELECTION =
-      new Color(100, 150, 255, 150); // Bleu semi-transparent pour cellule sélectionnée
-  private static final Color COULEUR_ERREUR =
-      new Color(255, 100, 100, 180); // Rouge semi-transparent pour erreur
+  private static final Color COULEUR_SELECTION = new Color(100, 150, 255, 150); // Bleu semi-transparent pour cellule
+                                                                                // sélectionnée
+  private static final Color COULEUR_ERREUR = new Color(255, 100, 100, 180); // Rouge semi-transparent pour erreur
+  private static final Color COULEUR_SOLUTION = new Color(120, 200, 120, 160);
 
   // ====== FONTS PRÉ-ALLOUÉES ======
-  private static final Font FONT_VALEUR = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 32);
-  private static final Font FONT_ZONE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 14);
-  private static final Font FONT_CANDIDAT = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
-  private static final Font FONT_AIDE_ZONE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 13);
+  private static final Font FONT_VALEUR = FontCache.get("Arial", Font.BOLD, 32); // Chiffres dans les cellules
+  private static final Font FONT_ZONE = FontCache.get("Arial", Font.BOLD, 14); // Label zone (target + opération)
+  private static final Font FONT_CANDIDAT = FontCache.get("Arial", Font.BOLD, 16); // Candidats (petits chiffres)
+  private static final Font FONT_AIDE_ZONE = FontCache.get("Arial", Font.PLAIN, 13); // Aide tooltip survol
 
   // ====== TRAITS/STROKES PRÉ-ALLOUÉS ======
-  private static final BasicStroke STROKE_CONTOUR_GRILLE =
-      new BasicStroke(4); // Bordure externe grille
-  private static final BasicStroke STROKE_ZONE_SOUS_COUCHE =
-      new BasicStroke(5); // Sous-couche zones
+  private static final BasicStroke STROKE_CONTOUR_GRILLE = new BasicStroke(4); // Bordure externe grille
+  private static final BasicStroke STROKE_ZONE_SOUS_COUCHE = new BasicStroke(5); // Sous-couche zones
   private static final BasicStroke STROKE_EPAISSE = new BasicStroke(3); // Bordures épaisses
   private static final BasicStroke STROKE_FINE = new BasicStroke(1); // Lignes fines
-  private static final BasicStroke STROKE_SELECTION =
-      new BasicStroke(2f); // Bordure cellule sélectionnée
 
   private static final int MAX_LIGNES_TOOLTIP = 8;
 
   // ====== DIMENSIONS DE RÉFÉRENCE ======
   private static final int MARGE_CASE = 2; // Marge entre cellules (pixels)
   private static final int TAILLE_GRILLE_DEFAULT = (int) (1080 / 1.5f); // Taille grille par défaut
-  private static final int OFFSET_X_DEFAULT =
-      (1920 - TAILLE_GRILLE_DEFAULT) / 2; // Centrage horizontal
-  private static final int OFFSET_Y_DEFAULT =
-      (1080 - TAILLE_GRILLE_DEFAULT) / 2; // Centrage vertical
+  private static final int OFFSET_X_DEFAULT = (1920 - TAILLE_GRILLE_DEFAULT) / 2; // Centrage horizontal
+  private static final int OFFSET_Y_DEFAULT = (1080 - TAILLE_GRILLE_DEFAULT) / 2; // Centrage vertical
 
   // ====== INSTANCE ======
   private final Grille grille; // Référence au modèle (lecture seule)
@@ -86,17 +89,18 @@ public class VueGrille {
   public VueGrille(Grille grille) {
     this.grille = grille;
     tailleCellule = TAILLE_GRILLE_DEFAULT / grille.getTaille();
-    tailleGrille = tailleCellule * grille.getTaille(); // multiple exact
-    offsetX = (1920 - tailleGrille) / 2;
-    offsetY = (1080 - tailleGrille) / 2;
+    offsetX = OFFSET_X_DEFAULT;
+    offsetY = OFFSET_Y_DEFAULT;
+    tailleGrille = TAILLE_GRILLE_DEFAULT;
     modeCandidat = false;
   }
 
-  /** Dessine la grille à l'écran en appliquant les couleurs du thème actif. */
+  /**
+   * Dessine la grille à l'écran en appliquant les couleurs du thème actif.
+   */
   public void draw(Graphics g, Fond fond) {
     Graphics2D g2d = (Graphics2D) g;
-    g2d.setRenderingHint(
-        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     dessinerGrille(g2d, fond);
     dessinerBorduresZones(g2d, fond);
@@ -119,12 +123,9 @@ public class VueGrille {
       contourFondCache = fond;
       contourGrilleCache = new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 220);
     }
-    g2d.setColor(contourGrilleCache);
-    g2d.drawRect(offsetX - 1, offsetY - 1, tailleGrille + 2, tailleGrille + 2);
   }
 
   private void dessinerGrille(Graphics2D g2d, Fond fond) {
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     int taille = grille.getTaille();
 
     g2d.setFont(FONT_VALEUR);
@@ -147,55 +148,37 @@ public class VueGrille {
     }
   }
 
-  /** Remplit le fond de la cellule selon son état (erreur, sélection, normal). */
-  private void dessinerFondCellule(
-      Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
+  /**
+   * Remplit le fond de la cellule selon son état (erreur, sélection, normal).
+   */
+  private void dessinerFondCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
     boolean erreurVisible = grille.isAfficherErreurDouble() && cellule.estErreurDuplique();
-    if (erreurVisible || !cellule.estValide()) {
+    if (grille.isSolutionAffichee()) {
+      g2d.setColor(COULEUR_SOLUTION);
+    } else if (erreurVisible || !cellule.estValide()) {
       g2d.setColor(COULEUR_ERREUR);
-      g2d.fillRoundRect(x, y, tailleCase, tailleCase, 8, 8);
     } else if (cellule.estSelectionnee()) {
-      Color sel = fond.getCouleurAccent();
-      // Halo extérieur (glow subtil)
-      g2d.setColor(new Color(sel.getRed(), sel.getGreen(), sel.getBlue(), 35));
-      g2d.fillRoundRect(x - 3, y - 3, tailleCase + 6, tailleCase + 6, 12, 12);
-      // Fond solide (opaque) pour ne pas révéler l'arrière-plan
-      g2d.setColor(fond.getCouleurFondCellule());
-      g2d.fillRoundRect(x, y, tailleCase, tailleCase, 8, 8);
-      // Teinte accent légère par-dessus
-      g2d.setColor(new Color(sel.getRed(), sel.getGreen(), sel.getBlue(), 45));
-      g2d.fillRoundRect(x, y, tailleCase, tailleCase, 8, 8);
+      g2d.setColor(COULEUR_SELECTION);
     } else {
       g2d.setColor(fond.getCouleurFondCellule());
-      g2d.fillRoundRect(x, y, tailleCase, tailleCase, 8, 8);
     }
+    g2d.fillRect(x, y, tailleCase, tailleCase);
   }
 
-  /** Dessine la bordure fine de la cellule. */
-  private void dessinerBordureCellule(
-      Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
-    if (cellule.estSelectionnee()) {
-      Color sel = fond.getCouleurAccent();
-      g2d.setColor(new Color(sel.getRed(), sel.getGreen(), sel.getBlue(), 220));
-      g2d.setStroke(STROKE_SELECTION);
-    } else {
-      Color texte = fond.getCouleurTexte();
-      g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 60));
-      g2d.setStroke(STROKE_FINE);
-    }
-    g2d.drawRoundRect(x + 1, y + 1, tailleCase, tailleCase, 8, 8);
+  /**
+   * Dessine la bordure fine de la cellule.
+   */
+  private void dessinerBordureCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
+    g2d.setColor(fond.getCouleurTexte());
+    g2d.setStroke(STROKE_FINE);
+    g2d.drawRect(x, y, tailleCase, tailleCase);
   }
 
-  /** Affiche la valeur numérique centrée dans la cellule, si présente. */
-  private void dessinerValeurCellule(
-      Graphics2D g2d,
-      Cellule cellule,
-      int x,
-      int y,
-      int tailleCase,
-      FontMetrics fm,
-      int fontAscent,
-      Fond fond) {
+  /**
+   * Affiche la valeur numérique centrée dans la cellule, si présente.
+   */
+  private void dessinerValeurCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase,
+      FontMetrics fm, int fontAscent, Fond fond) {
     int valeur = cellule.getValeur();
     if (valeur == 0) {
       dessinerCandidats(g2d, cellule, x, y, tailleCase, fond);
@@ -207,11 +190,12 @@ public class VueGrille {
     String valeurStr = String.valueOf(valeur);
     int strWidth = fm.stringWidth(valeurStr);
     g2d.drawString(
-        valeurStr, x + (tailleCase - strWidth) / 2, y + (tailleCase + fontAscent) / 2 - 5);
+        valeurStr,
+        x + (tailleCase - strWidth) / 2,
+        y + (tailleCase + fontAscent) / 2 - 5);
   }
 
-  private void dessinerCandidats(
-      Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
+  private void dessinerCandidats(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
     List<Integer> candidats = cellule.getListeCandidat();
     if (candidats == null || candidats.isEmpty()) {
       return;
@@ -244,8 +228,10 @@ public class VueGrille {
   }
 
   /**
-   * Dessine les bordures épaisses délimitant chaque zone de calcul. Pour chaque côté d'une cellule,
-   * un trait épais est tracé si la cellule voisine appartient à une zone différente (ou est hors
+   * Dessine les bordures épaisses délimitant chaque zone de calcul. Pour chaque
+   * côté d'une cellule,
+   * un trait épais est tracé si la cellule voisine appartient à une zone
+   * différente (ou est hors
    * grille).
    */
   private void dessinerBorduresZones(Graphics2D g2d, Fond fond) {
@@ -482,16 +468,17 @@ public class VueGrille {
   /** Gère la saisie de caractères (chiffres). */
   public void keyTyped(KeyEvent e) {
     // keyTyped mit sous commentaire pour régler le problème du undo
-    // à cause d'une redondance de l'appel saisirValeur(valeur) déjà fait dans keyPressed
+    // à cause d'une redondance de l'appel saisirValeur(valeur) déjà fait dans
+    // keyPressed
     // ce qui provoque un double enregistrement à chaque fois (d'o`u le double undo)
 
     /*
-    char c = e.getKeyChar();
-    if (Character.isDigit(c)) {
-        int valeur = Character.getNumericValue(c);
-        saisirValeur(valeur);
-    }
-    */
+     * char c = e.getKeyChar();
+     * if (Character.isDigit(c)) {
+     * int valeur = Character.getNumericValue(c);
+     * saisirValeur(valeur);
+     * }
+     */
   }
 
   /** Gère les touches pressées (suppression). */
@@ -609,7 +596,8 @@ public class VueGrille {
   public void applyLayout(int w, int h) {
     int n = grille.getTaille();
     // Calculer tailleCellule en premier pour éviter le désalignement
-    // dû à la troncature entière : tailleGrille/n puis n*tailleCellule < tailleGrille
+    // dû à la troncature entière : tailleGrille/n puis n*tailleCellule <
+    // tailleGrille
     tailleCellule = Math.max(1, (int) (h / 1.5f) / n);
     tailleGrille = tailleCellule * n; // multiple exact : contour = cellules réelles
     offsetX = (w - tailleGrille) / 2;

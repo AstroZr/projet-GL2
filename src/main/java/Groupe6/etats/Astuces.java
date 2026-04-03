@@ -38,6 +38,8 @@ public class Astuces extends Etats {
     private LayoutScale layoutScale;
 
     private static EtatJeu etatSource = EtatJeu.MENU;
+    private static Astuces instance = null;
+    private EtatJeu etatSourcePrecedent = null;
 
     public static void setEtatSource(EtatJeu etat) {
         etatSource = etat;
@@ -60,6 +62,7 @@ public class Astuces extends Etats {
 
     public Astuces(Game game) {
         super(game);
+        instance = this;
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         updateTexts();
@@ -122,6 +125,12 @@ public class Astuces extends Etats {
     @Override
     public void update() {
         getFond().update();
+        
+        // Si etatSource a changé depuis la dernière fois, recréer les boutons
+        if (etatSourcePrecedent != etatSource) {
+            calculerPositions();
+            etatSourcePrecedent = etatSource;
+        }
     }
 
     @Override
