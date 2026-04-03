@@ -51,6 +51,7 @@ public class Jeu extends Etats {
   private BoutonJeuAction boutonRedo;
   private BoutonJeuAction boutonModeCandidat;
   private BoutonJeuAction boutonParametres;
+  private BoutonJeuAction boutonTechniques;
   private BoutonAide boutonAide;
   private final ArrayList<BoutonJeuAction> boutonsNumeriques = new ArrayList<>();
   private String labelRetour;
@@ -60,6 +61,7 @@ public class Jeu extends Etats {
   private String labelCandidatOn;
   private String labelCandidatOff;
   private String labelParametres;
+  private String labelTechniques;
   private String labelTimer;
   private long startTimerMillis;
   private long baseElapsedMillis;
@@ -198,6 +200,17 @@ public class Jeu extends Etats {
             labelParametres,
             this::ouvrirParametresDepuisJeu);
     boutons.add(boutonParametres);
+
+    // Bouton Techniques d'aides (positionné dans le panel droit)
+    boutonTechniques =
+        new BoutonJeuAction(
+            0,
+            0, 
+            LARGEUR_BOUTON, 
+            HAUTEUR_BOUTON, 
+            labelTechniques, 
+            this::ouvrirTechniquesAides);
+    boutons.add(boutonTechniques);
 
     initBoutonsNumeriques();
     updateLabelModeCandidat();
@@ -358,15 +371,23 @@ public class Jeu extends Etats {
 
       int panelX = Math.max(20, w - 250);
       int panelY = Math.max(130, (h - 360) / 2);
+      // Bouton Mode Candidat
       boutons.get(4).setX(panelX);
-      boutons.get(4).setY(panelY + 120);
+      boutons.get(4).setY(panelY + 165);
       boutons.get(4).setLargeur(200);
       boutons.get(4).setHauteur(HAUTEUR_BOUTON);
 
+      // Bouton Paramètres
       boutons.get(5).setX(panelX);
-      boutons.get(5).setY(panelY + 70);
+      boutons.get(5).setY(panelY + 115);
       boutons.get(5).setLargeur(200);
       boutons.get(5).setHauteur(HAUTEUR_BOUTON);
+
+      // Bouton Techniques d'aides
+      boutons.get(6).setX(panelX);
+      boutons.get(6).setY(panelY + 70);
+      boutons.get(6).setLargeur(200);
+      boutons.get(6).setHauteur(HAUTEUR_BOUTON);
     }
 
     int panelX = Math.max(20, w - 250);
@@ -376,7 +397,7 @@ public class Jeu extends Etats {
       int row = i / 2;
       BoutonJeuAction b = boutonsNumeriques.get(i);
       b.setX(panelX + col * (LARGEUR_BOUTON_NUM + ESPACEMENT_NUM));
-      b.setY(panelY + 180 + row * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM));
+      b.setY(panelY + 225 + row * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM));
       b.setLargeur(LARGEUR_BOUTON_NUM);
       b.setHauteur(HAUTEUR_BOUTON_NUM);
     }
@@ -519,6 +540,7 @@ public class Jeu extends Etats {
     labelCandidatOn = LangManager.get("jeu.candidat.on");
     labelCandidatOff = LangManager.get("jeu.candidat.off");
     labelParametres = LangManager.get("menu.parametres");
+    labelTechniques = LangManager.get("menu.astuces");
     labelTimer = LangManager.get("jeu.timer");
     labelVictoireTitre = LangManager.get("jeu.victoire.titre");
     labelVictoireTexte = LangManager.get("jeu.victoire.texte");
@@ -540,6 +562,9 @@ public class Jeu extends Etats {
     }
     if (boutonParametres != null) {
       boutonParametres.setLabel(labelParametres);
+    }
+    if (boutonTechniques != null) {
+      boutonTechniques.setLabel(labelTechniques);
     }
     updateLabelModeCandidat();
   }
@@ -818,9 +843,9 @@ public class Jeu extends Etats {
     int panelX = Math.max(20, Constants.game_width - 250);
     int panelY = Math.max(130, (Constants.game_height - 360) / 2);
 
-    // Hauteur calculée depuis les boutons réels : zone timer + rangées de boutons + padding
+    // Hauteur calculée depuis les boutons réels : zone timer + 3 boutons d'action + rangées de boutons numériques + padding
     int numRows = (boutonsNumeriques.size() + 1) / 2;
-    int panelH = 12 + 180 + numRows * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM) + 20;
+    int panelH = 12 + 225 + numRows * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM) + 20;
 
     Graphics2D g2d = (Graphics2D) g;
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -851,9 +876,9 @@ public class Jeu extends Etats {
     g2d.setFont(FONT_TIMER);
     g2d.drawString(formatTimer(), panelX + 13, panelY + 50);
 
-    // Séparateur avant les boutons numériques
+    // Séparateur avant les boutons d'action (Techniques, Paramètres, Mode Candidat)
     g2d.setColor(getFond().getCouleurBordreBouton());
-    g2d.drawLine(panelX - 2, panelY + 72, panelX + 216, panelY + 72);
+    g2d.drawLine(panelX - 2, panelY + 65, panelX + 216, panelY + 65);
   }
 
   private String formatTimer() {
@@ -932,6 +957,13 @@ public class Jeu extends Etats {
     pauseTimer();
     Parametres.setEtatSource(EtatJeu.GRILLE);
     EtatJeu.setEtatActuel(EtatJeu.PARAMETRES);
+  }
+
+  private void ouvrirTechniquesAides() {
+    sauvegarderEtatNiveauCourant();
+    pauseTimer();
+    Astuces.setEtatSource(EtatJeu.GRILLE);
+    EtatJeu.setEtatActuel(EtatJeu.ASTUCES);
   }
 
   public void sauvegarderEtatNiveauCourant() {
