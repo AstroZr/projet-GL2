@@ -44,10 +44,12 @@ public class PossibiliteUnique extends AideAbstract {
     }
 
     @Override
-    public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3)
-            return false;
-        
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
+
+    @Override
+    public boolean check(Grille grille) {        
         Cellule[][] grid = grille.getMatriceCellules();
         int gridSize = grille.getTaille();
         boolean finded = false;
@@ -87,14 +89,6 @@ public class PossibiliteUnique extends AideAbstract {
                 this.aideTextuel = new AideTextuel(this.titre,
                         this.description + " " + LangManager.get("aide.possibiliteunique.colonne") + " " + String.valueOf(colonneCellule + 1) + " " +
                         LangManager.get("aide.possibiliteunique.ligne") + " " + String.valueOf(ligneCellule + 1) + " !");
-                
-                for (int colonne = 0; colonne < taille; colonne++){
-                    this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligneCellule, colonne, new String()));
-                }
-
-                for (int ligne = 0; ligne < taille; ligne++){
-                    this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligne, colonneCellule, new String()));
-                }
                 
                 this.nbUtilisation++;
                 break;

@@ -32,10 +32,12 @@ public class BlocageUnique extends AideAbstract {
     }
 
     @Override
-    public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3)
-            return false;
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
 
+    @Override
+    public boolean check(Grille grille) {
         this.cibleLigne = -1;
         this.cibleColonne = -1;
         this.cibleZone = null;

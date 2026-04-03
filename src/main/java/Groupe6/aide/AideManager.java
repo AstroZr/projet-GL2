@@ -40,14 +40,31 @@ public class AideManager {
     public boolean call(Grille grille) {
         Iterator<Aide> iteratorAide = this.aides.iterator();
         Aide aide = this.aides.get(0);
-        while (iteratorAide.hasNext() && !aide.check(grille)) {
+        while (iteratorAide.hasNext() && !(aide.check(grille) && !aide.isOverUsed())) {
             aide = iteratorAide.next();
         }
-
-        if (aide.check(grille)) {
+        
+        if (aide.check(grille) && !aide.isOverUsed()) {
             this.cost = aide.load(grille, this.aides.size());
             this.aide = aide;
             return true;
+        }
+        else{
+            boolean loop = true;
+            for (Aide a : aides){
+                if(a.check(grille)){
+                    if (!a.isOverUsed()){
+                        loop = false;
+                    }                   
+                }
+            }
+
+            if (loop){
+                for (Aide a : aides){
+                    a.setNbUtilisation(0);
+                }
+                return call(grille);
+            }
         }
         return false;
     }
