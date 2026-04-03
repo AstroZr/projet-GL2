@@ -152,7 +152,8 @@ public class VueGrille {
    * Remplit le fond de la cellule selon son état (erreur, sélection, normal).
    */
   private void dessinerFondCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
-    boolean erreurVisible = grille.isAfficherErreurDouble() && cellule.estErreurDuplique();
+    boolean erreurAideVisible = cellule.estErreurDuplique() && cellule.estVide();
+    boolean erreurVisible = (grille.isAfficherErreurDouble() && cellule.estErreurDuplique()) || erreurAideVisible;
     if (grille.isSolutionAffichee()) {
       g2d.setColor(COULEUR_SOLUTION);
     } else if (erreurVisible || !cellule.estValide()) {
