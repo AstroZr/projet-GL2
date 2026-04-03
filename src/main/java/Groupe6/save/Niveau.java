@@ -10,8 +10,8 @@ import Groupe6.models.ZoneCalcul;
  * 
  * Resp onsabilités:
  * - Mémoriser l'ennoncé du puzzle (zones, cellules poussière, solution)
- * - Êatre chargé à partir de JSON (saveGame/niveaux/facile1.json, etc.)
- * - Êatre stocké en mémoire avec référence partagée avec Grille
+ * - Être chargé à partir de JSON (saveGame/niveaux/facile1.json, etc.)
+ * - Être stocké en mémoire avec référence partagée avec Grille
  * 
  * Contenu:
  * - id: identifiant unique ("facile1", "moyen2", "difficile3", etc.)
@@ -26,22 +26,44 @@ import Groupe6.models.ZoneCalcul;
  */
 public class Niveau {
 
-    // ====== IDÉNTIFICATION ======
-    private String id;                        // Identifiant unique du niveau ("facile1", "moyen2", etc.)
+    // ====== IDENTIFICATION ======
+    
+    /** Identifiant unique du niveau (ex: "facile1", "moyen2", "difficile3"). */
+    private String id;
     
     // ====== DIMENSIONS ======
-    private int taille;                       // Dimension N de la grille N×N
+    
+    /** Dimension N de la grille N×N. */
+    private int taille;
     
     // ====== ÉNONCÉ ======
-    private Cellule[][] matriceCellules;     // Grille avec cellules poussière (puzzle à résoudre)
-    private List<ZoneCalcul> listeZones;     // Zones de calcul (contraintes mathématiques)
+    
+    /** Grille de base contenant les cellules de l'énoncé (souvent de valeur 0 pour commencer). */
+    private Cellule[][] matriceCellules;
+    
+    /** Liste des zones de calcul qui définissent les contraintes mathématiques de la grille. */
+    private List<ZoneCalcul> listeZones;
     
     // ====== SOLUTION ======
-    private int[][] matriceCorrection;        // Grille solution (pour vérification/correction)
+    
+    /** Grille contenant les valeurs correctes (solution) pour permettre la vérification. */
+    private int[][] matriceCorrection;
 
+    /**
+     * Constructeur par défaut.
+     * Indispensable pour permettre à GSON de désérialiser l'objet depuis le fichier JSON.
+     */
     public Niveau() {
     }
 
+    /**
+     * Constructeur paramétré d'un niveau.
+     * * @param id                L'identifiant unique du niveau.
+     * @param taille            La dimension N de la grille (N×N).
+     * @param matriceCellules   La matrice initiale des cellules.
+     * @param listeZones        La liste des zones de calcul associées à la grille.
+     * @param matriceCorrection La matrice d'entiers représentant la solution correcte.
+     */
     public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones, int[][] matriceCorrection) {
         this.id = id;
         this.taille = taille;
@@ -50,38 +72,74 @@ public class Niveau {
         this.matriceCorrection = matriceCorrection;
     }
 
+    /**
+     * Obtient l'identifiant du niveau.
+     * @return L'identifiant unique (ex: "facile1").
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Définit l'identifiant du niveau.
+     * @param id Le nouvel identifiant.
+     */
     public void setId(String id) {
         this.id = id;
     }
 
+    /**
+     * Obtient la dimension de la grille.
+     * @return La taille N (pour une grille N×N).
+     */
     public int getTaille() {
         return taille;
     }
 
+    /**
+     * Définit la dimension de la grille.
+     * @param taille La nouvelle taille N.
+     */
     public void setTaille(int taille) {
         this.taille = taille;
     }
 
+    /**
+     * Obtient la matrice des cellules de l'énoncé.
+     * @return Un tableau 2D de {@link Cellule}.
+     */
     public Cellule[][] getMatriceCellules() {
         return matriceCellules;
     }
 
+    /**
+     * Définit la matrice des cellules de l'énoncé.
+     * @param matriceCellules Le nouveau tableau 2D de {@link Cellule}.
+     */
     public void setMatriceCellules(Cellule[][] matriceCellules) {
         this.matriceCellules = matriceCellules;
     }
 
+    /**
+     * Obtient la liste des zones de calcul de la grille.
+     * @return Une liste d'objets {@link ZoneCalcul}.
+     */
     public List<ZoneCalcul> getListeZones() {
         return listeZones;
     }
 
+    /**
+     * Définit la liste des zones de calcul.
+     * @param listeZones La nouvelle liste de contraintes mathématiques.
+     */
     public void setListeZones(List<ZoneCalcul> listeZones) {
         this.listeZones = listeZones;
     }
 
+    /**
+     * Obtient la matrice de correction (solution).
+     * @return Un tableau 2D d'entiers contenant les valeurs correctes.
+     */
     public int[][] getMatriceCorrection() {
         return matriceCorrection;
     }

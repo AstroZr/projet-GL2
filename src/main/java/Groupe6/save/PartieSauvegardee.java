@@ -32,23 +32,50 @@ import Groupe6.models.Cellule;
  * - Champs publics ou getters/setters pour accés GSON
  */
 public class PartieSauvegardee {
+
     // ====== ÉTAT DE LA GRILLE ======
-    private transient AideManager aideManager;       // Exclu JSON: contient des interfaces non désérialisables par défaut
-    private Cellule[][] matriceCellules;  // Grille N×N avec valeurs actuelles
+    
+    /** * Gestionnaire d'aides. 
+     * Exclu de la sérialisation JSON (transient) car il contient des interfaces et 
+     * des logiques non désérialisables directement.
+     */
+    private transient AideManager aideManager;
+
+    /** Matrice N×N représentant l'état actuel de la grille avec les valeurs saisies par le joueur. */
+    private Cellule[][] matriceCellules;
     
     // ====== HISTORIQUE & TEMPS ======
-    private List<int[]> historique;        // Enregistrement de tous les coups [ligne, col, ancVal, nouvelleVal, actionType]
-    private long tempsEcoule;              // Temps total écoulé en millisecondes
     
-    // ====== AIDS TRACKING ======
-    private Map<Integer, Integer> nbAidesUtilisees;  // Comptage des hints utilisés par type
+    /** Historique des coups joués pour la fonctionnalité Undo/Redo. 
+     * Format typique d'un coup : [ligne, colonne, ancienneValeur, nouvelleValeur].
+     */
+    private List<int[]> historique;
 
+    /** Temps de jeu total écoulé sur cette partie, en millisecondes. */
+    private long tempsEcoule;
+    
+    // ====== AIDES TRACKING ======
+    
+    /** Comptage du nombre d'utilisations pour chaque type d'aide (Clé: ID Type, Valeur: Quantité). */
+    private Map<Integer, Integer> nbAidesUtilisees;
+
+    /**
+     * Constructeur par défaut.
+     * Indispensable pour la désérialisation via GSON. Initialise les collections à vide
+     * et récupère l'instance du gestionnaire d'aides.
+     */
     public PartieSauvegardee() {
         this.historique = new ArrayList<>();
         this.nbAidesUtilisees = new HashMap<>();
         this.aideManager = AideManager.getInstance();
     }
 
+    /**
+     * Constructeur paramétré utilisé lors de la création d'une nouvelle sauvegarde depuis le jeu.
+     * * @param matriceCellules L'état actuel des cellules de la grille.
+     * @param historique      La liste des coups joués jusqu'à présent.
+     * @param tempsEcoule     Le temps total passé sur cette grille en millisecondes.
+     */
     public PartieSauvegardee(Cellule[][] matriceCellules, List<int[]> historique, long tempsEcoule) {
         this.matriceCellules = matriceCellules;
         this.historique = historique;
@@ -57,30 +84,58 @@ public class PartieSauvegardee {
         this.nbAidesUtilisees = this.aideManager.getNBUtilisations();
     }
 
+    /**
+     * Retourne la matrice des cellules sauvegardée.
+     * * @return Un tableau 2D de {@link Cellule} représentant la grille.
+     */
     public Cellule[][] getMatriceCellules() {
         return matriceCellules;
     }
 
+    /**
+     * Définit la matrice des cellules.
+     * * @param matriceCellules Le nouveau tableau 2D de {@link Cellule}.
+     */
     public void setMatriceCellules(Cellule[][] matriceCellules) {
         this.matriceCellules = matriceCellules;
     }
 
+    /**
+     * Retourne l'historique des coups joués.
+     * * @return Une liste de tableaux d'entiers représentant les actions du joueur.
+     */
     public List<int[]> getHistorique() {
         return historique;
     }
 
+    /**
+     * Définit l'historique des coups joués.
+     * * @param historique La nouvelle liste des coups.
+     */
     public void setHistorique(List<int[]> historique) {
         this.historique = historique;
     }
 
+    /**
+     * Retourne le temps écoulé sur la partie.
+     * * @return Le temps de jeu en millisecondes.
+     */
     public long getTempsEcoule() {
         return tempsEcoule;
     }
 
+    /**
+     * Définit le temps écoulé sur la partie.
+     * * @param tempsEcoule Le temps de jeu en millisecondes.
+     */
     public void setTempsEcoule(long tempsEcoule) {
         this.tempsEcoule = tempsEcoule;
     }
 
+    /**
+     * Retourne les statistiques d'utilisation des aides de jeu.
+     * * @return Une Map associant l'identifiant d'un type d'aide à son nombre d'utilisations.
+     */
     public Map<Integer, Integer> getNbAidesUtilisees() {
         return nbAidesUtilisees;
     }
