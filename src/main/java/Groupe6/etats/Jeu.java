@@ -128,24 +128,10 @@ public class Jeu extends Etats {
   private void initClasses() {
     boutons = new ArrayList<>();
     updateTexts();
-    
-    /*
-    String joueurActuel = game.getJoueurCourant();
-    if (joueurActuel == null) joueurActuel = "testUser";
-    grille = new Grille(joueurActuel, "test");
-    victoireAnnoncee = false;
-   
-    // Créer la vue
-    vueGrille = new VueGrille(grille);
-    baseElapsedMillis = grille.getTempsEcoule();
-    startTimerMillis = System.currentTimeMillis();
-    */
-    
-    
+
     grille = null;
-    //grille = new Grille(game.getJoueurCourant(), "Facile 1");
     vueGrille = null;
-    
+
     // Bouton retour au menu - position initiale
     int cx = 50;
     int cy = 950;
@@ -204,12 +190,7 @@ public class Jeu extends Etats {
     // Bouton Techniques d'aides (positionné dans le panel droit)
     boutonTechniques =
         new BoutonJeuAction(
-            0,
-            0, 
-            LARGEUR_BOUTON, 
-            HAUTEUR_BOUTON, 
-            labelTechniques, 
-            this::ouvrirTechniquesAides);
+            0, 0, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelTechniques, this::ouvrirTechniquesAides);
     boutons.add(boutonTechniques);
 
     initBoutonsNumeriques();
@@ -622,7 +603,8 @@ public class Jeu extends Etats {
   private void drawAideOverlay(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     int w = Constants.game_width;
     int h = Constants.game_height;
@@ -843,13 +825,15 @@ public class Jeu extends Etats {
     int panelX = Math.max(20, Constants.game_width - 250);
     int panelY = Math.max(130, (Constants.game_height - 360) / 2);
 
-    // Hauteur calculée depuis les boutons réels : zone timer + 3 boutons d'action + rangées de boutons numériques + padding
+    // Hauteur calculée depuis les boutons réels : zone timer + 3 boutons d'action + rangées de
+    // boutons numériques + padding
     int numRows = (boutonsNumeriques.size() + 1) / 2;
     int panelH = 12 + 225 + numRows * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM) + 20;
 
     Graphics2D g2d = (Graphics2D) g;
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     // Fond du panel
     g2d.setColor(getFond().getCouleurFondBouton());
@@ -928,6 +912,17 @@ public class Jeu extends Etats {
       startTimerMillis = System.currentTimeMillis();
       timerPaused = false;
     }
+  }
+
+  public void applyTimePenalty(int seconds) {
+    if (seconds <= 0) return;
+    long penaltyMs = seconds * 1000L;
+    if (timerPaused) {
+      pausedElapsedMillis += penaltyMs;
+    } else {
+      baseElapsedMillis += penaltyMs;
+    }
+    lastTimerSecond = -1;
   }
 
   private void quitterNiveauVersMenu() {
