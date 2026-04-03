@@ -222,12 +222,15 @@ public class Grille {
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
             initialiserDepuisSauvegarde(niveauBase, sauvegarde);
+            nettoyerSelection();
+            // NE PAS appeler validerGrille() ici car elle réinitialiserait les états d'erreur sauvegardés
+            // À la place, calculer simplement estComplete avec les états actuels
+            calculerEtatComplete();
         } else {
             initialiserDepuisNiveau(niveauBase);
+            nettoyerSelection();
+            validerGrille();
         }
-
-        nettoyerSelection();
-        validerGrille();
     }
 
     /**
@@ -557,6 +560,35 @@ public class Grille {
                 return true;
         }
         return false;
+    }
+
+    /**
+     * Calcule simplement l'état de complétude après le chargement d'une sauvegarde.
+     * Cette méthode NE réinitialise PAS les états d'erreur (contrairement à validerGrille).
+     * Elle préserve les états d'erreur sauvegardés et calcule juste estComplete.
+     */
+    private void calculerEtatComplete() {
+        celluleMatriceLock.readLock().lock();
+        try {
+            estComplete = true;
+
+            // Vérifier si la grille est remplie
+            for (int i = 0; i < taille; i++) {
+                for (int j = 0; j < taille; j++) {
+                    if (matriceCellules[i][j].estVide()) {
+                        estComplete = false;
+                        return;
+                    }
+                }
+            }
+
+            // Si on a des erreurs, le jeu n'est pas fini
+            if (aDesErreurs()) {
+                estComplete = false;
+            }
+        } finally {
+            celluleMatriceLock.readLock().unlock();
+        }
     }
 
     /**
