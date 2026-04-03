@@ -38,6 +38,8 @@ public class Astuces extends Etats {
     private LayoutScale layoutScale;
 
     private static EtatJeu etatSource = EtatJeu.MENU;
+    private static Astuces instance = null;
+    private EtatJeu etatSourcePrecedent = null;
 
     public static void setEtatSource(EtatJeu etat) {
         etatSource = etat;
@@ -60,6 +62,7 @@ public class Astuces extends Etats {
 
     public Astuces(Game game) {
         super(game);
+        instance = this;
         layoutScale = LayoutScale.getInstance();
         boutons = new ArrayList<>();
         updateTexts();
@@ -74,22 +77,43 @@ public class Astuces extends Etats {
         fontTitre    = FontCache.get("Berlin Sans FB Demi", Font.BOLD,  layoutScale.scaleUniform(34));
         fontCardTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD,  layoutScale.scaleUniform(17));
         fontCardDesc  = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14));
-        fontBadge     = FontCache.get("Berlin Sans FB Demi", Font.BOLD,  layoutScale.scaleUniform(16));
 
-        badgeSize  = layoutScale.scaleUniform(36);
-        cardHeight = layoutScale.scaleY(110);
-        cardGap    = layoutScale.scaleY(12);
+        cardGap = layoutScale.scaleY(12);
 
         List<Aide> aides = AideManager.getInstance().getAides();
-        int n = aides.size();
+        int n = Math.max(aides.size(), 1);
+
+        int paddingPanel = layoutScale.scaleY(20);
+
+        // Hauteur préférée (cardHeight fixe de 110) réduite de 50px
+        int preferredCardHeight = layoutScale.scaleY(110);
+        int gapsTotal = (n - 1) * cardGap;
+        int preferredPanelH = n * preferredCardHeight + gapsTotal + 2 * paddingPanel - layoutScale.scaleY(50);
+
+        // Hauteur max disponible : laisser de la place pour le titre et le bouton
+        int maxAvailable = Constants.game_height - layoutScale.scaleY(180);
+
+        // On prend le minimum pour ne pas déborder
+        panelHeight = Math.min(preferredPanelH, maxAvailable);
+
+        // cardHeight calculé dynamiquement depuis la hauteur du panel et les espacements
+        cardHeight = (panelHeight - 2 * paddingPanel - gapsTotal) / n;
+        cardHeight = Math.max(cardHeight, layoutScale.scaleY(50));
+
+        // badgeSize dynamique proportionnel à la hauteur de carte
+        badgeSize = cardHeight - layoutScale.scaleY(20);
+        badgeSize = Math.min(badgeSize, layoutScale.scaleUniform(36));
+        badgeSize = Math.max(badgeSize, layoutScale.scaleUniform(16));
+
+        fontBadge = FontCache.get("Berlin Sans FB Demi", Font.BOLD, Math.max(badgeSize / 2, layoutScale.scaleUniform(10)));
+
         panelWidth  = layoutScale.scaleX(760);
-        panelHeight = n * cardHeight + (n - 1) * cardGap + layoutScale.scaleY(40);
         panelX = cx - panelWidth / 2;
         panelY = cy - panelHeight / 2 - layoutScale.scaleY(30);
 
         cardX      = panelX + layoutScale.scaleX(20);
         cardWidth  = panelWidth - layoutScale.scaleX(40);
-        cardStartY = panelY + layoutScale.scaleY(20);
+        cardStartY = panelY + paddingPanel;
 
         boutons.clear();
         int bw = layoutScale.scaleX(LARGEUR_BTN);
@@ -101,6 +125,12 @@ public class Astuces extends Etats {
     @Override
     public void update() {
         getFond().update();
+        
+        // Si etatSource a changé depuis la dernière fois, recréer les boutons
+        if (etatSourcePrecedent != etatSource) {
+            calculerPositions();
+            etatSourcePrecedent = etatSource;
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package Groupe6.etats;
 
-import Groupe6.aide.AideManager;
 import Groupe6.aide.AideTextuel;
 import Groupe6.game.Game;
 import Groupe6.models.Grille;
@@ -38,8 +37,10 @@ public class Jeu extends Etats {
   private static final Font FONT_TIMER = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 22);
   private static final Font FONT_LABEL = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
   private static final Font FONT_BOUTON = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 16);
-  private static final Font FONT_OVERLAY_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 20);
-  private static final Font FONT_OVERLAY_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 15);
+  private static final Font FONT_OVERLAY_TITRE =
+      FontCache.get("Berlin Sans FB Demi", Font.BOLD, 20);
+  private static final Font FONT_OVERLAY_TEXTE =
+      FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 15);
   private static final Font FONT_MSG_TITRE = FontCache.get("Berlin Sans FB Demi", Font.BOLD, 14);
   private static final Font FONT_MSG_TEXTE = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, 13);
 
@@ -50,10 +51,10 @@ public class Jeu extends Etats {
   private BoutonJeuAction boutonRedo;
   private BoutonJeuAction boutonModeCandidat;
   private BoutonJeuAction boutonParametres;
+  private BoutonJeuAction boutonTechniques;
   private BoutonAide boutonAide;
   private BoutonJeuAction boutonAbandon;
   private final ArrayList<BoutonJeuAction> boutonsNumeriques = new ArrayList<>();
-  private static final int TAILLE_GRILLE = 4; // Grille 4x4 par défaut
   private String labelRetour;
   private String labelAide;
   private String labelUndo;
@@ -61,6 +62,7 @@ public class Jeu extends Etats {
   private String labelCandidatOn;
   private String labelCandidatOff;
   private String labelParametres;
+  private String labelTechniques;
   private String labelTimer;
   private long startTimerMillis;
   private long baseElapsedMillis;
@@ -136,17 +138,8 @@ public class Jeu extends Etats {
     boutons = new ArrayList<>();
     updateTexts();
 
-    AideManager aideManager = AideManager.getInstance();
-
-    String joueurActuel = game.getJoueurCourant();
-    if (joueurActuel == null) joueurActuel = "testUser";
-    grille = new Grille(joueurActuel, "test");
-    victoireAnnoncee = false;
-
-    // Créer la vue
-    vueGrille = new VueGrille(grille);
-    baseElapsedMillis = grille.getTempsEcoule();
-    startTimerMillis = System.currentTimeMillis();
+    grille = null;
+    vueGrille = null;
 
     // Bouton retour au menu - position initiale
     int cx = 50;
@@ -206,6 +199,11 @@ public class Jeu extends Etats {
     int abandonX = paramX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
     boutonAbandon = new BoutonJeuAction(abandonX, cy, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelAbandon, this::abandonnerAction);
     boutons.add(boutonAbandon);
+    // Bouton Techniques d'aides (positionné dans le panel droit)
+    boutonTechniques =
+        new BoutonJeuAction(
+            0, 0, LARGEUR_BOUTON, HAUTEUR_BOUTON, labelTechniques, this::ouvrirTechniquesAides);
+    boutons.add(boutonTechniques);
 
     initBoutonsNumeriques();
     updateLabelModeCandidat();
@@ -263,7 +261,8 @@ public class Jeu extends Etats {
     return joueurActuel;
   }
 
-  private Grille reinitialiserSiNiveauDejaComplete(String joueurActuel, String idNiveau, Grille grilleChargee) {
+  private Grille reinitialiserSiNiveauDejaComplete(
+      String joueurActuel, String idNiveau, Grille grilleChargee) {
     if (!grilleChargee.estComplete()) {
       return grilleChargee;
     }
@@ -365,15 +364,23 @@ public class Jeu extends Etats {
 
       int panelX = Math.max(20, w - 250);
       int panelY = Math.max(130, (h - 360) / 2);
+      // Bouton Mode Candidat
       boutons.get(4).setX(panelX);
-      boutons.get(4).setY(panelY + 120);
+      boutons.get(4).setY(panelY + 165);
       boutons.get(4).setLargeur(200);
       boutons.get(4).setHauteur(HAUTEUR_BOUTON);
 
+      // Bouton Paramètres
       boutons.get(5).setX(panelX);
-      boutons.get(5).setY(panelY + 70);
+      boutons.get(5).setY(panelY + 115);
       boutons.get(5).setLargeur(200);
       boutons.get(5).setHauteur(HAUTEUR_BOUTON);
+
+      // Bouton Techniques d'aides
+      boutons.get(6).setX(panelX);
+      boutons.get(6).setY(panelY + 70);
+      boutons.get(6).setLargeur(200);
+      boutons.get(6).setHauteur(HAUTEUR_BOUTON);
     }
 
     int panelX = Math.max(20, w - 250);
@@ -383,12 +390,14 @@ public class Jeu extends Etats {
       int row = i / 2;
       BoutonJeuAction b = boutonsNumeriques.get(i);
       b.setX(panelX + col * (LARGEUR_BOUTON_NUM + ESPACEMENT_NUM));
-      b.setY(panelY + 180 + row * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM));
+      b.setY(panelY + 225 + row * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM));
       b.setLargeur(LARGEUR_BOUTON_NUM);
       b.setHauteur(HAUTEUR_BOUTON_NUM);
     }
 
-    vueGrille.applyLayout(w, h);
+    if (vueGrille != null) {
+      vueGrille.applyLayout(w, h);
+    }
   }
 
   @Override
@@ -398,7 +407,9 @@ public class Jeu extends Etats {
     getFond().draw(g);
 
     // Déléguer l'affichage à la vue grille
-    vueGrille.draw(g, getFond());
+    if (vueGrille != null) {
+      vueGrille.draw(g, getFond());
+    }
 
     drawPanelDroit(g);
     drawAideMessages(g);
@@ -420,7 +431,9 @@ public class Jeu extends Etats {
   @Override
   public void mouseClicked(MouseEvent e) {
     // Déléguer le clic à la vue grille
-    vueGrille.mouseClicked(e);
+    if (vueGrille != null) {
+      vueGrille.mouseClicked(e);
+    }
   }
 
   @Override
@@ -517,7 +530,7 @@ public class Jeu extends Etats {
     if (panelW < 80) return;
     int panelX = 20;
     int panelY = 100;
-    int panelH = h - 200;
+    int panelH = h - 250;
     int mx = e.getX();
     int my = e.getY();
     if (mx >= panelX && mx <= panelX + panelW && my >= panelY && my <= panelY + panelH) {
@@ -534,6 +547,7 @@ public class Jeu extends Etats {
     labelCandidatOn = LangManager.get("jeu.candidat.on");
     labelCandidatOff = LangManager.get("jeu.candidat.off");
     labelParametres = LangManager.get("menu.parametres");
+    labelTechniques = LangManager.get("menu.astuces");
     labelTimer = LangManager.get("jeu.timer");
     labelVictoireTitre = LangManager.get("jeu.victoire.titre");
     labelVictoireTexte = LangManager.get("jeu.victoire.texte");
@@ -557,6 +571,9 @@ public class Jeu extends Etats {
     }
     if (boutonParametres != null) {
       boutonParametres.setLabel(labelParametres);
+    }
+    if (boutonTechniques != null) {
+      boutonTechniques.setLabel(labelTechniques);
     }
     updateLabelModeCandidat();
   }
@@ -623,6 +640,8 @@ public class Jeu extends Etats {
     }
     boutonsNumeriques.clear();
 
+    if (grille == null) return;
+
     int max = Math.min(9, Math.max(1, grille.getTaille()));
     for (int i = 1; i <= max; i++) {
       final int valeur = i;
@@ -645,6 +664,7 @@ public class Jeu extends Etats {
 
   private void drawAideOverlay(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g2d.setRenderingHint(
         RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -666,15 +686,21 @@ public class Jeu extends Etats {
     g2d.setColor(getFond().getCouleurBordreBouton());
     g2d.drawRoundRect(boxX, boxY, boxW, boxH, 20, 20);
 
-    // Titre
-    g2d.setColor(getFond().getCouleurTexte());
+    // Bandeau accent en haut de la boîte (zone titre)
+    Color accent = getFond().getCouleurAccent();
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 45));
+    g2d.fillRoundRect(boxX, boxY, boxW, 58, 20, 20);
+    g2d.fillRect(boxX, boxY + 38, boxW, 20);
+
+    // Titre en couleur accent
+    g2d.setColor(accent);
     g2d.setFont(FONT_OVERLAY_TITRE);
     FontMetrics fmTitre = g2d.getFontMetrics();
     int titreX = boxX + (boxW - fmTitre.stringWidth(overlayAideTitre)) / 2;
     g2d.drawString(overlayAideTitre, titreX, boxY + 42);
 
-    // Séparateur
-    g2d.setColor(getFond().getCouleurBordreBouton());
+    // Séparateur accent
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 120));
     g2d.drawLine(boxX + 20, boxY + 55, boxX + boxW - 20, boxY + 55);
 
     // Texte (multi-lignes)
@@ -690,14 +716,14 @@ public class Jeu extends Etats {
       textY += fmTexte.getHeight() + 2;
     }
 
-    // Bouton fermer
+    // Bouton fermer avec bordure accent
     int btnW = 120;
     int btnH = 36;
     int btnX = boxX + (boxW - btnW) / 2;
     int btnY = boxY + boxH - 52;
     g2d.setColor(getFond().getCouleurFondCellule());
     g2d.fillRoundRect(btnX, btnY, btnW, btnH, 10, 10);
-    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 200));
     g2d.drawRoundRect(btnX, btnY, btnW, btnH, 10, 10);
     g2d.setColor(getFond().getCouleurTexte());
     g2d.setFont(FONT_LABEL);
@@ -785,7 +811,8 @@ public class Jeu extends Etats {
   }
 
   private List<String> getOverlayLines(FontMetrics fm, int maxWidth) {
-    if (!overlayAideTexte.equals(overlayAideTexteCacheKey) || maxWidth != overlayAideMaxWidthCache) {
+    if (!overlayAideTexte.equals(overlayAideTexteCacheKey)
+        || maxWidth != overlayAideMaxWidthCache) {
       overlayAideLinesCache = wrapText(overlayAideTexte, fm, maxWidth);
       overlayAideTexteCacheKey = overlayAideTexte;
       overlayAideMaxWidthCache = maxWidth;
@@ -803,10 +830,11 @@ public class Jeu extends Etats {
 
     int panelX = 20;
     int panelY = 100;
-    int panelH = h - 200;
+    int panelH = h - 250;
 
     Graphics2D g2d = (Graphics2D) g;
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
     // Fond du panneau
     g2d.setColor(getFond().getCouleurFondBouton());
@@ -819,7 +847,9 @@ public class Jeu extends Etats {
     FontMetrics fmTitre = g2d.getFontMetrics();
     g2d.setColor(getFond().getCouleurTexte());
     String panelLabel = LangManager.get("jeu.aide");
-    g2d.drawString(panelLabel, panelX + (panelW - fmTitre.stringWidth(panelLabel)) / 2,
+    g2d.drawString(
+        panelLabel,
+        panelX + (panelW - fmTitre.stringWidth(panelLabel)) / 2,
         panelY + 10 + fmTitre.getAscent());
     int headerH = 10 + fmTitre.getHeight() + 6;
     g2d.setColor(getFond().getCouleurBordreBouton());
@@ -840,8 +870,8 @@ public class Jeu extends Etats {
     int totalH = 0;
     for (int i = 0; i < messagesAide.size(); i++) {
       List<String> lines = wrapText(messagesAide.get(i).getTexte(), fmTexte, maxTextW);
-      cardHeights[i] = cardPad + titreLineH + 4 + 1 + 4
-          + lines.size() * (fmTexte.getHeight() + 2) + cardPad;
+      cardHeights[i] =
+          cardPad + titreLineH + 4 + 1 + 4 + lines.size() * (fmTexte.getHeight() + 2) + cardPad;
       if (i > 0) totalH += cardMargin;
       totalH += cardHeights[i];
     }
@@ -874,8 +904,8 @@ public class Jeu extends Etats {
         g2d.setFont(FONT_MSG_TITRE);
         fmTitre = g2d.getFontMetrics();
         g2d.setColor(getFond().getCouleurTexte());
-        g2d.drawString(messagesAide.get(i).getTitre(), cardX + cardPad,
-            drawY + cardPad + fmTitre.getAscent());
+        g2d.drawString(
+            messagesAide.get(i).getTitre(), cardX + cardPad, drawY + cardPad + fmTitre.getAscent());
 
         // Séparateur
         int sepY = drawY + cardPad + titreLineH + 4;
@@ -911,23 +941,44 @@ public class Jeu extends Etats {
     int panelX = Math.max(20, Constants.game_width - 250);
     int panelY = Math.max(130, (Constants.game_height - 360) / 2);
 
-    g.setColor(getFond().getCouleurFondBouton());
-    g.fillRoundRect(panelX - 8, panelY - 12, 230, 320, 18, 18);
-    g.setColor(getFond().getCouleurBordreBouton());
-    g.drawRoundRect(panelX - 8, panelY - 12, 230, 320, 18, 18);
+    // Hauteur calculée depuis les boutons réels : zone timer + 3 boutons d'action + rangées de
+    // boutons numériques + padding
+    int numRows = (boutonsNumeriques.size() + 1) / 2;
+    int panelH = 12 + 225 + numRows * (HAUTEUR_BOUTON_NUM + ESPACEMENT_NUM) + 20;
 
-    g.setColor(getFond().getCouleurTexte());
-    g.setFont(FONT_LABEL);
-    g.drawString(labelTimer, panelX, panelY + 14);
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-    g.setColor(getFond().getCouleurFondCellule());
-    g.fillRoundRect(panelX, panelY + 22, 120, 40, 10, 10);
-    g.setColor(getFond().getCouleurBordreBouton());
-    g.drawRoundRect(panelX, panelY + 22, 120, 40, 10, 10);
+    // Fond du panel
+    g2d.setColor(getFond().getCouleurFondBouton());
+    g2d.fillRoundRect(panelX - 8, panelY - 12, 230, panelH, 18, 18);
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawRoundRect(panelX - 8, panelY - 12, 230, panelH, 18, 18);
 
-    g.setColor(getFond().getCouleurTexte());
-    g.setFont(FONT_TIMER);
-    g.drawString(formatTimer(), panelX + 13, panelY + 50);
+    // Bandeau accent vertical à gauche du panel
+    Color accent = getFond().getCouleurAccent();
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 210));
+    g2d.fillRoundRect(panelX - 8, panelY - 12, 4, panelH, 4, 4);
+
+    // Label timer (en accent)
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 170));
+    g2d.setFont(FONT_LABEL);
+    g2d.drawString(labelTimer, panelX, panelY + 14);
+
+    // Affichage timer
+    g2d.setColor(getFond().getCouleurFondCellule());
+    g2d.fillRoundRect(panelX, panelY + 22, 120, 40, 10, 10);
+    g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 80));
+    g2d.drawRoundRect(panelX, panelY + 22, 120, 40, 10, 10);
+    g2d.setColor(getFond().getCouleurTexte());
+    g2d.setFont(FONT_TIMER);
+    g2d.drawString(formatTimer(), panelX + 13, panelY + 50);
+
+    // Séparateur avant les boutons d'action (Techniques, Paramètres, Mode Candidat)
+    g2d.setColor(getFond().getCouleurBordreBouton());
+    g2d.drawLine(panelX - 2, panelY + 65, panelX + 216, panelY + 65);
   }
 
   private String formatTimer() {
@@ -979,6 +1030,17 @@ public class Jeu extends Etats {
     }
   }
 
+  public void applyTimePenalty(int seconds) {
+    if (seconds <= 0) return;
+    long penaltyMs = seconds * 1000L;
+    if (timerPaused) {
+      pausedElapsedMillis += penaltyMs;
+    } else {
+      baseElapsedMillis += penaltyMs;
+    }
+    lastTimerSecond = -1;
+  }
+
   private void quitterNiveauVersMenu() {
     sauvegarderEtatNiveauCourant();
     pauseTimer();
@@ -1007,6 +1069,13 @@ public class Jeu extends Etats {
     pauseTimer();
     Parametres.setEtatSource(EtatJeu.GRILLE);
     EtatJeu.setEtatActuel(EtatJeu.PARAMETRES);
+  }
+
+  private void ouvrirTechniquesAides() {
+    sauvegarderEtatNiveauCourant();
+    pauseTimer();
+    Astuces.setEtatSource(EtatJeu.GRILLE);
+    EtatJeu.setEtatActuel(EtatJeu.ASTUCES);
   }
 
   public void sauvegarderEtatNiveauCourant() {

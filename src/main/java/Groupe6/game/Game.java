@@ -60,7 +60,7 @@ public class Game implements Runnable {
     private java.awt.image.BufferedImage frameBuffer = null;  // Double-buffer hors-écran
     
     // ====== JOUEUR COURANT ======
-    private String joueurCourant = "Invité";  // Nom/pseudo du joueur actif
+    private String joueurCourant = "Default";  // Nom/pseudo du joueur actif
 
     private Start start;
     private Menu menu;

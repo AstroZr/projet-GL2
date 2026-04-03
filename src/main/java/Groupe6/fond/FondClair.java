@@ -9,21 +9,21 @@ import java.awt.Color;
 public class FondClair extends AbstractFondDegrade {
 
     // Cellule & texte
-    private static final Color C_FOND_CELLULE        = new Color(0xFF, 0xFF, 0xFD);
-    private static final Color C_TEXTE               = new Color(0x1F, 0x29, 0x37); // ardoise foncé
+    private static final Color C_FOND_CELLULE        = new Color(0xF4, 0xED, 0xE0); // ivoire chaud
+    private static final Color C_TEXTE               = new Color(0x1A, 0x23, 0x30); // marine profond
     // Grille
-    private static final Color C_BORDURE_ZONE        = new Color(0x2A, 0x6E, 0xD6);
-    private static final Color C_ETIQUETTE_ZONE      = new Color(0x1D, 0x5E, 0xC4);
-    // Boutons — blanc cassé, bordure gris clair, hover subtil
-    private static final Color C_FOND_BOUTON         = new Color(0xF8, 0xF9, 0xFA, 210);
-    private static final Color C_FOND_BOUTON_SURVOL  = new Color(0xEB, 0xF3, 0xFF, 220);
-    private static final Color C_FOND_BOUTON_CLIC    = new Color(0xD6, 0xE8, 0xFF, 230);
-    private static final Color C_BORDURE_BOUTON      = new Color(0xB0, 0xC4, 0xDE);
-    // Inputs — fond très clair, focus avec bord bleu
-    private static final Color C_FOND_INPUT          = new Color(0xF0, 0xF4, 0xF8);
-    private static final Color C_FOND_INPUT_FOCUS    = new Color(0xFF, 0xFF, 0xFF);
-    private static final Color C_ACCENT              = new Color(0x2A, 0x6E, 0xD6);
-    private static final Color C_PLACEHOLDER         = new Color(0x9C, 0xA3, 0xAF);
+    private static final Color C_BORDURE_ZONE        = new Color(0x1F, 0x5C, 0xB8); // bleu vif
+    private static final Color C_ETIQUETTE_ZONE      = new Color(0x18, 0x4E, 0xA6); // bleu intense
+    // Boutons — crème chaud bien visible, bordure ardoise, états distincts
+    private static final Color C_FOND_BOUTON         = new Color(0xEC, 0xE5, 0xD8, 245); // crème chaud
+    private static final Color C_FOND_BOUTON_SURVOL  = new Color(0xCE, 0xE1, 0xF5, 250); // bleu doux
+    private static final Color C_FOND_BOUTON_CLIC    = new Color(0xB3, 0xCE, 0xEC, 255); // bleu moyen
+    private static final Color C_BORDURE_BOUTON      = new Color(0x52, 0x7E, 0xA8); // ardoise bleu
+    // Inputs
+    private static final Color C_FOND_INPUT          = new Color(0xE8, 0xE1, 0xD4); // crème foncé
+    private static final Color C_FOND_INPUT_FOCUS    = new Color(0xF4, 0xED, 0xE0); // ivoire chaud
+    private static final Color C_ACCENT              = new Color(0x1F, 0x5C, 0xB8); // bleu vif
+    private static final Color C_PLACEHOLDER         = new Color(0x72, 0x84, 0x95); // ardoise moyen
 
     private static final FondClair INSTANCE = new FondClair();
 
@@ -35,10 +35,10 @@ public class FondClair extends AbstractFondDegrade {
 
     @Override
     protected void chargerCouleurs() {
-        this.cielHaut    = new Color(0x72, 0xB7, 0xE0); // bleu ciel moyen
-        this.cielBas     = new Color(0xFD, 0xF0, 0xE0); // sable chaud
-        this.overlayColor = new Color(0xFF, 0xFF, 0xF8);
-        this.overlayAlpha = 0.12f;
+        this.cielHaut    = new Color(0x2E, 0x72, 0xB0); // bleu azur profond
+        this.cielBas     = new Color(0xE8, 0xC5, 0x6A); // ambre doré
+        this.overlayColor = new Color(0xFF, 0xF8, 0xEE);
+        this.overlayAlpha = 0.06f; // overlay minimal pour ne pas laver les couleurs
     }
 
     @Override public Color getCouleurFondCellule()        { return C_FOND_CELLULE; }

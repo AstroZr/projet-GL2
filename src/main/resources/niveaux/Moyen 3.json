@@ -1,0 +1,69 @@
+{
+  "id": "Moyen3",
+  "taille": 5,
+  "matriceCorrection": [
+    [1, 2, 3, 4, 5],
+    [3, 5, 4, 1, 2],
+    [5, 4, 2, 3, 1],
+    [2, 3, 1, 5, 4],
+    [4, 1, 5, 2, 3]
+  ],
+  "listeZones": [
+    { "valeurCible": 1, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 0, "colonne": 0}] },
+    { "valeurCible": 3, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 4, "colonne": 4}] },
+    {
+      "valeurCible": 6,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 0, "colonne": 1}, {"ligne": 0, "colonne": 2}]
+    },
+    {
+      "valeurCible": 40,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 0, "colonne": 3}, {"ligne": 0, "colonne": 4}, {"ligne": 1, "colonne": 4}]
+    },
+    {
+      "valeurCible": 15,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 1, "colonne": 0}, {"ligne": 1, "colonne": 1}]
+    },
+    {
+      "valeurCible": 8,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 1, "colonne": 2}, {"ligne": 2, "colonne": 2}, {"ligne": 1, "colonne": 3}]
+    },
+    {
+      "valeurCible": 20,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 2, "colonne": 0}, {"ligne": 2, "colonne": 1}]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "DIVISION",
+      "listeCellules": [{"ligne": 2, "colonne": 3}, {"ligne": 2, "colonne": 4}]
+    },
+    {
+      "valeurCible": 2,
+      "typeOperation": "DIVISION",
+      "listeCellules": [{"ligne": 3, "colonne": 0}, {"ligne": 4, "colonne": 0}]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "DIVISION",
+      "listeCellules": [{"ligne": 3, "colonne": 1}, {"ligne": 3, "colonne": 2}]
+    },
+    {
+      "valeurCible": 20,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne": 3, "colonne": 3}, {"ligne": 3, "colonne": 4}]
+    },
+    {
+      "valeurCible": 10,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [
+        {"ligne": 4, "colonne": 1},
+        {"ligne": 4, "colonne": 2},
+        {"ligne": 4, "colonne": 3}
+      ]
+    }
+  ]
+}
