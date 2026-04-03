@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class AideManager {
     private static AideManager instance = null;
@@ -38,33 +37,29 @@ public class AideManager {
     }
 
     public boolean call(Grille grille) {
-        Iterator<Aide> iteratorAide = this.aides.iterator();
-        Aide aide = this.aides.get(0);
-        while (iteratorAide.hasNext() && !(aide.check(grille) && !aide.isOverUsed())) {
-            aide = iteratorAide.next();
-        }
-
-        if (aide.check(grille) && !aide.isOverUsed()) {
-            this.cost = aide.load(grille, this.aides.size());
-            this.aide = aide;
-            return true;
-        } else {
-            boolean loop = true;
-            for (Aide a : aides) {
-                if (a.check(grille)) {
-                    if (!a.isOverUsed()) {
-                        loop = false;
-                    }
-                }
-            }
-
-            if (loop) {
-                for (Aide a : aides) {
-                    a.setNbUtilisation(0);
-                }
-                return call(grille);
+        for (Aide a : this.aides) {
+            if (a.check(grille) && !a.isOverUsed()) {
+                this.cost = a.load(grille, this.aides.size());
+                this.aide = a;
+                return true;
             }
         }
+
+        boolean hasOverusedValidAide = false;
+        for (Aide a : this.aides) {
+            if (a.check(grille)) {
+                hasOverusedValidAide = true;
+                break;
+            }
+        }
+
+        if (hasOverusedValidAide) {
+            for (Aide a : this.aides) {
+                a.setNbUtilisation(0);
+            }
+            return call(grille);
+        }
+
         return false;
     }
 
