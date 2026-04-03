@@ -222,15 +222,12 @@ public class Grille {
         this.taille = niveauBase.getTaille();
         if (sauvegarde != null) {
             initialiserDepuisSauvegarde(niveauBase, sauvegarde);
-            nettoyerSelection();
-            // NE PAS appeler validerGrille() ici car elle réinitialiserait les états d'erreur sauvegardés
-            // À la place, calculer simplement estComplete avec les états actuels
-            calculerEtatComplete();
         } else {
             initialiserDepuisNiveau(niveauBase);
-            nettoyerSelection();
-            validerGrille();
         }
+
+        nettoyerSelection();
+        validerGrille();
     }
 
     /**
@@ -284,19 +281,29 @@ public class Grille {
 
     /**
      * Relie les zones aux cellules sauvegardées.
+     * IMPORTANT: remplace les cellules dans les zones par les cellules sauvegardées,
+     * sinon validerGrille() modifierait les mauvaises cellules.
      */
     private void relierZonesAuxCellulesSauvegardees() {
         celluleMatriceLock.readLock().lock();
-        zonesLock.readLock().lock();
+        zonesLock.writeLock().lock();
         try {
             for (ZoneCalcul zone : listeZones) {
+                // Créer une nouvelle liste avec les cellules sauvegardées
+                List<Cellule> nouvelleListeCellules = new ArrayList<>();
                 for (Cellule celluleZone : zone.getListeCellules()) {
-                    Cellule celluleSauvegardee = matriceCellules[celluleZone.getLigne()][celluleZone.getColonne()];
+                    int ligne = celluleZone.getLigne();
+                    int colonne = celluleZone.getColonne();
+                    Cellule celluleSauvegardee = matriceCellules[ligne][colonne];
+                    nouvelleListeCellules.add(celluleSauvegardee);
                     celluleSauvegardee.setZoneCalcul(zone);
                 }
+                // Remplacer la liste des cellules dans la zone
+                zone.getListeCellules().clear();
+                zone.getListeCellules().addAll(nouvelleListeCellules);
             }
         } finally {
-            zonesLock.readLock().unlock();
+            zonesLock.writeLock().unlock();
             celluleMatriceLock.readLock().unlock();
         }
     }
@@ -560,35 +567,6 @@ public class Grille {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * Calcule simplement l'état de complétude après le chargement d'une sauvegarde.
-     * Cette méthode NE réinitialise PAS les états d'erreur (contrairement à validerGrille).
-     * Elle préserve les états d'erreur sauvegardés et calcule juste estComplete.
-     */
-    private void calculerEtatComplete() {
-        celluleMatriceLock.readLock().lock();
-        try {
-            estComplete = true;
-
-            // Vérifier si la grille est remplie
-            for (int i = 0; i < taille; i++) {
-                for (int j = 0; j < taille; j++) {
-                    if (matriceCellules[i][j].estVide()) {
-                        estComplete = false;
-                        return;
-                    }
-                }
-            }
-
-            // Si on a des erreurs, le jeu n'est pas fini
-            if (aDesErreurs()) {
-                estComplete = false;
-            }
-        } finally {
-            celluleMatriceLock.readLock().unlock();
-        }
     }
 
     /**
