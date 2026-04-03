@@ -29,9 +29,12 @@ public class UniqueCacheeLigne extends AideAbstract {
     }
 
     @Override
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
+
+    @Override
     public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3)
-            return false;
         this.cibleLigne = -1;
         this.cibleColonne = -1;
         int taille = grille.getTaille();

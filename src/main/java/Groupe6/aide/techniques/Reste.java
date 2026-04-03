@@ -25,9 +25,12 @@ public class Reste extends AideAbstract {
     }
 
     @Override
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
+
+    @Override
     public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3)
-            return false;
         this.index = -1;
 
         int taille = grille.getTaille();
