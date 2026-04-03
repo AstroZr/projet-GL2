@@ -5,7 +5,7 @@ import Groupe6.aide.techniques.Singleton;
 import Groupe6.aide.techniques.UniqueCacheeLigne;
 import Groupe6.aide.techniques.UniqueCacheeColonne;
 import Groupe6.aide.techniques.BlocageUnique;
-import Groupe6.aide.techniques.PossibiliteUnique;
+import Groupe6.aide.techniques.CandidatUnique;
 import Groupe6.models.Grille;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class AideManager {
         this.aides.add(new UniqueCacheeLigne());
         this.aides.add(new UniqueCacheeColonne());
         this.aides.add(new BlocageUnique());
-        this.aides.add(new PossibiliteUnique());
+        this.aides.add(new CandidatUnique());
     }
 
     public static AideManager getInstance() {
@@ -43,24 +43,23 @@ public class AideManager {
         while (iteratorAide.hasNext() && !(aide.check(grille) && !aide.isOverUsed())) {
             aide = iteratorAide.next();
         }
-        
+
         if (aide.check(grille) && !aide.isOverUsed()) {
             this.cost = aide.load(grille, this.aides.size());
             this.aide = aide;
             return true;
-        }
-        else{
+        } else {
             boolean loop = true;
-            for (Aide a : aides){
-                if(a.check(grille)){
-                    if (!a.isOverUsed()){
+            for (Aide a : aides) {
+                if (a.check(grille)) {
+                    if (!a.isOverUsed()) {
                         loop = false;
-                    }                   
+                    }
                 }
             }
 
-            if (loop){
-                for (Aide a : aides){
+            if (loop) {
+                for (Aide a : aides) {
                     a.setNbUtilisation(0);
                 }
                 return call(grille);
