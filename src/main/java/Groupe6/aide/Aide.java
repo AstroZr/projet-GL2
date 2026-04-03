@@ -11,6 +11,7 @@ public interface Aide {
     boolean check(Grille grille);
     String getTitre();
     String getDescription();
+    boolean isOverUsed();
 
     // Must be called after check awnser true
     int load(Grille grille, int nbAides);

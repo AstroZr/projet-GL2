@@ -9,27 +9,32 @@ import Groupe6.models.Grille;
 import Groupe6.models.Cellule;
 import Groupe6.utilz.LangManager;
 
-public class CandidatUniqueColonne extends AideAbstract {
+public class UniqueCacheeColonne extends AideAbstract {
     private int cibleLigne = -1;
     private int cibleColonne = -1;
 
-    public CandidatUniqueColonne() {
+    public UniqueCacheeColonne() {
         super(5);
         refreshTexts();
     }
 
     private void refreshTexts() {
-        this.titre = LangManager.get("aide.candidatuniquecolonne.titre");
-        this.description = LangManager.get("aide.candidatuniquecolonne.description");
+        this.titre = LangManager.get("aide.uniquecacheecolonne.titre");
+        this.description = LangManager.get("aide.uniquecacheecolonne.description");
     }
 
     @Override
-    public int getMaxUtilisation() { return 3; }
+    public int getMaxUtilisation() {
+        return 3;
+    }
+
+    @Override
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
 
     @Override
     public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3)
-            return false;
         this.cibleLigne = -1;
         this.cibleColonne = -1;
         int taille = grille.getTaille();

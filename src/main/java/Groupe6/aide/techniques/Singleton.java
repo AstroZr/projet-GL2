@@ -30,11 +30,12 @@ public class Singleton extends AideAbstract {
     public int getMaxUtilisation() { return 3; }
 
     @Override
-    public boolean check(Grille grille) {
-        if (this.nbUtilisation >= 3) {
-            return false;
-        }
+    public boolean isOverUsed(){
+        return (this.nbUtilisation >= 3);
+    }
 
+    @Override
+    public boolean check(Grille grille) {
         List<Cellule> cellules = grille.getListeCellules();
 
         Iterator<Cellule> iterator = cellules.iterator();
