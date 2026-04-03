@@ -1,0 +1,170 @@
+{
+    "id": "exemple_Singleton",
+    "taille": 4,
+    "listeZones": [
+        {
+            "valeurCible": 1,
+            "typeOperation": "FIXE",
+            "listeCellules": [
+                {
+                    "ligne": 0,
+                    "colonne": 0
+                }
+            ]
+        },
+        {
+            "valeurCible": 9,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 0,
+                    "colonne": 1
+                },
+                {
+                    "ligne": 0,
+                    "colonne": 2
+                },
+                {
+                    "ligne": 0,
+                    "colonne": 3
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 1,
+                    "colonne": 0
+                },
+                {
+                    "ligne": 1,
+                    "colonne": 1
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 1,
+                    "colonne": 2
+                },
+                {
+                    "ligne": 1,
+                    "colonne": 3
+                }
+            ]
+        },
+        {
+            "valeurCible": 7,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 2,
+                    "colonne": 0
+                },
+                {
+                    "ligne": 3,
+                    "colonne": 0
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 2,
+                    "colonne": 1
+                },
+                {
+                    "ligne": 3,
+                    "colonne": 1
+                }
+            ]
+        },
+        {
+            "valeurCible": 3,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 2,
+                    "colonne": 2
+                },
+                {
+                    "ligne": 3,
+                    "colonne": 2
+                }
+            ]
+        },
+        {
+            "valeurCible": 5,
+            "typeOperation": "ADDITION",
+            "listeCellules": [
+                {
+                    "ligne": 2,
+                    "colonne": 3
+                },
+                {
+                    "ligne": 3,
+                    "colonne": 3
+                }
+            ]
+        }
+    ],
+    "matricePreRemplie": [
+        [
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null
+        ]
+    ],
+    "matriceCorrection": [
+        [
+            1,
+            2,
+            3,
+            4
+        ],
+        [
+            2,
+            3,
+            4,
+            1
+        ],
+        [
+            3,
+            4,
+            1,
+            2
+        ],
+        [
+            4,
+            1,
+            2,
+            3
+        ]
+    ]
+}
