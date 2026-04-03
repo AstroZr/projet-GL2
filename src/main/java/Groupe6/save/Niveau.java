@@ -7,43 +7,60 @@ import Groupe6.models.ZoneCalcul;
 
 /**
  * Modèle de données pour un niveau/puzzle CalcuDoku.
- * 
- * Resp onsabilités:
+ * * Resp onsabilités:
  * - Mémoriser l'ennoncé du puzzle (zones, cellules poussière, solution)
- * - Êatre chargé à partir de JSON (saveGame/niveaux/facile1.json, etc.)
- * - Êatre stocké en mémoire avec référence partagée avec Grille
- * 
- * Contenu:
+ * - Être chargé à partir de JSON (saveGame/niveaux/facile1.json, etc.)
+ * - Être stocké en mémoire avec référence partagée avec Grille
+ * * Contenu:
  * - id: identifiant unique ("facile1", "moyen2", "difficile3", etc.)
  * - taille: dimension N de la grille N×N (généralement 4, 5 ou 6)
  * - matriceCellules: grille avec cellules poussière (values = 0 ou
  * pré-remplies)
  * - listeZones: contraintes mathématiques (zones de calcul)
  * - matriceCorrection: grille solution (pour vérification)
- * 
- * Sérialisation JSON:
+ * * Sérialisation JSON:
  * - Chargé par SaveManager.chargerNiveau(idNiveau)
  * - Contient toute l'information de base du puzzle
  */
 public class Niveau {
 
     // ====== IDÉNTIFICATION ======
-    private String id; // Identifiant unique du niveau ("facile1", "moyen2", etc.)
+    /** Identifiant unique du niveau ("facile1", "moyen2", etc.). */
+    private String id;
 
     // ====== DIMENSIONS ======
-    private int taille; // Dimension N de la grille N×N
+    /** Dimension N de la grille N×N. */
+    private int taille;
 
     // ====== ÉNONCÉ ======
-    private Cellule[][] matriceCellules; // Grille avec cellules poussière (puzzle à résoudre)
-    private List<ZoneCalcul> listeZones; // Zones de calcul (contraintes mathématiques)
+    /** Grille avec cellules poussière (puzzle à résoudre). */
+    private Cellule[][] matriceCellules;
+
+    /** Zones de calcul (contraintes mathématiques). */
+    private List<ZoneCalcul> listeZones;
 
     // ====== SOLUTION ======
-    private int[][] matriceCorrection; // Grille solution (pour vérification/correction)
-    private int[][] matricePreRemplie; // Grille pré-remplie (pour aide/ajouter automatiquement des chiffres)
+    /** Grille solution (pour vérification/correction). */
+    private int[][] matriceCorrection;
 
+    /** Grille pré-remplie (pour aide/ajouter automatiquement des chiffres). */
+    private int[][] matricePreRemplie;
+
+    /**
+     * Constructeur par défaut nécessaire pour la désérialisation GSON.
+     */
     public Niveau() {
     }
 
+    /**
+     * Constructeur complet pour initialiser un niveau.
+     * * @param id                Identifiant unique du niveau.
+     * @param taille            Taille de la grille (N).
+     * @param matriceCellules   Matrice des cellules initiales.
+     * @param listeZones        Liste des zones de calcul.
+     * @param matriceCorrection Matrice contenant la solution attendue.
+     * @param matricePreRemplie Matrice contenant les chiffres pré-remplis pour l'aide.
+     */
     public Niveau(String id, int taille, Cellule[][] matriceCellules, List<ZoneCalcul> listeZones,
             int[][] matriceCorrection, int[][] matricePreRemplie) {
         this.id = id;
@@ -54,42 +71,72 @@ public class Niveau {
         this.matricePreRemplie = matricePreRemplie;
     }
 
+    /**
+     * @return L'identifiant du niveau.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * @param id Le nouvel identifiant du niveau.
+     */
     public void setId(String id) {
         this.id = id;
     }
 
+    /**
+     * @return La taille de la grille.
+     */
     public int getTaille() {
         return taille;
     }
 
+    /**
+     * @param taille La nouvelle taille de la grille.
+     */
     public void setTaille(int taille) {
         this.taille = taille;
     }
 
+    /**
+     * @return La matrice des cellules du puzzle.
+     */
     public Cellule[][] getMatriceCellules() {
         return matriceCellules;
     }
 
+    /**
+     * @param matriceCellules La nouvelle matrice de cellules.
+     */
     public void setMatriceCellules(Cellule[][] matriceCellules) {
         this.matriceCellules = matriceCellules;
     }
 
+    /**
+     * @return La liste des zones de calcul.
+     */
     public List<ZoneCalcul> getListeZones() {
         return listeZones;
     }
 
+    /**
+     * @param listeZones La nouvelle liste de zones de calcul.
+     */
     public void setListeZones(List<ZoneCalcul> listeZones) {
         this.listeZones = listeZones;
     }
 
+    /**
+     * @return La matrice de correction.
+     */
     public int[][] getMatriceCorrection() {
         return matriceCorrection;
     }
 
+    /**
+     * @return La matrice pré-remplie pour l'aide.
+     */
     public int[][] getMatricePreRemplie() {
         return matricePreRemplie;
     }
