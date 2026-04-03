@@ -338,29 +338,52 @@ public class Jeu extends Etats {
 
   @Override
   protected void applyLayout(int w, int h) {
-    // Repositionner le bouton retour en fonction de la taille de l'écran
-    int x = 50;
-    int cy = h - 130; // 130px du bas
+    int tailleGrille = (int) (h / 1.5f);
+    int gridOffsetY = (h - tailleGrille) / 2;
+    int cy = Math.min(h - 90, gridOffsetY + tailleGrille + 44);
 
-    if (boutons.size() >= 6) {
+    if (boutons.size() >= 8) {
+      int largeurRangeeBas =
+          LARGEUR_BOUTON
+              + ESPACEMENT_BOUTONS
+              + LARGEUR_BOUTON
+              + ESPACEMENT_BOUTONS
+              + LARGEUR_BOUTON_UNDO
+              + ESPACEMENT_BOUTONS
+              + LARGEUR_BOUTON_UNDO
+              + ESPACEMENT_BOUTONS
+              + LARGEUR_BOUTON;
+      int x = Math.max(20, (w - largeurRangeeBas) / 2);
+
+      // Ligne du bas : Retour, Aide, Undo, Redo, Abandon
+      boutons.get(0).setLargeur(LARGEUR_BOUTON);
+      boutons.get(0).setHauteur(HAUTEUR_BOUTON);
       boutons.get(0).setX(x);
       boutons.get(0).setY(cy);
 
       int aideX = x + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
+      boutons.get(1).setLargeur(LARGEUR_BOUTON);
+      boutons.get(1).setHauteur(HAUTEUR_BOUTON);
       boutons.get(1).setX(aideX);
       boutons.get(1).setY(cy);
 
       int undoX = aideX + LARGEUR_BOUTON + ESPACEMENT_BOUTONS;
+      boutons.get(2).setLargeur(LARGEUR_BOUTON_UNDO);
+      boutons.get(2).setHauteur(HAUTEUR_BOUTON);
       boutons.get(2).setX(undoX);
       boutons.get(2).setY(cy);
 
       int redoX = undoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
+      boutons.get(3).setLargeur(LARGEUR_BOUTON_UNDO);
+      boutons.get(3).setHauteur(HAUTEUR_BOUTON);
       boutons.get(3).setX(redoX);
       boutons.get(3).setY(cy);
 
-      int candidatX = redoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
-      boutons.get(4).setX(candidatX);
-      boutons.get(4).setY(cy);
+      int abandonX = redoX + LARGEUR_BOUTON_UNDO + ESPACEMENT_BOUTONS;
+      boutons.get(6).setX(abandonX);
+      boutons.get(6).setY(cy);
+      boutons.get(6).setLargeur(LARGEUR_BOUTON);
+      boutons.get(6).setHauteur(HAUTEUR_BOUTON);
 
       int panelX = Math.max(20, w - 250);
       int panelY = Math.max(130, (h - 360) / 2);
@@ -376,11 +399,11 @@ public class Jeu extends Etats {
       boutons.get(5).setLargeur(200);
       boutons.get(5).setHauteur(HAUTEUR_BOUTON);
 
-      // Bouton Techniques d'aides
-      boutons.get(6).setX(panelX);
-      boutons.get(6).setY(panelY + 70);
-      boutons.get(6).setLargeur(200);
-      boutons.get(6).setHauteur(HAUTEUR_BOUTON);
+      // Bouton Techniques d'aides (dans le panel droit)
+      boutons.get(7).setX(panelX);
+      boutons.get(7).setY(panelY + 70);
+      boutons.get(7).setLargeur(200);
+      boutons.get(7).setHauteur(HAUTEUR_BOUTON);
     }
 
     int panelX = Math.max(20, w - 250);
