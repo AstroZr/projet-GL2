@@ -71,6 +71,10 @@ public class Grille {
     // ====== ÉTAT ======
     private boolean estComplete; // true si grille complète et valide
 
+    // ====== BOUTON ABANDON ======
+    private boolean solutionAffichee = false; 
+    public boolean isSolutionAffichee() { return solutionAffichee; }
+    
     // ====== THREAD-SAFE HELPER METHODS ======
 
     /**
@@ -624,6 +628,24 @@ public class Grille {
                 matriceCellules[ligne][col].setEstErreurDuplique(true);
             }
         }
+    }
+
+    // Affiche la solution complète de la grille
+    public void afficherSolution(int[][] correction){
+        celluleMatriceLock.writeLock().lock();
+        try{
+            for(int i = 0; i < taille; i++){
+                for(int j = 0; j < taille; j++){
+                    matriceCellules[i][j].setValeur(correction[i][j]);
+                    matriceCellules[i][j].getListeCandidat().clear();
+                }
+            }
+            solutionAffichee = true;
+        } finally{
+            celluleMatriceLock.writeLock().unlock();
+        }
+        validerGrille();
+        notifierObservateurs();
     }
 
     /**

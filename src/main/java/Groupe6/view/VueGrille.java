@@ -46,7 +46,8 @@ public class VueGrille {
     // ====== COULEURS PRÉ-ALLOUÉES ======
     private static final Color COULEUR_SELECTION = new Color(100, 150, 255, 150);  // Bleu semi-transparent pour cellule sélectionnée
     private static final Color COULEUR_ERREUR = new Color(255, 100, 100, 180);     // Rouge semi-transparent pour erreur
-    
+    private static final Color COULEUR_SOLUTION = new Color(120, 200, 120, 160);
+
     // ====== FONTS PRÉ-ALLOUÉES ======
     private static final Font FONT_VALEUR = FontCache.get("Arial", Font.BOLD, 32);      // Chiffres dans les cellules
     private static final Font FONT_ZONE = FontCache.get("Arial", Font.BOLD, 14);        // Label zone (target + opération)
@@ -150,7 +151,9 @@ public class VueGrille {
      */
     private void dessinerFondCellule(Graphics2D g2d, Cellule cellule, int x, int y, int tailleCase, Fond fond) {
         boolean erreurVisible = grille.isAfficherErreurDouble() && cellule.estErreurDuplique();
-        if (erreurVisible || !cellule.estValide()) {
+        if(grille.isSolutionAffichee()){
+            g2d.setColor(COULEUR_SOLUTION);
+        } else if (erreurVisible || !cellule.estValide()) {
             g2d.setColor(COULEUR_ERREUR);
         } else if (cellule.estSelectionnee()) {
             g2d.setColor(COULEUR_SELECTION);
