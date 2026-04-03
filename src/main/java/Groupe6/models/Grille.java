@@ -153,6 +153,7 @@ public class Grille {
         if (niveauBase == null) {
             this.taille = 4;
             this.matriceCellules = new Cellule[4][4];
+            initialiserCellulesVides();
             this.listeZones = new ArrayList<>();
             this.matriceCorrection = new int[4][4];
             this.estComplete = false;
@@ -202,6 +203,7 @@ public class Grille {
         if (niveauBase == null) {
             this.taille = 4;
             this.matriceCellules = new Cellule[4][4];
+            initialiserCellulesVides();
             this.listeZones = new ArrayList<>();
             this.matriceCorrection = new int[4][4];
             this.estComplete = false;

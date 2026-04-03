@@ -361,7 +361,8 @@ public class SaveManager {
                     for (int i = 0; i < taille; i++) {
                         JsonArray ligneJson = jsonPreRemplie.get(i).getAsJsonArray();
                         for (int j = 0; j < taille; j++) {
-                            matricePreRemplie[i][j] = ligneJson.get(j).getAsInt();
+                            JsonElement el = ligneJson.get(j);
+                            matricePreRemplie[i][j] = el.isJsonNull() ? 0 : el.getAsInt();
                         }
                     }
                 }

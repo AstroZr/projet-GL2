@@ -8,6 +8,8 @@ import Groupe6.aide.TypeEffect;
 import Groupe6.models.Grille;
 import Groupe6.models.Cellule;
 import Groupe6.models.ZoneCalcul;
+import Groupe6.save.Niveau;
+import Groupe6.save.SaveManager;
 import Groupe6.utilz.LangManager;
 
 import java.util.ArrayList;
@@ -149,5 +151,28 @@ public class BlocageUnique extends AideAbstract {
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
         }
+    }
+
+    /**
+     * Génère une grille d'exemple de taille 4 pour voir la technique du Reste.
+     * 
+     * @return Une grille initialisée d'exemple pour le Reste.
+     */
+    public Grille getGrilleExemple() {
+        Niveau niveauExemple = SaveManager.chargerNiveau("exemple_BlocageUnique");
+
+        if (niveauExemple == null) {
+            return new Grille(null);
+        }
+
+        Grille grille = new Grille(niveauExemple);
+
+        // On utilise le pre-remplissage pour avoir des chiffres
+        grille.autoRemplissage();
+
+        this.nbUtilisation = -1;
+        load(grille, 0);
+
+        return grille;
     }
 }
