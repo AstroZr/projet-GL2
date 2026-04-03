@@ -73,6 +73,10 @@ public class Grille {
     // ====== ÉTAT ======
     private boolean estComplete; // true si grille complète et valide
 
+    // ====== BOUTON ABANDON ======
+    private boolean solutionAffichee = false; 
+    public boolean isSolutionAffichee() { return solutionAffichee; }
+    
     // ====== THREAD-SAFE HELPER METHODS ======
 
     /**
@@ -147,7 +151,7 @@ public class Grille {
         this.idNiveau = niveauBase != null ? niveauBase.getId() : null;
 
         // Valeurs par défaut au lieu de charger les paramètres de l'utilisateur
-        this.afficherPossibilites = true;
+        this.afficherPossibilites = false;
         this.afficherErreurDouble = false;
 
         if (niveauBase == null) {
@@ -305,7 +309,7 @@ public class Grille {
             this.afficherErreurDouble = params.isAfficherErreurDouble();
         } else {
             // Valeurs par défaut
-            this.afficherPossibilites = true;
+            this.afficherPossibilites = false;
             this.afficherErreurDouble = false;
         }
     }
@@ -581,9 +585,11 @@ public class Grille {
      * @param ligne La ligne à vérifier
      */
     private void verifierDoublonsLigne(int ligne) {
+        /*
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
+        */
 
         int[] comptes = new int[taille + 1];
 
@@ -609,9 +615,12 @@ public class Grille {
      * @param col La colonne à vérifier
      */
     private void verifierDoublonsColonne(int col) {
+        
+        /*
         if (!afficherErreurDouble) {
             return; // Ne pas marquer les doublons s'ils sont désactivés
         }
+        */
 
         int[] comptes = new int[taille + 1];
 
@@ -629,6 +638,24 @@ public class Grille {
                 matriceCellules[ligne][col].setEstErreurDuplique(true);
             }
         }
+    }
+
+    // Affiche la solution complète de la grille
+    public void afficherSolution(int[][] correction){
+        celluleMatriceLock.writeLock().lock();
+        try{
+            for(int i = 0; i < taille; i++){
+                for(int j = 0; j < taille; j++){
+                    matriceCellules[i][j].setValeur(correction[i][j]);
+                    matriceCellules[i][j].getListeCandidat().clear();
+                }
+            }
+            solutionAffichee = true;
+        } finally{
+            celluleMatriceLock.writeLock().unlock();
+        }
+        validerGrille();
+        notifierObservateurs();
     }
 
     /**

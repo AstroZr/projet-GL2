@@ -75,6 +75,7 @@ public class Menu extends Etats {
     @Override
     public void update() {
       getFond().update();
+      Astuces.setEtatSource(EtatJeu.MENU);
     }
 
     @Override

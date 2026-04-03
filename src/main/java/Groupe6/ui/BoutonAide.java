@@ -78,6 +78,7 @@ public class BoutonAide extends Bouton {
             historiqueAides.add(copierVecteur(aideManager.saveVector()));
             indexAide++;
             grille.enregistrerUsageAide();
+            jeu.applyTimePenalty(aideManager.getCost());
         }
 
         grille.notifierObservateurs();

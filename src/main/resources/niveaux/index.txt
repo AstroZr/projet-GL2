@@ -1,10 +1,12 @@
-test
-facile1
-facile2
-facile3
-facile4
-moyen1
-moyen2
-moyen3
-test6
-test7
+Facile 1
+Facile 2
+Facile 3
+Facile 4
+Moyen 1
+Moyen 2
+Moyen 3
+Moyen 4
+Difficile 1
+Difficile 2
+Difficile 3
+Difficile 4

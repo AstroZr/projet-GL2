@@ -314,8 +314,9 @@ public class Parametres extends Etats {
     }
 
     // Dropdowns en dernier pour qu'ils s'affichent au-dessus de tout
-    dessinerDropdown(g);
+    // Thème en premier, Langue en dernier pour que les options Langue s'affichent au-dessus du label Thème
     dessinerDropdownThemes(g);
+    dessinerDropdown(g);
   }
 
   private void dessinerSectionLabel(Graphics2D g2d, int x, int y, int w) {
@@ -1062,7 +1063,7 @@ public class Parametres extends Etats {
 
   public void sauvegarderProfilActuel() {
     String pseudo = game != null ? game.getJoueurCourant() : null;
-    if (pseudo == null || pseudo.trim().isEmpty()) {
+    if (pseudo == null || pseudo.trim().isEmpty() || pseudo == "Default") {
       return;
     }
 
