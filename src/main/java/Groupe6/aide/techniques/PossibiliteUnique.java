@@ -40,43 +40,40 @@ public class PossibiliteUnique extends AideAbstract {
                 valeurs.add(grid[ligneCellule][colonne].getValeur());
             }
         }
-       if ( (valeurs.size() == gridSize)){
-        System.out.println(valeurs);
-       }
-       System.out.println("test");System.out.print(ligneCellule);System.out.print(colonneCellule);
         return (valeurs.size() == gridSize); // beacause of the 0 is in the list
     }
 
     @Override
     public boolean check(Grille grille) {
+        if (this.nbUtilisation >= 3)
+            return false;
+        
         Cellule[][] grid = grille.getMatriceCellules();
         int gridSize = grille.getTaille();
         boolean finded = false;
 
-        for (ligneCellule = 0; ligneCellule < gridSize && !finded; ligneCellule++){
-            System.out.print("call");
-            for (colonneCellule = 0; colonneCellule < gridSize && !finded; colonneCellule++){
-                System.out.print(ligneCellule);System.out.print(colonneCellule);
-                if (grid[ligneCellule][colonneCellule].getValeur() == 0){
-                    
-                    finded = checkCellule(grid, gridSize, ligneCellule, colonneCellule);
-
+        int ligne = 0;
+        int colonne = 0;
+        for (ligne = 0; ligne < gridSize && !finded; ligne++){
+            for (colonne = 0; colonne < gridSize && !finded; colonne++){
+                if (grid[ligne][colonne].getValeur() == 0){
+                    finded = checkCellule(grid, gridSize, ligne, colonne);
                 }
             }
         }
 
-
         if (finded){
-            System.out.println(ligneCellule);
-            System.out.println(colonneCellule);
+            this.ligneCellule = ligne - 1;
+            this.colonneCellule = colonne - 1;
+            return true;
         }
-        return (finded) ? true : false;
+        return false;
     }
 
     @Override
     public int load(Grille grille, int nbAides) {
         refreshTexts();
-        int taille = grille.getTaille(); // par sécurité
+        int taille = grille.getTaille();
 
         this.aideVisuel = new AideVisuel();
 
@@ -88,8 +85,8 @@ public class PossibiliteUnique extends AideAbstract {
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.possibiliteunique.colonne") + " " + String.valueOf(colonneCellule) + " " +
-                        LangManager.get("aide.possibiliteunique.ligne") + " " + String.valueOf(ligneCellule) + " !");
+                        this.description + " " + LangManager.get("aide.possibiliteunique.colonne") + " " + String.valueOf(colonneCellule + 1) + " " +
+                        LangManager.get("aide.possibiliteunique.ligne") + " " + String.valueOf(ligneCellule + 1) + " !");
                 
                 for (int colonne = 0; colonne < taille; colonne++){
                     this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligneCellule, colonne, new String()));
@@ -104,8 +101,8 @@ public class PossibiliteUnique extends AideAbstract {
 
             default:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.possibiliteunique.colonne") + " " + String.valueOf(colonneCellule) + " " +
-                        LangManager.get("aide.possibiliteunique.ligne") + " " + String.valueOf(ligneCellule) + " !");
+                        this.description + " " + LangManager.get("aide.possibiliteunique.colonne") + " " + String.valueOf(colonneCellule + 1) + " " +
+                        LangManager.get("aide.possibiliteunique.ligne") + " " + String.valueOf(ligneCellule + 1) + " !");
                 
                 this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligneCellule, colonneCellule, new String()));
                 
