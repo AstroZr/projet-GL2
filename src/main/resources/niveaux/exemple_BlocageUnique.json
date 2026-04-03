@@ -3,7 +3,7 @@
   "taille": 4,
   "listeZones": [
     {
-      "valeurCible": 25,
+      "valeurCible": 24,
       "typeOperation": "MULTIPLICATION",
       "listeCellules": [
         {
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "valeurCible": 8,
+      "valeurCible": 2,
       "typeOperation": "MULTIPLICATION",
       "listeCellules": [
         {
