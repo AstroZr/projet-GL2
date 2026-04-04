@@ -3,55 +3,60 @@
   "taille": 4,
   "listeZones": [
     {
+      "valeurCible": 2,
+      "typeOperation": "AUCUNE",
+      "listeCellules": [{"ligne":0,"colonne":0}]
+    },
+    {
       "valeurCible": 1,
       "typeOperation": "AUCUNE",
-      "listeCellules": [{ "ligne": 0, "colonne": 0 }]
-    },
-    {
-      "valeurCible": 1,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 0, "colonne": 1 }, { "ligne": 0, "colonne": 2 }]
-    },
-    {
-      "valeurCible": 1,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 1, "colonne": 0 }, { "ligne": 2, "colonne": 0 }]
-    },
-    {
-      "valeurCible": 0,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 1, "colonne": 1 }, { "ligne": 1, "colonne": 2 }, { "ligne": 1, "colonne": 3 }]
-    },
-    {
-      "valeurCible": 3,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 2, "colonne": 1 }, { "ligne": 2, "colonne": 2 }]
-    },
-    {
-      "valeurCible": 1,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 2, "colonne": 3 }, { "ligne": 3, "colonne": 3 }]
-    },
-    {
-      "valeurCible": 3,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{ "ligne": 3, "colonne": 0 }, { "ligne": 3, "colonne": 1 }]
+      "listeCellules": [{"ligne":1,"colonne":2}]
     },
     {
       "valeurCible": 2,
       "typeOperation": "AUCUNE",
-      "listeCellules": [{ "ligne": 3, "colonne": 2 }]
+      "listeCellules": [{"ligne":2,"colonne":1}]
     },
     {
-      "valeurCible": 4,
+      "valeurCible": 1,
       "typeOperation": "AUCUNE",
-      "listeCellules": [{ "ligne": 0, "colonne": 3 }]
+      "listeCellules": [{"ligne":3,"colonne":3}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":3,"colonne":0}, {"ligne":3,"colonne":1}]
+    },
+    {
+      "valeurCible": 2,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":1,"colonne":3}, {"ligne":2,"colonne":3}]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":1,"colonne":0}, {"ligne":2,"colonne":0}]
+    },
+    {
+      "valeurCible": 2,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":0,"colonne":1}, {"ligne":1,"colonne":1}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":2,"colonne":2}, {"ligne":3,"colonne":2}]
+    },
+    {
+      "valeurCible": 1,
+      "typeOperation": "SOUSTRACTION",
+      "listeCellules": [{"ligne":0,"colonne":2}, {"ligne":0,"colonne":3}]
     }
   ],
   "matriceCorrection": [
+    [2, 1, 4, 3],
+    [4, 3, 1, 2],
     [1, 2, 3, 4],
-    [2, 3, 4, 1],
-    [3, 4, 1, 2],
-    [4, 1, 2, 3]
+    [3, 4, 2, 1]
   ]
 }

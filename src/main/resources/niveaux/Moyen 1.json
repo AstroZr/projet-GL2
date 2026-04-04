@@ -11,6 +11,7 @@
   "listeZones": [
     { "valeurCible": 5, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 0, "colonne": 0}] },
     { "valeurCible": 5, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 4, "colonne": 4}] },
+    { "valeurCible": 3, "typeOperation": "AUCUNE", "listeCellules": [{"ligne": 3, "colonne": 0}] },
     {
       "valeurCible": 7,
       "typeOperation": "ADDITION",
@@ -55,20 +56,16 @@
       "valeurCible": 6,
       "typeOperation": "ADDITION",
       "listeCellules": [
-        {"ligne": 3, "colonne": 0},
         {"ligne": 3, "colonne": 1},
-        {"ligne": 3, "colonne": 2}
+        {"ligne": 3, "colonne": 2},
+        {"ligne": 4, "colonne": 2}, 
+        {"ligne": 4, "colonne": 3}
       ]
     },
     {
       "valeurCible": 1,
       "typeOperation": "SOUSTRACTION",
       "listeCellules": [{"ligne": 4, "colonne": 0}, {"ligne": 4, "colonne": 1}]
-    },
-    {
-      "valeurCible": 1,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{"ligne": 4, "colonne": 2}, {"ligne": 4, "colonne": 3}]
     }
   ]
 }

@@ -1,79 +1,59 @@
 {
   "id": "Difficile1",
   "taille": 6,
-  "matriceCorrection": [
-    [5, 1, 4, 3, 6, 2],
-    [3, 6, 1, 5, 2, 4],
-    [1, 4, 3, 2, 5, 6],
-    [6, 2, 5, 4, 1, 3],
-    [4, 5, 2, 6, 3, 1],
-    [2, 3, 6, 1, 4, 5]
-  ],
   "listeZones": [
+    {
+      "valeurCible": 1350,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne":0,"colonne":2}, {"ligne":0,"colonne":3}, {"ligne":1,"colonne":3}, {"ligne":2,"colonne":3}, {"ligne":3,"colonne":2}, {"ligne":3,"colonne":3}]
+    },
+    {
+      "valeurCible": 32,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne":0,"colonne":0}, {"ligne":0,"colonne":1}, {"ligne":1,"colonne":1}, {"ligne":1,"colonne":2}]
+    },
+    {
+      "valeurCible": 28,
+      "typeOperation": "ADDITION",
+      "listeCellules": [{"ligne":1,"colonne":0}, {"ligne":2,"colonne":0}, {"ligne":2,"colonne":1}, {"ligne":2,"colonne":2}, {"ligne":3,"colonne":0}, {"ligne":4,"colonne":0}, {"ligne":5,"colonne":0}]
+    },
     {
       "valeurCible": 13,
       "typeOperation": "ADDITION",
-      "listeCellules": [{"ligne": 0, "colonne": 0}, {"ligne": 1, "colonne": 0}, {"ligne": 2, "colonne": 0}, {"ligne": 2, "colonne": 1}]
+      "listeCellules": [{"ligne":4,"colonne":5}, {"ligne":5,"colonne":3}, {"ligne":5,"colonne":4}, {"ligne":5,"colonne":5}]
     },
     {
-      "valeurCible": 12,
+      "valeurCible": 512,
       "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 0, "colonne": 1}, {"ligne": 0, "colonne": 2}, {"ligne": 0, "colonne": 3}]
+      "listeCellules": [{"ligne":2,"colonne":4}, {"ligne":3,"colonne":4}, {"ligne":3,"colonne":5}, {"ligne":4,"colonne":2}, {"ligne":4,"colonne":3}, {"ligne":4,"colonne":4}, {"ligne":5,"colonne":2}]
     },
     {
       "valeurCible": 3,
       "typeOperation": "DIVISION",
-      "listeCellules": [{"ligne": 0, "colonne": 4}, {"ligne": 0, "colonne": 5}]
+      "listeCellules": [{"ligne":3,"colonne":1}, {"ligne":4,"colonne":1}]
     },
     {
-      "valeurCible": 18,
-      "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 1, "colonne": 1}, {"ligne": 1, "colonne": 2}, {"ligne": 2, "colonne": 2}]
-    },
-    {
-      "valeurCible": 14,
-      "typeOperation": "ADDITION",
-      "listeCellules": [{"ligne": 1, "colonne": 3}, {"ligne": 1, "colonne": 4}, {"ligne": 2, "colonne": 3}, {"ligne": 2, "colonne": 4}]
-    },
-    {
-      "valeurCible": 13,
-      "typeOperation": "ADDITION",
-      "listeCellules": [{"ligne": 1, "colonne": 5}, {"ligne": 2, "colonne": 5}, {"ligne": 3, "colonne": 5}]
-    },
-    {
-      "valeurCible": 120,
-      "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 3, "colonne": 0}, {"ligne": 4, "colonne": 0}, {"ligne": 4, "colonne": 1}]
-    },
-    {
-      "valeurCible": 15,
-      "typeOperation": "ADDITION",
-      "listeCellules": [{"ligne": 3, "colonne": 1}, {"ligne": 3, "colonne": 2}, {"ligne": 4, "colonne": 2}, {"ligne": 5, "colonne": 2}]
-    },
-    {
-      "valeurCible": 4,
-      "typeOperation": "DIVISION",
-      "listeCellules": [{"ligne": 3, "colonne": 3}, {"ligne": 3, "colonne": 4}]
-    },
-    {
-      "valeurCible": 5,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{"ligne": 4, "colonne": 3}, {"ligne": 5, "colonne": 3}]
-    },
-    {
-      "valeurCible": 15,
-      "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 4, "colonne": 4}, {"ligne": 4, "colonne": 5}, {"ligne": 5, "colonne": 5}]
-    },
-    {
-      "valeurCible": 1,
-      "typeOperation": "SOUSTRACTION",
-      "listeCellules": [{"ligne": 5, "colonne": 0}, {"ligne": 5, "colonne": 1}]
-    },
-    {
-      "valeurCible": 4,
+      "valeurCible": 6,
       "typeOperation": "AUCUNE",
-      "listeCellules": [{"ligne": 5, "colonne": 4}]
+      "listeCellules": [{"ligne":5,"colonne":1}]
+    },
+    {
+      "valeurCible": 12,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne":1,"colonne":5}, {"ligne":2,"colonne":5}]
+    },
+    {
+      "valeurCible": 108,
+      "typeOperation": "MULTIPLICATION",
+      "listeCellules": [{"ligne":0,"colonne":4}, {"ligne":0,"colonne":5}, {"ligne":1,"colonne":4}]
     }
+  ],
+  "matriceCorrection": [
+    [4, 2, 5, 1, 3, 6],
+    [2, 4, 1, 5, 6, 3],
+    [1, 5, 6, 3, 2, 4],
+    [5, 1, 3, 6, 4, 2],
+    [6, 3, 2, 4, 1, 5],
+    [3, 6, 4, 2, 5, 1]
   ]
 }

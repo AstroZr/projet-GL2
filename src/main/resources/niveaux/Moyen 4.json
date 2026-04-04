@@ -11,9 +11,14 @@
   ],
   "listeZones": [
     {
-      "valeurCible": 15,
+      "valeurCible": 5,
+      "typeOperation": "AUCUNE",
+      "listeCellules": [{"ligne": 0, "colonne": 0}]
+    },
+    {
+      "valeurCible": 3,
       "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 0, "colonne": 0}, {"ligne": 1, "colonne": 0}, {"ligne": 1, "colonne": 1}]
+      "listeCellules": [{"ligne": 1, "colonne": 0}, {"ligne": 1, "colonne": 1}]
     },
     {
       "valeurCible": 3,
