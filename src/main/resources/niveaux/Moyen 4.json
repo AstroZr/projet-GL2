@@ -16,6 +16,11 @@
       "listeCellules": [{"ligne": 0, "colonne": 0}]
     },
     {
+      "valeurCible": 2,
+      "typeOperation": "AUCUNE",
+      "listeCellules": [{"ligne": 5, "colonne": 4}]
+    },
+    {
       "valeurCible": 3,
       "typeOperation": "MULTIPLICATION",
       "listeCellules": [{"ligne": 1, "colonne": 0}, {"ligne": 1, "colonne": 1}]
@@ -53,7 +58,7 @@
     {
       "valeurCible": 90,
       "typeOperation": "MULTIPLICATION",
-      "listeCellules": [{"ligne": 2, "colonne": 3}, {"ligne": 3, "colonne": 3}, {"ligne": 4, "colonne": 3}]
+      "listeCellules": [{"ligne": 2, "colonne": 3}, {"ligne": 3, "colonne": 3}, {"ligne": 4, "colonne": 3}, {"ligne": 5, "colonne": 3}]
     },
     {
       "valeurCible": 144,
@@ -79,11 +84,6 @@
       "valeurCible": 20,
       "typeOperation": "MULTIPLICATION",
       "listeCellules": [{"ligne": 4, "colonne": 4}, {"ligne": 4, "colonne": 5}, {"ligne": 5, "colonne": 5}]
-    },
-    {
-      "valeurCible": 2,
-      "typeOperation": "DIVISION",
-      "listeCellules": [{"ligne": 5, "colonne": 3}, {"ligne": 5, "colonne": 4}]
     }
   ]
 }
