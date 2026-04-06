@@ -35,6 +35,12 @@ public class ZoneCalcul {
         this.typeOperation = typeOperation;
     }
 
+    public ZoneCalcul(ZoneCalcul zone){
+        this.listeCellules = zone.getListeCellules();
+        this.valeurCible = zone.getValeurCible();
+        this.typeOperation = zone.getTypeOperation();
+    }
+
     /**
      * Ajoute une cellule à la zone.
      * 
