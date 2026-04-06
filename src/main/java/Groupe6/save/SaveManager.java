@@ -344,6 +344,7 @@ public class SaveManager {
      * @param idNiveau  L'ID du niveau (correspondant au fichier de sauvegarde).
      * @return La somme de toutes les aides utilisées, ou 0 si aucune donnée.
      */
+    @Deprecated
     public static int chargerNbAidesTotalPartie(String nomJoueur, String idNiveau) {
         PartieSauvegardee partie = chargerPartie(nomJoueur, idNiveau);
         if (partie == null || partie.getNbAidesUtilisees() == null)

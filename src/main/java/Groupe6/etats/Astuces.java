@@ -20,6 +20,7 @@ import Groupe6.aide.EffetVisuel;
 import Groupe6.aide.TypeEffect;
 import Groupe6.aide.techniques.BlocageUnique;
 import Groupe6.aide.techniques.CandidatUnique;
+import Groupe6.aide.techniques.NakedN;
 import Groupe6.aide.techniques.Reste;
 import Groupe6.aide.techniques.Singleton;
 import Groupe6.aide.techniques.UniqueCacheeColonne;
@@ -39,18 +40,24 @@ import Groupe6.utilz.LangManager;
 import Groupe6.utilz.LayoutScale;
 
 /**
- * État « ASTUCES » : liste toutes les techniques d'aide disponibles.
- *
- * Affiche une carte par technique avec son titre et sa description.
- * Accessible depuis le menu principal.
+ * Etat ASTUCES avec 2 vues:
+ * - Liste des techniques (boutons lisibles)
+ * - Detail d'une technique (mini-grille + description complete)
  */
 public class Astuces extends Etats {
 
-    private static final int LARGEUR_BTN = 200;
-    private static final int HAUTEUR_BTN = 44;
+    private enum VueAstuces {
+        LISTE,
+        DETAIL
+    }
+
+    private static final int LARGEUR_BTN = 230;
+    private static final int HAUTEUR_BTN = 46;
+
     private static final BasicStroke STROKE_UI = new BasicStroke(1.5f);
     private static final BasicStroke STROKE_MINI_FINE = new BasicStroke(0.8f);
     private static final BasicStroke STROKE_MINI_ZONE = new BasicStroke(2f);
+    private static final Color COULEUR_MINI_ROUGE = new Color(220, 60, 60, 200);
 
     private static final String[] EXEMPLE_IDS = {
         "exemple_Singleton",
@@ -63,54 +70,67 @@ public class Astuces extends Etats {
         "exemple_Naked3"
     };
 
+    private static EtatJeu etatSource = EtatJeu.MENU;
+
+    private final LayoutScale layoutScale;
+
     private List<Niveau> exemplesNiveaux;
     private List<AideVisuel> exemplesVisuels;
 
-    private LayoutScale layoutScale;
-
-    private static EtatJeu etatSource = EtatJeu.MENU;
-    private static Astuces instance = null;
+    private VueAstuces vue = VueAstuces.LISTE;
+    private int indexAideSelectionnee = 0;
     private EtatJeu etatSourcePrecedent = null;
-
-    public static void setEtatSource(EtatJeu etat) {
-        etatSource = etat;
-    }
 
     private String titrePage;
     private String labelRetour;
+    private String labelRetourListe;
+    private String labelPrecedent;
+    private String labelSuivant;
+    private String titreListe;
 
     private Font fontTitre;
-    private Font fontCardTitre;
-    private Font fontCardDesc;
-    private Font fontBadge;
+    private Font fontSousTitre;
+    private Font fontDesc;
 
-    private int panelX, panelY, panelWidth, panelHeight;
-    private int cardStartY;
-    private int cardHeight;
-    private int cardGap;
-    private int cardX, cardWidth;
-    private int badgeSize;
+    private int panelX;
+    private int panelY;
+    private int panelWidth;
+    private int panelHeight;
+
+    private int detailCardX;
+    private int detailCardY;
+    private int detailCardW;
+    private int detailCardH;
 
     public Astuces(Game game) {
         super(game);
-        instance = this;
-        layoutScale = LayoutScale.getInstance();
-        boutons = new ArrayList<>();
+        this.layoutScale = LayoutScale.getInstance();
+        this.boutons = new ArrayList<>();
         chargerExemples();
         updateTexts();
         layoutScale.update(Constants.game_width, Constants.game_height);
         calculerPositions();
     }
 
+    public static void setEtatSource(EtatJeu etat) {
+        etatSource = etat;
+    }
+
     private void chargerExemples() {
         exemplesNiveaux = new ArrayList<>();
         exemplesVisuels = new ArrayList<>();
+
         Aide[] freshTechniques = {
-            new Singleton(), new Reste(), new UniqueCacheeLigne(),
-            new UniqueCacheeColonne(), new BlocageUnique(), new CandidatUnique(),
-            new Groupe6.aide.techniques.NakedN(8, 2),
-            new Groupe6.aide.techniques.NakedN(9, 3)
+            new Singleton(),
+            new Reste(),
+            new UniqueCacheeLigne(),
+            new UniqueCacheeColonne(),
+            new BlocageUnique(),
+            new CandidatUnique(),
+            new NakedN(8, 2),
+            new NakedN(9, 3)
         };
+
         for (int i = 0; i < EXEMPLE_IDS.length; i++) {
             Niveau n = SaveManager.chargerNiveau(EXEMPLE_IDS[i]);
             exemplesNiveaux.add(n);
@@ -118,10 +138,12 @@ public class Astuces extends Etats {
                 exemplesVisuels.add(null);
                 continue;
             }
+
             Grille g = new Grille(n);
             g.autoRemplissage();
-            AideVisuel visuel = null;
             Aide tech = freshTechniques[i];
+            AideVisuel visuel = null;
+
             if (tech.check(g)) {
                 tech.setNbUtilisation(2);
                 tech.load(g, freshTechniques.length);
@@ -135,59 +157,97 @@ public class Astuces extends Etats {
         int cx = layoutScale.ratioX(0.5f);
         int cy = layoutScale.ratioY(0.5f);
 
-        fontTitre    = FontCache.get("Berlin Sans FB Demi", Font.BOLD,  layoutScale.scaleUniform(34));
-        fontCardTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD,  layoutScale.scaleUniform(17));
-        fontCardDesc  = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(14));
+        fontTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(34));
+        fontSousTitre = FontCache.get("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(22));
+        fontDesc = FontCache.get("Berlin Sans FB Demi", Font.PLAIN, layoutScale.scaleUniform(16));
 
-        cardGap = layoutScale.scaleY(12);
-
-        List<Aide> aides = AideManager.getInstance().getAides();
-        int n = Math.max(aides.size(), 1);
-
-        int paddingPanel = layoutScale.scaleY(20);
-
-        // Hauteur préférée (cardHeight fixe de 110) réduite de 50px
-        int preferredCardHeight = layoutScale.scaleY(110);
-        int gapsTotal = (n - 1) * cardGap;
-        int preferredPanelH = n * preferredCardHeight + gapsTotal + 2 * paddingPanel - layoutScale.scaleY(50);
-
-        // Hauteur max disponible : laisser de la place pour le titre et le bouton
-        int maxAvailable = Constants.game_height - layoutScale.scaleY(180);
-
-        // On prend le minimum pour ne pas déborder
-        panelHeight = Math.min(preferredPanelH, maxAvailable);
-
-        // cardHeight calculé dynamiquement depuis la hauteur du panel et les espacements
-        cardHeight = (panelHeight - 2 * paddingPanel - gapsTotal) / n;
-        cardHeight = Math.max(cardHeight, layoutScale.scaleY(50));
-
-        // badgeSize dynamique proportionnel à la hauteur de carte
-        badgeSize = cardHeight - layoutScale.scaleY(20);
-        badgeSize = Math.min(badgeSize, layoutScale.scaleUniform(36));
-        badgeSize = Math.max(badgeSize, layoutScale.scaleUniform(16));
-
-        fontBadge = FontCache.get("Berlin Sans FB Demi", Font.BOLD, Math.max(badgeSize / 2, layoutScale.scaleUniform(10)));
-
-        panelWidth  = layoutScale.scaleX(760);
+        panelWidth = Math.min(layoutScale.scaleX(1020), Constants.game_width - layoutScale.scaleX(50));
+        panelHeight = Math.min(layoutScale.scaleY(610), Constants.game_height - layoutScale.scaleY(130));
         panelX = cx - panelWidth / 2;
-        panelY = cy - panelHeight / 2 - layoutScale.scaleY(30);
+        panelY = cy - panelHeight / 2 - layoutScale.scaleY(10);
 
-        cardX      = panelX + layoutScale.scaleX(20);
-        cardWidth  = panelWidth - layoutScale.scaleX(40);
-        cardStartY = panelY + paddingPanel;
+        detailCardX = panelX + layoutScale.scaleX(22);
+        detailCardY = panelY + layoutScale.scaleY(70);
+        detailCardW = panelWidth - layoutScale.scaleX(44);
+        detailCardH = panelHeight - layoutScale.scaleY(120);
 
+        reconstruireBoutons();
+    }
+
+    private void reconstruireBoutons() {
         boutons.clear();
+        clearFocusClavier();
+
+        int cx = layoutScale.ratioX(0.5f);
         int bw = layoutScale.scaleX(LARGEUR_BTN);
         int bh = layoutScale.scaleY(HAUTEUR_BTN);
-        int by = panelY + panelHeight + layoutScale.scaleY(24);
-        boutons.add(new BoutonChangeurEtat(cx - bw / 2, by, bw, bh, etatSource, labelRetour));
+
+        if (vue == VueAstuces.LISTE) {
+            construireBoutonsListe();
+            int by = panelY + panelHeight + layoutScale.scaleY(14);
+            boutons.add(new BoutonChangeurEtat(cx - bw / 2, by, bw, bh, etatSource, labelRetour));
+            return;
+        }
+
+        int yBottom = panelY + panelHeight + layoutScale.scaleY(14);
+        int gap = layoutScale.scaleX(12);
+        int smallW = layoutScale.scaleX(170);
+
+        boutons.add(new BoutonAction(cx - bw / 2, yBottom, bw, bh, labelRetourListe, this::retourListe));
+        boutons.add(new BoutonAction(cx - bw / 2 - gap - smallW, yBottom, smallW, bh, labelPrecedent, this::selectionnerPrecedent));
+        boutons.add(new BoutonAction(cx + bw / 2 + gap, yBottom, smallW, bh, labelSuivant, this::selectionnerSuivant));
+    }
+
+    private void construireBoutonsListe() {
+        List<Aide> aides = AideManager.getInstance().getAides();
+        int n = aides.size();
+        if (n == 0) return;
+
+        int padding = layoutScale.scaleY(18);
+        int gapY = layoutScale.scaleY(10);
+        int availableH = panelHeight - layoutScale.scaleY(120);
+
+        int listBtnH = Math.max(layoutScale.scaleY(56),
+            (availableH - (n - 1) * gapY - 2 * padding) / n);
+
+        int x = panelX + layoutScale.scaleX(34);
+        int y = panelY + layoutScale.scaleY(70);
+        int w = panelWidth - layoutScale.scaleX(68);
+
+        for (int i = 0; i < n; i++) {
+            Aide aide = aides.get(i);
+            String label = (i + 1) + ". " + aide.getTitre();
+            final int index = i;
+            boutons.add(new BoutonAction(x, y + i * (listBtnH + gapY), w, listBtnH, label, () -> ouvrirDetail(index)));
+        }
+    }
+
+    private void ouvrirDetail(int index) {
+        indexAideSelectionnee = index;
+        vue = VueAstuces.DETAIL;
+        calculerPositions();
+    }
+
+    private void retourListe() {
+        vue = VueAstuces.LISTE;
+        calculerPositions();
+    }
+
+    private void selectionnerSuivant() {
+        List<Aide> aides = AideManager.getInstance().getAides();
+        if (aides.isEmpty()) return;
+        indexAideSelectionnee = (indexAideSelectionnee + 1) % aides.size();
+    }
+
+    private void selectionnerPrecedent() {
+        List<Aide> aides = AideManager.getInstance().getAides();
+        if (aides.isEmpty()) return;
+        indexAideSelectionnee = (indexAideSelectionnee - 1 + aides.size()) % aides.size();
     }
 
     @Override
     public void update() {
         getFond().update();
-        
-        // Si etatSource a changé depuis la dernière fois, recréer les boutons
         if (etatSourcePrecedent != etatSource) {
             calculerPositions();
             etatSourcePrecedent = etatSource;
@@ -205,119 +265,121 @@ public class Astuces extends Etats {
         getFond().draw(g);
 
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // Titre de la page
         g2d.setFont(fontTitre);
         g2d.setColor(getFond().getCouleurTexte());
         int tw = g2d.getFontMetrics().stringWidth(titrePage);
         g2d.drawString(titrePage, layoutScale.centerX() - tw / 2, panelY - layoutScale.scaleY(16));
 
-        // Panneau de fond
-        Color panelBase = getFond().getCouleurFondBouton();
-        g2d.setColor(new Color(panelBase.getRed(), panelBase.getGreen(), panelBase.getBlue(), 210));
-        g2d.fill(new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20));
-        g2d.setColor(getFond().getCouleurBordreBouton());
-        g2d.setStroke(STROKE_UI);
-        g2d.draw(new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20));
+        dessinerPanneau(g2d);
 
-        // Cartes des techniques
-        List<Aide> aides = AideManager.getInstance().getAides();
-        for (int i = 0; i < aides.size(); i++) {
-            int cardY = cardStartY + i * (cardHeight + cardGap);
-            dessinerCarteAide(g2d, aides.get(i), i, cardX, cardY, cardWidth, cardHeight);
+        if (vue == VueAstuces.LISTE) {
+            dessinerListe(g2d);
+        } else {
+            dessinerDetail(g2d);
         }
 
-        // Bouton retour
         for (Bouton b : boutons) {
             b.draw(g, getFond());
         }
     }
 
-    private void dessinerCarteAide(Graphics2D g2d, Aide aide, int index, int x, int y, int w, int h) {
-        Color accent = getFond().getCouleurAccent();
-
-        // Fond de la carte
-        g2d.setColor(getFond().getCouleurFondCellule());
-        g2d.fill(new RoundRectangle2D.Float(x, y, w, h, 12, 12));
-
-        // Barre d'accent à gauche
-        int barW = layoutScale.scaleX(4);
-        g2d.setColor(accent);
-        g2d.fillRoundRect(x, y + layoutScale.scaleY(12), barW, h - layoutScale.scaleY(24), barW, barW);
-
-        // Bordure
+    private void dessinerPanneau(Graphics2D g2d) {
+        Color panelBase = getFond().getCouleurFondBouton();
+        g2d.setColor(new Color(panelBase.getRed(), panelBase.getGreen(), panelBase.getBlue(), 218));
+        g2d.fill(new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20));
         g2d.setColor(getFond().getCouleurBordreBouton());
         g2d.setStroke(STROKE_UI);
-        g2d.draw(new RoundRectangle2D.Float(x, y, w, h, 12, 12));
+        g2d.draw(new RoundRectangle2D.Float(panelX, panelY, panelWidth, panelHeight, 20, 20));
+    }
 
-        // Mini-grille exemple (côté droit)
-        int miniPadding = layoutScale.scaleY(8);
-        int miniSize = h - 2 * miniPadding;
-        int miniX = x + w - layoutScale.scaleX(12) - miniSize;
-        int miniY = y + miniPadding;
-        Niveau niveau = (index < exemplesNiveaux.size()) ? exemplesNiveaux.get(index) : null;
-        AideVisuel visuel = (index < exemplesVisuels.size()) ? exemplesVisuels.get(index) : null;
+    private void dessinerListe(Graphics2D g2d) {
+        g2d.setFont(fontSousTitre);
+        g2d.setColor(getFond().getCouleurTexte());
+        int x = panelX + layoutScale.scaleX(30);
+        int y = panelY + layoutScale.scaleY(45);
+        g2d.drawString(titreListe, x, y);
+    }
+
+    private void dessinerDetail(Graphics2D g2d) {
+        List<Aide> aides = AideManager.getInstance().getAides();
+        if (aides.isEmpty()) return;
+
+        int index = Math.max(0, Math.min(indexAideSelectionnee, aides.size() - 1));
+        Aide aide = aides.get(index);
+
+        g2d.setFont(fontSousTitre);
+        g2d.setColor(getFond().getCouleurTexte());
+        String titre = aide.getTitre();
+        int tw = g2d.getFontMetrics().stringWidth(titre);
+        g2d.drawString(titre, panelX + (panelWidth - tw) / 2, panelY + layoutScale.scaleY(44));
+
+        g2d.setColor(getFond().getCouleurFondCellule());
+        g2d.fill(new RoundRectangle2D.Float(detailCardX, detailCardY, detailCardW, detailCardH, 14, 14));
+        g2d.setColor(getFond().getCouleurBordreBouton());
+        g2d.setStroke(STROKE_UI);
+        g2d.draw(new RoundRectangle2D.Float(detailCardX, detailCardY, detailCardW, detailCardH, 14, 14));
+
+        int miniSize = Math.min(layoutScale.scaleY(240), detailCardH - layoutScale.scaleY(42));
+        int miniX = detailCardX + detailCardW - miniSize - layoutScale.scaleX(20);
+        int miniY = detailCardY + (detailCardH - miniSize) / 2;
+        Niveau niveau = index < exemplesNiveaux.size() ? exemplesNiveaux.get(index) : null;
+        AideVisuel visuel = index < exemplesVisuels.size() ? exemplesVisuels.get(index) : null;
         dessinerMiniGrille(g2d, niveau, visuel, miniX, miniY, miniSize);
 
-        // Badge numéroté (cercle accent)
-        int badgeX = x + layoutScale.scaleX(18);
-        int badgeY = y + (h - badgeSize) / 2;
-        g2d.setColor(accent);
-        g2d.fillOval(badgeX, badgeY, badgeSize, badgeSize);
-        g2d.setFont(fontBadge);
-        g2d.setColor(Color.WHITE);
-        String num = String.valueOf(index + 1);
-        FontMetrics fmBadge = g2d.getFontMetrics();
-        g2d.drawString(num,
-            badgeX + (badgeSize - fmBadge.stringWidth(num)) / 2,
-            badgeY + (badgeSize + fmBadge.getAscent() - fmBadge.getDescent()) / 2);
+        int textX = detailCardX + layoutScale.scaleX(24);
+        int textW = miniX - textX - layoutScale.scaleX(22);
 
-        // Zone texte entre badge et mini-grille
-        int textX = badgeX + badgeSize + layoutScale.scaleX(16);
-        int textW = miniX - textX - layoutScale.scaleX(12);
-
-        // Titre de la technique
-        g2d.setFont(fontCardTitre);
-        g2d.setColor(getFond().getCouleurTexte());
-        int titleY = y + layoutScale.scaleY(32);
-        g2d.drawString(aide.getTitre(), textX, titleY);
-
-        // Description avec retour à la ligne automatique
-        g2d.setFont(fontCardDesc);
+        g2d.setFont(fontDesc);
         Color texte = getFond().getCouleurTexte();
-        g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 180));
-        dessinerTexteEnveloppe(g2d, aide.getDescription(), textX, titleY + layoutScale.scaleY(20), textW, layoutScale.scaleY(18));
+        g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 210));
 
-        // Badge de limite d'utilisation (coin bas-gauche de la zone texte)
-        int padding = layoutScale.scaleX(12);
-        g2d.setFont(fontCardDesc);
+        int bodyY = detailCardY + layoutScale.scaleY(34);
+        int lineHeight = g2d.getFontMetrics().getHeight() + layoutScale.scaleY(2);
+
+        dessinerTexteWrap(g2d, aide.getDescription(), textX, bodyY, textW, lineHeight);
+
         FontMetrics fmLimit = g2d.getFontMetrics();
-        if (aide.getMaxUtilisation() > 0) {
-            String labelLimite = LangManager.get("astuces.limite") + " " + aide.getMaxUtilisation();
-            int pillW = fmLimit.stringWidth(labelLimite) + layoutScale.scaleX(16);
-            int pillH = fmLimit.getHeight() + layoutScale.scaleY(4);
-            int pillX = textX;
-            int pillY = y + h - padding - pillH;
-            g2d.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 51));
-            g2d.fillRoundRect(pillX, pillY, pillW, pillH, 8, 8);
-            g2d.setColor(accent);
-            g2d.drawString(labelLimite,
-                pillX + layoutScale.scaleX(8),
-                pillY + fmLimit.getAscent() + layoutScale.scaleY(2));
-        } else {
-            String labelIllimite = LangManager.get("astuces.illimite");
-            int textLimiteY = y + h - padding - fmLimit.getDescent();
-            g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 120));
-            g2d.drawString(labelIllimite, textX, textLimiteY);
+        int footerY = detailCardY + detailCardH - layoutScale.scaleY(22);
+        String limite = aide.getMaxUtilisation() > 0
+            ? (LangManager.get("astuces.limite") + " " + aide.getMaxUtilisation())
+            : LangManager.get("astuces.illimite");
+
+        g2d.setColor(new Color(texte.getRed(), texte.getGreen(), texte.getBlue(), 150));
+        g2d.drawString(limite, textX, footerY + fmLimit.getAscent() / 2);
+    }
+
+    private void dessinerTexteWrap(Graphics2D g2d, String texte, int x, int y, int maxWidth, int lineHeight) {
+        if (texte == null || texte.isEmpty() || maxWidth <= 0) return;
+        FontMetrics fm = g2d.getFontMetrics();
+        String[] mots = texte.trim().split("\\s+");
+        StringBuilder ligne = new StringBuilder();
+        int currentY = y;
+
+        for (String mot : mots) {
+            String test = ligne.length() == 0 ? mot : ligne + " " + mot;
+            if (fm.stringWidth(test) <= maxWidth) {
+                if (ligne.length() > 0) ligne.append(' ');
+                ligne.append(mot);
+            } else {
+                if (ligne.length() > 0) {
+                    g2d.drawString(ligne.toString(), x, currentY);
+                    currentY += lineHeight;
+                }
+                ligne = new StringBuilder(mot);
+            }
+        }
+
+        if (ligne.length() > 0) {
+            g2d.drawString(ligne.toString(), x, currentY);
         }
     }
 
-    private static final Color COULEUR_MINI_ROUGE = new Color(220, 60, 60, 200);
-
     private void dessinerMiniGrille(Graphics2D g2d, Niveau niveau, AideVisuel visuel, int gx, int gy, int gsize) {
         if (niveau == null) return;
+
         int n = niveau.getTaille();
         int cellSize = Math.max(4, gsize / n);
         int totalSize = cellSize * n;
@@ -325,23 +387,22 @@ public class Astuces extends Etats {
         Cellule[][] cells = niveau.getMatriceCellules();
         int[][] preRemplie = niveau.getMatricePreRemplie();
 
-        // Construire la carte des cases à surligner en rouge
         boolean[][] rouge = new boolean[n][n];
         if (visuel != null) {
             for (EffetVisuel effet : visuel) {
                 if (effet.getType() == TypeEffect.CASE_NEGATIVE || effet.getType() == TypeEffect.CANDIDAT_POSITIF) {
-                    int r = effet.getX(), c = effet.getY();
-                    if (r >= 0 && r < n && c >= 0 && c < n)
+                    int r = effet.getX();
+                    int c = effet.getY();
+                    if (r >= 0 && r < n && c >= 0 && c < n) {
                         rouge[r][c] = true;
+                    }
                 }
             }
         }
 
-        // Fond global de la mini-grille
         g2d.setColor(getFond().getCouleurFondCellule());
         g2d.fillRect(gx, gy, totalSize, totalSize);
 
-        // Fond des cellules et valeurs pré-remplies
         int fontSize = Math.max(6, cellSize * 2 / 3);
         Font fontVal = FontCache.get("Arial", Font.BOLD, fontSize);
         g2d.setFont(fontVal);
@@ -372,7 +433,6 @@ public class Astuces extends Etats {
             }
         }
 
-        // Bordures de zones (traits épais)
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
                 ZoneCalcul zone = cells[row][col].getZoneCalcul();
@@ -391,12 +451,12 @@ public class Astuces extends Etats {
             }
         }
 
-        // Étiquettes des zones (valeur + opération) dans la première cellule de chaque zone
         int labelSize = Math.max(5, cellSize / 3);
         Font fontLabel = FontCache.get("Arial", Font.BOLD, labelSize);
         g2d.setFont(fontLabel);
         FontMetrics fmLabel = g2d.getFontMetrics();
         Color etiquette = getFond().getCouleurEtiquetteZone();
+
         for (ZoneCalcul zone : niveau.getListeZones()) {
             Cellule premiere = zone.getListeCellules().get(0);
             int cx = gx + premiere.getColonne() * cellSize;
@@ -410,52 +470,56 @@ public class Astuces extends Etats {
         }
     }
 
-    private void dessinerTexteEnveloppe(Graphics2D g2d, String texte, int x, int y, int maxWidth, int lineHeight) {
-        if (texte == null || texte.isEmpty()) return;
-        FontMetrics fm = g2d.getFontMetrics();
-        String[] mots = texte.split(" ");
-        StringBuilder ligne = new StringBuilder();
-        int currentY = y;
+    @Override
+    public void updateTexts() {
+        titrePage = LangManager.get("astuces.titre");
+        titreListe = LangManager.get("astuces.liste.titre");
+        labelRetour = LangManager.get("common.retour");
+        labelRetourListe = LangManager.get("astuces.retour.liste");
+        labelPrecedent = LangManager.get("common.precedent");
+        labelSuivant = LangManager.get("common.suivant");
 
-        for (String mot : mots) {
-            String test = ligne.length() == 0 ? mot : ligne + " " + mot;
-            if (fm.stringWidth(test) <= maxWidth) {
-                if (ligne.length() > 0) ligne.append(' ');
-                ligne.append(mot);
-            } else {
-                if (ligne.length() > 0) {
-                    g2d.drawString(ligne.toString(), x, currentY);
-                    currentY += lineHeight;
-                }
-                ligne = new StringBuilder(mot);
-            }
-        }
-        if (ligne.length() > 0) {
-            g2d.drawString(ligne.toString(), x, currentY);
+        if (boutons != null && !boutons.isEmpty()) {
+            reconstruireBoutons();
         }
     }
 
     @Override
-    public void updateTexts() {
-        titrePage   = LangManager.get("astuces.titre");
-        labelRetour = LangManager.get("common.retour");
+    public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode();
 
-        if (boutons == null || boutons.isEmpty()) return;
-        ((BoutonChangeurEtat) boutons.get(0)).setLabel(labelRetour);
+        if (code == KeyEvent.VK_ESCAPE || code == KeyEvent.VK_BACK_SPACE) {
+            if (vue == VueAstuces.DETAIL) {
+                retourListe();
+            } else {
+                EtatJeu.setEtatActuel(etatSource);
+            }
+            return;
+        }
+
+        if (vue == VueAstuces.DETAIL) {
+            if (code == KeyEvent.VK_PAGE_DOWN || code == KeyEvent.VK_RIGHT) {
+                selectionnerSuivant();
+                return;
+            }
+            if (code == KeyEvent.VK_PAGE_UP || code == KeyEvent.VK_LEFT) {
+                selectionnerPrecedent();
+                return;
+            }
+        }
+
+        gererNavigationClavier(e);
     }
 
     @Override public void keyTyped(KeyEvent e) {}
     @Override public void keyReleased(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
-        gererNavigationClavier(e);
-    }
-
-    @Override
     public void mouseMoved(MouseEvent e) {
         clearFocusClavier();
-        for (Bouton b : boutons) b.setSourisSurvol(isIn(e, b));
+        for (Bouton b : boutons) {
+            b.setSourisSurvol(isIn(e, b));
+        }
     }
 
     @Override public void mouseDragged(MouseEvent e) {}
@@ -471,8 +535,39 @@ public class Astuces extends Etats {
     @Override
     public void mouseReleased(MouseEvent e) {
         for (Bouton b : boutons) {
-            if (b.isSourisEnfonce() && isIn(e, b)) b.appliquerAction();
+            if (b.isSourisEnfonce() && isIn(e, b)) {
+                b.appliquerAction();
+            }
             b.setSourisEnfonce(false);
+        }
+    }
+
+    private class BoutonAction extends Bouton {
+        private final Runnable action;
+        private final String label;
+        private final Font font;
+
+        BoutonAction(int x, int y, int largeur, int hauteur, String label, Runnable action) {
+            super(x, y, largeur, hauteur);
+            this.action = action;
+            this.label = label;
+            this.font = FontCache.get("Berlin Sans FB Demi", Font.BOLD, layoutScale.scaleUniform(16));
+        }
+
+        @Override
+        public void appliquerAction() {
+            action.run();
+        }
+
+        @Override
+        public void draw(Graphics g, Groupe6.fond.Fond fond) {
+            super.draw(g, fond);
+            g.setColor(fond.getCouleurTexte());
+            g.setFont(font);
+            FontMetrics fm = g.getFontMetrics();
+            int tx = getX() + (getLargeur() - fm.stringWidth(label)) / 2;
+            int ty = getY() + (getHauteur() + fm.getAscent()) / 2 - 2;
+            g.drawString(label, tx, ty);
         }
     }
 }

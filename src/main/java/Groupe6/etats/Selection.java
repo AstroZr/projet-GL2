@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import Groupe6.audio.SoundManager;
 import Groupe6.game.Game;
 import Groupe6.save.SaveManager;
 import Groupe6.ui.Bouton;
@@ -161,6 +162,7 @@ public class Selection extends Etats {
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        clearFocusClavier();
         for (Bouton b : boutons) {
             b.setSourisSurvol(isIn(e, b));
         }
@@ -192,7 +194,81 @@ public class Selection extends Etats {
     public void keyReleased(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
+    public void keyPressed(KeyEvent e) {
+        if (boutons == null || boutons.isEmpty()) {
+            return;
+        }
+
+        int code = e.getKeyCode();
+        if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+            if (indiceFocusClavierBouton < 0) {
+                setFocusIndex(0);
+            } else {
+                boutons.get(indiceFocusClavierBouton).appliquerAction();
+            }
+            return;
+        }
+
+        if (indiceFocusClavierBouton < 0) {
+            if (code == KeyEvent.VK_DOWN || code == KeyEvent.VK_RIGHT
+                    || code == KeyEvent.VK_UP || code == KeyEvent.VK_LEFT) {
+                setFocusIndex(0);
+            }
+            return;
+        }
+
+        int current = indiceFocusClavierBouton;
+        int next = current;
+        int retourIndex = nombreNiveaux;
+
+        switch (code) {
+            case KeyEvent.VK_RIGHT:
+                if (current < nombreNiveaux && current % 2 == 0 && current + 1 < nombreNiveaux) {
+                    next = current + 1;
+                }
+                break;
+
+            case KeyEvent.VK_LEFT:
+                if (current < nombreNiveaux && current % 2 == 1) {
+                    next = current - 1;
+                }
+                break;
+
+            case KeyEvent.VK_DOWN:
+                if (current < nombreNiveaux) {
+                    int below = current + 2;
+                    next = (below < nombreNiveaux) ? below : retourIndex;
+                }
+                break;
+
+            case KeyEvent.VK_UP:
+                if (current == retourIndex) {
+                    next = Math.max(0, nombreNiveaux - 1);
+                } else if (current < nombreNiveaux) {
+                    int above = current - 2;
+                    next = (above >= 0) ? above : current;
+                }
+                break;
+
+            default:
+                gererNavigationClavier(e);
+                return;
+        }
+
+        if (next != current) {
+            setFocusIndex(next);
+        }
+    }
+
+    private void setFocusIndex(int index) {
+        if (index < 0 || index >= boutons.size()) return;
+        for (Bouton b : boutons) {
+            b.setFocusClavier(false);
+        }
+        indiceFocusClavierBouton = index;
+        boutons.get(index).setFocusClavier(true);
+        SoundManager.getInstance().playClick();
+    }
 
     @Override
     public void mouseDragged(MouseEvent e) {}

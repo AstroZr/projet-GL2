@@ -490,6 +490,11 @@ public class VueGrille {
       return;
     }
 
+    if (isArrowKey(e.getKeyCode())) {
+      gererDeplacementSelection(e.getKeyCode());
+      return;
+    }
+
     if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
       Cellule cellule = grille.getCelluleSelectionnee();
       if (cellule != null) {
@@ -512,6 +517,46 @@ public class VueGrille {
         }
       }
     }
+  }
+
+  private boolean isArrowKey(int code) {
+    return code == KeyEvent.VK_UP
+        || code == KeyEvent.VK_DOWN
+        || code == KeyEvent.VK_LEFT
+        || code == KeyEvent.VK_RIGHT;
+  }
+
+  private void gererDeplacementSelection(int code) {
+    int dLigne = 0;
+    int dColonne = 0;
+
+    switch (code) {
+      case KeyEvent.VK_UP:
+        dLigne = -1;
+        break;
+      case KeyEvent.VK_DOWN:
+        dLigne = 1;
+        break;
+      case KeyEvent.VK_LEFT:
+        dColonne = -1;
+        break;
+      case KeyEvent.VK_RIGHT:
+        dColonne = 1;
+        break;
+      default:
+        return;
+    }
+
+    Cellule selection = grille.getCelluleSelectionnee();
+    if (selection == null) {
+        grille.selectionnerCellule(0, 0);
+        return;
+    }
+
+    int taille = grille.getTaille();
+    int ligne = Math.max(0, Math.min(taille - 1, selection.getLigne() + dLigne));
+    int colonne = Math.max(0, Math.min(taille - 1, selection.getColonne() + dColonne));
+    grille.selectionnerCellule(ligne, colonne);
   }
 
   private int extraireValeurNumerique(KeyEvent e) {

@@ -174,13 +174,7 @@ public class Records extends Etats {
 
         int rowY = panelY + 60;
         for (String niv : niveaux) {
-            String temps;
-            if (mesTemps.containsKey(niv)) {
-                int nbAides = cachedNbAides.getOrDefault(niv, 0);
-                temps = formaterTemps(mesTemps.get(niv)) + " (" + nbAides + ")";
-            } else {
-                temps = "\u2014";
-            }
+            String temps = mesTemps.containsKey(niv) ? formaterTemps(mesTemps.get(niv)) : "\u2014";
             dessinerLigne(g2d, leftX + 12, rowY, panelW - 24, rowH, niv, temps, false);
             rowY += rowH + 6;
         }
