@@ -26,7 +26,8 @@ public class NakedN extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.nakedn.titre") + String.valueOf(n);
         this.description = LangManager.get("aide.difficiles") + LangManager.get("aide.nakedn.description");
         this.explication = LangManager.get("aide.nakedn.explication");

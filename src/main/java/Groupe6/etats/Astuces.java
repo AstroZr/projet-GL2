@@ -479,6 +479,10 @@ public class Astuces extends Etats {
         labelPrecedent = LangManager.get("common.precedent");
         labelSuivant = LangManager.get("common.suivant");
 
+        for(Aide aide : AideManager.getInstance().getAides()){
+            aide.refreshTexts();
+        }
+
         if (boutons != null && !boutons.isEmpty()) {
             reconstruireBoutons();
         }

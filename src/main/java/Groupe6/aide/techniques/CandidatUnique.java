@@ -21,7 +21,8 @@ public class CandidatUnique extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.candidatunique.titre");
         this.description = LangManager.get("aide.candidatunique.description");
         this.explication = LangManager.get("aide.candidatunique.explication");

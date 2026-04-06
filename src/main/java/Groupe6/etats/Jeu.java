@@ -598,6 +598,9 @@ public class Jeu extends Etats {
     if (boutonTechniques != null) {
       boutonTechniques.setLabel(labelTechniques);
     }
+    if (boutonAbandon != null) {
+      boutonAbandon.setLabel(labelAbandon);
+    }
     updateLabelModeCandidat();
   }
 

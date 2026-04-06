@@ -58,15 +58,28 @@ public class Selection extends Etats {
 
     private static class BoutonNiveau extends BoutonChangeurEtat {
         private final Jeu jeu;
+        private final String idNiveau;
 
         BoutonNiveau(int x, int y, int w, int h, String idNiveau, Jeu jeu) {
             super(x, y, w, h, EtatJeu.GRILLE, idNiveau);
             this.jeu = jeu;
+            this.idNiveau = idNiveau;
+        }
+
+        static String labelTraduit(String idNiveau){
+            String cle = "niveau." + idNiveau.toLowerCase().replace(" ", "");
+            String traduit = LangManager.get(cle);
+            // Si la clé n'existe pas, LangManager retourne la clé elle-même
+            return traduit.equals(cle) ? idNiveau : traduit;
+        }
+
+        void updateLabel() {
+            setLabel(labelTraduit(idNiveau));
         }
 
         @Override
         public void appliquerAction() {
-            jeu.chargerNiveau(label);
+            jeu.chargerNiveau(idNiveau);
             super.appliquerAction();
         }
     }
@@ -283,6 +296,13 @@ public class Selection extends Etats {
 
         if (boutons == null || boutons.size() <= nombreNiveaux) {
             return;
+        }
+
+        for(int i = 0; i < nombreNiveaux; i++){
+            Bouton b = boutons.get(i);
+            if (b instanceof BoutonNiveau) {
+                ((BoutonNiveau) b).updateLabel();
+            }
         }
         ((BoutonChangeurEtat) boutons.get(nombreNiveaux)).setLabel(labelRetour);
     }

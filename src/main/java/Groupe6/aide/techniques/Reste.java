@@ -19,7 +19,8 @@ public class Reste extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.reste.titre");
         this.description = LangManager.get("aide.reste.description");
         this.explication = LangManager.get("aide.reste.explication");

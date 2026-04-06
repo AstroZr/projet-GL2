@@ -21,7 +21,8 @@ public class Singleton extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.singleton.titre");
         this.description = LangManager.get("aide.singleton.description");
         this.explication = LangManager.get("aide.singleton.explication");
