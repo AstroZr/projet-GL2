@@ -1,0 +1,92 @@
+<h1 id="mathdoku-calcudoku---projet-gl2">MathDoku (CalcuDoku) - Projet
+GL2</h1>
+<p><a href=""><img
+src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&amp;logo=java&amp;logoColor=white"
+alt="Java" /></a></p>
+<h2 id="présentation-du-projet">Présentation du Projet</h2>
+<p>Projet réalisé dans le cadre du module de <strong>Génie Logiciel
+2</strong> (3ème année de licence Informatique à <strong>Le Mans
+Université</strong>). Il s’agit de la conception et du développement
+d’une application de jeu <strong>CalcuDoku</strong> complète en
+<strong>Java</strong>.</p>
+<p>L’objectif principal du projet se focalise sur
+<strong>l’accompagnement du joueur</strong>, avec la mise en place d’un
+système d’aide contextuelle intelligent conçu pour assister
+l’utilisateur sans résoudre le jeu à sa place.</p>
+<hr />
+<h2 id="quest-ce-que-le-calcudoku">Qu’est-ce que le CalcuDoku ?</h2>
+<p>Le CalcuDoku est un casse-tête logique où le joueur doit remplir une
+grille N x N en respectant deux règles fondamentales : -
+<strong>L’unicité :</strong> Pour remporter la partie, chaque chiffre de
+<code>1</code> à <code>N</code> ne doit apparaître qu’une seule fois par
+ligne et par colonne (le jeu vous laisse libre d’en placer plusieurs). -
+<strong>L’arithmétique :</strong> La grille est divisée en zones
+délimitées. Chaque zone affiche un résultat cible et un opérateur
+(<code>+</code>, <code>-</code>, <code>x</code>, <code>÷</code>). Les
+chiffres placés dans la zone doivent produire le résultat cible en
+utilisant l’opérateur donné.</p>
+<hr />
+<h2 id="fonctionnalités-principales">Fonctionnalités Principales</h2>
+<h3 id="système-de-jeu-avancé">Système de Jeu Avancé</h3>
+<ul>
+<li><strong>Détection des erreurs :</strong> Retour visuel (activable ou
+désactivable dans les paramètres) signalant les conflits d’unicité
+lorsqu’un chiffre est présent en double sur une ligne ou une
+colonne.</li>
+<li><strong>Mode Candidat :</strong> Possibilité d’annoter des
+hypothèses (brouillon) dans chaque case pour préparer ses prochains
+coups sans valider le choix.</li>
+<li><strong>Historique complet :</strong> Registre séquentiel autorisant
+l’annulation (Undo / <code>Ctrl+Z</code>) et le rétablissement (Redo) de
+n’importe quelle action (y compris en mode candidat).</li>
+</ul>
+<h3 id="système-daide-progressif">Système d’Aide Progressif</h3>
+<p>Au lieu de simplement donner la solution au joueur bloqué, le jeu
+l’accompagne avec un système d’indices à paliers (impactant le score) :
+1. <strong>Description technique :</strong> Explication théorique de la
+règle ou déduction à appliquer. 2. <strong>Indice textuel ciblé
+:</strong> Indication sur la zone spécifique de la grille (lignes,
+colonnes) à observer. 3. <strong>Aide visuelle :</strong> Mise en
+surbrillance d’une cellule, d’un secteur ou des candidats.</p>
+<h3 id="profils-sauvegarde">Profils &amp; Sauvegarde</h3>
+<ul>
+<li><strong>Profils Joueurs :</strong> Suivi des scores, des temps, des
+aides utilisées et sauvegarde du meilleur score de votre pseudonyme
+(visible par les autres).</li>
+<li><strong>Sauvegarde d’état complète :</strong> Possibilité de quitter
+et de reprendre une partie exactement à l’endroit laissé (chronomètre,
+brouillons et historique conservés).</li>
+<li><strong>Personnalisation :</strong> Thème sombre/clair, et contrôle
+des volumes (bruitages &amp; musique).</li>
+</ul>
+<h3 id="interface-modes">Interface &amp; Modes</h3>
+<ul>
+<li><strong>Multilingue :</strong> Chargement dynamique et changement à
+la volée de la langue de l’interface.</li>
+<li><strong>Mode Campagne :</strong> Suite de grilles prédéfinies à la
+difficulté croissante et intégrant un tutoriel de départ.</li>
+<li><strong>Mode Aléatoire :</strong> Sélection d’une grille parmi une
+liste selon la difficulté choisie.</li>
+</ul>
+<hr />
+<h2 id="technique">Technique</h2>
+<ul>
+<li><strong>Langage privilégié :</strong> Java</li>
+<li><strong>Interface Graphique :</strong> Swing</li>
+<li><strong>Multiplateforme :</strong> Jouable sur Windows, macOS et
+Linux.</li>
+</ul>
+<hr />
+<h2 id="exécution-du-jeu">Exécution du jeu</h2>
+<p>Une fois le projet compilé, utilisez l’archive exécutable générée
+pour lancer l’application :</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> groupe6.jar</span></code></pre></div>
+<hr />
+<h2 id="équipe-de-développement-groupe-6">Équipe de Développement
+(Groupe 6)</h2>
+<p><em>Licence Informatique 3ème année (2025-2026) - Le Mans
+Université</em> - <strong>Alban Borde</strong> - <strong>Lucien
+Defosse</strong> - <strong>Lucas Dupont</strong> - <strong>Maël
+Gaumont</strong> - <strong>Maxime Jouatel</strong> - <strong>Lucas
+Reverbel–Longhi</strong> - <strong>Louis Subtil</strong></p>
