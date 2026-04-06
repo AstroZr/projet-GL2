@@ -17,7 +17,7 @@ public class CandidatUnique extends AideAbstract {
     private int colonneCellule = -1;
 
     public CandidatUnique() {
-        super(6);
+        super(7);
         refreshTexts();
     }
 
@@ -75,7 +75,6 @@ public class CandidatUnique extends AideAbstract {
     @Override
     public int load(Grille grille, int nbAides) {
         refreshTexts();
-        int taille = grille.getTaille();
 
         this.aideVisuel = new AideVisuel();
 

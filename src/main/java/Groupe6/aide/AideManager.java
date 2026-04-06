@@ -6,6 +6,8 @@ import Groupe6.aide.techniques.UniqueCacheeLigne;
 import Groupe6.aide.techniques.UniqueCacheeColonne;
 import Groupe6.aide.techniques.BlocageUnique;
 import Groupe6.aide.techniques.CandidatUnique;
+import Groupe6.aide.techniques.IntraZone;
+import Groupe6.aide.techniques.NakedN;
 import Groupe6.models.Grille;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class AideManager {
         this.aides.add(new UniqueCacheeColonne());
         this.aides.add(new BlocageUnique());
         this.aides.add(new CandidatUnique());
+        this.aides.add(new IntraZone());
+        this.aides.add(new NakedN(8, 2));
+        this.aides.add(new NakedN(8, 3));
     }
 
     public static AideManager getInstance() {
