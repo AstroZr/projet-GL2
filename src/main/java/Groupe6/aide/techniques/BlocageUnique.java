@@ -29,10 +29,11 @@ public class BlocageUnique extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.blocageunique.titre");
         this.description = LangManager.get("aide.blocageunique.description");
+        this.explication = LangManager.get("aide.blocageunique.explication");
     }
 
     @Override
-    public boolean isOverUsed(){
+    public boolean isOverUsed() {
         return (this.nbUtilisation >= 3);
     }
 
@@ -122,19 +123,19 @@ public class BlocageUnique extends AideAbstract {
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.blocageunique.position") + " "
+                        this.explication + "\n" + LangManager.get("aide.blocageunique.position") + " "
                                 + String.valueOf(this.cibleLigne + 1));
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             default:
-                this.aideTextuel = new AideTextuel(this.titre, this.description + "\n"
+                this.aideTextuel = new AideTextuel(this.titre, this.explication + "\n"
                         + LangManager.get("aide.blocageunique.position") + " " + (this.cibleLigne + 1));
 
                 if (this.cibleZone != null) {

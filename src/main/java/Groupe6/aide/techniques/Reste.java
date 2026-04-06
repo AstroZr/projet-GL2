@@ -22,6 +22,7 @@ public class Reste extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.reste.titre");
         this.description = LangManager.get("aide.reste.description");
+        this.explication = LangManager.get("aide.reste.explication");
     }
 
     @Override
@@ -85,13 +86,13 @@ public class Reste extends AideAbstract {
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.reste.position") + " "
+                        this.explication + "\n" + LangManager.get("aide.reste.position") + " "
                                 + LangManager.get(this.isLigne ? "aide.reste.ligne" : "aide.reste.colonne") + " "
                                 + LangManager.get("aide.reste.numero") + " " + String.valueOf(this.index + 1) + " !");
                 this.nbUtilisation++;
@@ -99,7 +100,7 @@ public class Reste extends AideAbstract {
 
             default:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.reste.position") + " "
+                        this.explication + "\n" + LangManager.get("aide.reste.position") + " "
                                 + LangManager.get(this.isLigne ? "aide.reste.ligne" : "aide.reste.colonne") + " "
                                 + LangManager.get("aide.reste.numero") + " " + String.valueOf(this.index + 1) + "!");
                 if (this.isLigne) {

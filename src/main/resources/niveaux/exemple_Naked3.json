@@ -1,0 +1,76 @@
+{
+  "id": "exemple_Naked3",
+  "taille": 4,
+  "listeZones": [
+    {
+      "valeurCible": 6,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 0, "colonne": 0 },
+        { "ligne": 0, "colonne": 1 },
+        { "ligne": 0, "colonne": 2 }
+      ]
+    },
+    {
+      "valeurCible": 6,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 0, "colonne": 3 },
+        { "ligne": 1, "colonne": 3 }
+      ]
+    },
+    {
+      "valeurCible": 7,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 1, "colonne": 0 },
+        { "ligne": 2, "colonne": 0 }
+      ]
+    },
+    {
+      "valeurCible": 7,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 1, "colonne": 1 },
+        { "ligne": 2, "colonne": 1 }
+      ]
+    },
+    {
+      "valeurCible": 3,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 1, "colonne": 2 },
+        { "ligne": 2, "colonne": 2 }
+      ]
+    },
+    {
+      "valeurCible": 4,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 2, "colonne": 3 },
+        { "ligne": 3, "colonne": 3 }
+      ]
+    },
+    {
+      "valeurCible": 7,
+      "typeOperation": "ADDITION",
+      "listeCellules": [
+        { "ligne": 3, "colonne": 0 },
+        { "ligne": 3, "colonne": 1 },
+        { "ligne": 3, "colonne": 2 }
+      ]
+    }
+  ],
+  "matricePreRemplie": [
+    [ null, null, null, null ],
+    [ null, null, null, null ],
+    [ null, null, null, null ],
+    [ null, null, null, null ]
+  ],
+  "matriceCorrection": [
+    [ 1, 2, 3, 4 ],
+    [ 3, 4, 1, 2 ],
+    [ 4, 3, 2, 1 ],
+    [ 2, 1, 4, 3 ]
+  ]
+}

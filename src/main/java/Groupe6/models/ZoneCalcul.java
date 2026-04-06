@@ -95,6 +95,9 @@ public class ZoneCalcul {
                                                                        // résultats négatifs
                 int premierDiv = valeurs.get(0);
                 for (int i = 1; i < valeurs.size(); i++) {
+                    if (valeurs.get(i) == 0 || premierDiv % valeurs.get(i) != 0) {
+                        return false;
+                    }
                     premierDiv /= valeurs.get(i);
                 }
                 return (premierDiv) == valeurCible;

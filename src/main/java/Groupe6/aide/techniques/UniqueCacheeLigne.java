@@ -21,6 +21,7 @@ public class UniqueCacheeLigne extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.uniquecacheeligne.titre");
         this.description = LangManager.get("aide.uniquecacheeligne.description");
+        this.explication = LangManager.get("aide.uniquecacheeligne.explication");
     }
 
     @Override
@@ -29,7 +30,7 @@ public class UniqueCacheeLigne extends AideAbstract {
     }
 
     @Override
-    public boolean isOverUsed(){
+    public boolean isOverUsed() {
         return (this.nbUtilisation >= 3);
     }
 
@@ -90,20 +91,20 @@ public class UniqueCacheeLigne extends AideAbstract {
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.candidatuniqueligne.position") + " "
+                        this.explication + "\n" + LangManager.get("aide.uniquecacheeligne.position") + " "
                                 + String.valueOf(this.cibleLigne + 1));
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             default:
-                this.aideTextuel = new AideTextuel(this.titre, this.description + "\n"
-                        + LangManager.get("aide.candidatuniqueligne.position") + " " + (this.cibleLigne + 1));
+                this.aideTextuel = new AideTextuel(this.titre, this.explication + "\n"
+                        + LangManager.get("aide.uniquecacheeligne.position") + " " + (this.cibleLigne + 1));
                 this.aideVisuel.add(
                         new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.cibleLigne, this.cibleColonne, new String()));
                 this.nbUtilisation++;

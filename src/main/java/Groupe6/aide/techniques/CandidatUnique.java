@@ -24,9 +24,10 @@ public class CandidatUnique extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.candidatunique.titre");
         this.description = LangManager.get("aide.candidatunique.description");
+        this.explication = LangManager.get("aide.candidatunique.explication");
     }
 
-    private boolean checkCellule(Cellule[][] grid, int gridSize, int ligneCellule, int colonneCellule) {
+    private int checkCellule(Cellule[][] grid, int gridSize, int ligneCellule, int colonneCellule) {
         Set<Integer> valeurs = new HashSet<>();
 
         for (int ligne = 0; ligne < gridSize; ligne++) {
@@ -40,7 +41,14 @@ public class CandidatUnique extends AideAbstract {
                 valeurs.add(grid[ligneCellule][colonne].getValeur());
             }
         }
-        return (valeurs.size() == gridSize); // beacause of the 0 is in the list
+
+        if (valeurs.size() == gridSize) { // because of the 0 is in the list
+            for (int k = 1; k <= gridSize; k++) {
+                if (!valeurs.contains(k))
+                    return k;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -52,19 +60,19 @@ public class CandidatUnique extends AideAbstract {
     public boolean check(Grille grille) {
         Cellule[][] grid = grille.getMatriceCellules();
         int gridSize = grille.getTaille();
-        boolean finded = false;
+        int missingVal = -1;
 
         int ligne = 0;
         int colonne = 0;
-        for (ligne = 0; ligne < gridSize && !finded; ligne++) {
-            for (colonne = 0; colonne < gridSize && !finded; colonne++) {
+        for (ligne = 0; ligne < gridSize && missingVal == -1; ligne++) {
+            for (colonne = 0; colonne < gridSize && missingVal == -1; colonne++) {
                 if (grid[ligne][colonne].getValeur() == 0) {
-                    finded = checkCellule(grid, gridSize, ligne, colonne);
+                    missingVal = checkCellule(grid, gridSize, ligne, colonne);
                 }
             }
         }
 
-        if (finded) {
+        if (missingVal != -1) {
             this.ligneCellule = ligne - 1;
             this.colonneCellule = colonne - 1;
             return true;
@@ -75,31 +83,28 @@ public class CandidatUnique extends AideAbstract {
     @Override
     public int load(Grille grille, int nbAides) {
         refreshTexts();
-
         this.aideVisuel = new AideVisuel();
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 break;
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.candidatunique.colonne") + " "
+                        this.explication + "\n" + LangManager.get("aide.candidatunique.colonne") + " "
                                 + String.valueOf(colonneCellule + 1) + " " +
-                                LangManager.get("aide.candidatunique.ligne") + " " + String.valueOf(ligneCellule + 1)
-                                + " !");
+                                LangManager.get("aide.candidatunique.ligne") + " " + String.valueOf(ligneCellule + 1));
 
                 this.nbUtilisation++;
                 break;
 
             default:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.candidatunique.colonne") + " "
+                        this.explication + "\n" + LangManager.get("aide.candidatunique.colonne") + " "
                                 + String.valueOf(colonneCellule + 1) + " " +
-                                LangManager.get("aide.candidatunique.ligne") + " " + String.valueOf(ligneCellule + 1)
-                                + " !");
+                                LangManager.get("aide.candidatunique.ligne") + " " + String.valueOf(ligneCellule + 1));
 
                 this.aideVisuel
                         .add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, ligneCellule, colonneCellule, new String()));

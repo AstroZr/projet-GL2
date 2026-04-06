@@ -29,7 +29,7 @@ public class AideManager {
         this.aides.add(new BlocageUnique());
         this.aides.add(new CandidatUnique());
         this.aides.add(new NakedN(8, 2));
-        this.aides.add(new NakedN(8, 3));
+        this.aides.add(new NakedN(9, 3));
     }
 
     public static AideManager getInstance() {

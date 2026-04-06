@@ -681,6 +681,15 @@ public class Grille {
 
     // === GETTERS ===
     /**
+     * Retourne la matrice de correction
+     * 
+     * @return la matrice de correction (solution)
+     */
+    public int[][] getMatriceCorrection() {
+        return matriceCorrection;
+    }
+
+    /**
      * Retourne la taille de la grille
      * 
      * @return la taille de la grille

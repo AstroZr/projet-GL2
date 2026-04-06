@@ -21,6 +21,7 @@ public class UniqueCacheeColonne extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.uniquecacheecolonne.titre");
         this.description = LangManager.get("aide.uniquecacheecolonne.description");
+        this.explication = LangManager.get("aide.uniquecacheecolonne.explication");
     }
 
     @Override
@@ -29,7 +30,7 @@ public class UniqueCacheeColonne extends AideAbstract {
     }
 
     @Override
-    public boolean isOverUsed(){
+    public boolean isOverUsed() {
         return (this.nbUtilisation >= 3);
     }
 
@@ -88,20 +89,20 @@ public class UniqueCacheeColonne extends AideAbstract {
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             case 1:
                 this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + " " + LangManager.get("aide.candidatuniquecolonne.position") + " "
+                        this.explication + "\n" + LangManager.get("aide.uniquecacheecolonne.position") + " "
                                 + String.valueOf(this.cibleColonne + 1));
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             default:
-                this.aideTextuel = new AideTextuel(this.titre, this.description + "\n"
-                        + LangManager.get("aide.candidatuniquecolonne.position") + " " + (this.cibleColonne + 1));
+                this.aideTextuel = new AideTextuel(this.titre, this.explication + "\n"
+                        + LangManager.get("aide.uniquecacheecolonne.position") + " " + (this.cibleColonne + 1));
                 this.aideVisuel.add(
                         new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.cibleLigne, this.cibleColonne, new String()));
                 this.nbUtilisation++;

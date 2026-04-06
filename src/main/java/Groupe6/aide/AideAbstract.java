@@ -7,6 +7,7 @@ public abstract class AideAbstract implements Aide{
     protected AideVisuel aideVisuel;
     protected String titre;
     protected String description;
+    protected String explication;
 
     public AideAbstract(int numero){
         this.numero = numero;

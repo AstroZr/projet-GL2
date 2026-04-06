@@ -58,7 +58,9 @@ public class Astuces extends Etats {
         "exemple_UniqueCacheeLigne",
         "exemple_UniqueCacheeColonne",
         "exemple_BlocageUnique",
-        "exemple_CandidatUnique"
+        "exemple_CandidatUnique",
+        "exemple_Naked2",
+        "exemple_Naked3"
     };
 
     private List<Niveau> exemplesNiveaux;
@@ -105,7 +107,9 @@ public class Astuces extends Etats {
         exemplesVisuels = new ArrayList<>();
         Aide[] freshTechniques = {
             new Singleton(), new Reste(), new UniqueCacheeLigne(),
-            new UniqueCacheeColonne(), new BlocageUnique(), new CandidatUnique()
+            new UniqueCacheeColonne(), new BlocageUnique(), new CandidatUnique(),
+            new Groupe6.aide.techniques.NakedN(8, 2),
+            new Groupe6.aide.techniques.NakedN(9, 3)
         };
         for (int i = 0; i < EXEMPLE_IDS.length; i++) {
             Niveau n = SaveManager.chargerNiveau(EXEMPLE_IDS[i]);
@@ -325,7 +329,7 @@ public class Astuces extends Etats {
         boolean[][] rouge = new boolean[n][n];
         if (visuel != null) {
             for (EffetVisuel effet : visuel) {
-                if (effet.getType() == TypeEffect.CASE_NEGATIVE) {
+                if (effet.getType() == TypeEffect.CASE_NEGATIVE || effet.getType() == TypeEffect.CANDIDAT_POSITIF) {
                     int r = effet.getX(), c = effet.getY();
                     if (r >= 0 && r < n && c >= 0 && c < n)
                         rouge[r][c] = true;

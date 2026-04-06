@@ -24,13 +24,16 @@ public class Singleton extends AideAbstract {
     private void refreshTexts() {
         this.titre = LangManager.get("aide.singleton.titre");
         this.description = LangManager.get("aide.singleton.description");
+        this.explication = LangManager.get("aide.singleton.explication");
     }
 
     @Override
-    public int getMaxUtilisation() { return 3; }
+    public int getMaxUtilisation() {
+        return 3;
+    }
 
     @Override
-    public boolean isOverUsed(){
+    public boolean isOverUsed() {
         return (this.nbUtilisation >= 3);
     }
 
@@ -67,23 +70,17 @@ public class Singleton extends AideAbstract {
 
         switch (this.nbUtilisation) {
             case 0:
-                this.aideTextuel = new AideTextuel(this.titre, this.description);
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             case 1:
-                this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + "\n" + LangManager.get("aide.singleton.valeur") + " " + grille
-                                .getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible()
-                                + "!");
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.nbUtilisation++;
                 return this.getCost(nbAides);
 
             default:
-                this.aideTextuel = new AideTextuel(this.titre,
-                        this.description + "\n" + LangManager.get("aide.singleton.valeur") + " " + grille
-                                .getCellule(this.ligneCellule, this.colonneCellule).getZoneCalcul().getValeurCible()
-                                + "!");
+                this.aideTextuel = new AideTextuel(this.titre, this.explication);
                 this.aideVisuel.add(new EffetVisuel(TypeEffect.CASE_NEGATIVE, this.ligneCellule, this.colonneCellule,
                         new String()));
                 this.nbUtilisation++;
