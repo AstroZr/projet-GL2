@@ -3,6 +3,7 @@ package Groupe6.aide;
 import Groupe6.models.Grille;
 
 public interface Aide {
+    default void refreshTexts() {}
     int getId();
     int getNbUtilisation();
     void setNbUtilisation(int nbUtilisation);

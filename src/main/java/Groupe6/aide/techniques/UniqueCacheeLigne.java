@@ -18,7 +18,8 @@ public class UniqueCacheeLigne extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.uniquecacheeligne.titre");
         this.description = LangManager.get("aide.uniquecacheeligne.description");
         this.explication = LangManager.get("aide.uniquecacheeligne.explication");

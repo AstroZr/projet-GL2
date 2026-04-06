@@ -18,7 +18,8 @@ public class UniqueCacheeColonne extends AideAbstract {
         refreshTexts();
     }
 
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.uniquecacheecolonne.titre");
         this.description = LangManager.get("aide.uniquecacheecolonne.description");
         this.explication = LangManager.get("aide.uniquecacheecolonne.explication");

@@ -25,8 +25,8 @@ public class BlocageUnique extends AideAbstract {
         super(6);
         refreshTexts();
     }
-
-    private void refreshTexts() {
+    @Override
+    public void refreshTexts() {
         this.titre = LangManager.get("aide.blocageunique.titre");
         this.description = LangManager.get("aide.blocageunique.description");
         this.explication = LangManager.get("aide.blocageunique.explication");

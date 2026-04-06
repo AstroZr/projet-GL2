@@ -6,6 +6,8 @@ import Groupe6.models.Grille;
 import Groupe6.models.TypeOperation;
 import Groupe6.models.ZoneCalcul;
 import Groupe6.utilz.FontCache;
+import Groupe6.utilz.LangManager;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -335,7 +337,7 @@ public class VueGrille {
     g2d.setFont(FONT_AIDE_ZONE);
     FontMetrics fm = g2d.getFontMetrics();
 
-    String titre = "Possibilites " + zone.getValeurCible() + zone.getTypeOperation().getSymbole();
+    String titre = LangManager.get("tooltip.combinaisons") + " " + zone.getValeurCible() + zone.getTypeOperation().getSymbole() + " :";
 
     int w = fm.stringWidth(titre);
     for (int i = 0; i < nbAff; i++) {
