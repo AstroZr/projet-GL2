@@ -6,7 +6,6 @@ import Groupe6.aide.techniques.UniqueCacheeLigne;
 import Groupe6.aide.techniques.UniqueCacheeColonne;
 import Groupe6.aide.techniques.BlocageUnique;
 import Groupe6.aide.techniques.CandidatUnique;
-import Groupe6.aide.techniques.IntraZone;
 import Groupe6.aide.techniques.NakedN;
 import Groupe6.models.Grille;
 
