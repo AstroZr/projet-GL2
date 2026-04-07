@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import Groupe6.audio.SoundManager;
 import Groupe6.game.Game;
@@ -49,7 +50,9 @@ public class Selection extends Etats {
 
     // ====== SCALING & LAYOUT ======
     private LayoutScale layoutScale;  // Responsable du redimensionnement
-    private int nombreNiveaux;        // Nombre de niveaux chargés
+    private int nombreNiveaux;        // Nombre de niveaux chargés (n'inclut pas le bouton aléatoire)
+    private int indexBoutonAleatoire; // Index du bouton aléatoire
+    private int indexBoutonRetour;    // Index du bouton retour
     private int titreTy;              // Position Y du titre
     
     // ====== TEXTES LOCALISÉS ======
@@ -84,6 +87,38 @@ public class Selection extends Etats {
         }
     }
 
+    private static class BoutonNiveauAleatoire extends BoutonChangeurEtat {
+        private final Jeu jeu;
+        private final List<String> listeNiveaux;
+        private final Random random;
+
+        BoutonNiveauAleatoire(int x, int y, int w, int h, List<String> listeNiveaux, Jeu jeu) {
+            super(x, y, w, h, EtatJeu.GRILLE, "Aléatoire");
+            this.jeu = jeu;
+            this.listeNiveaux = listeNiveaux;
+            this.random = new Random();
+            updateLabel();
+        }
+
+        void updateLabel() {
+            String label = LangManager.get("selection.aleatoire");
+            // Si la clé n'existe pas, utiliser le texte par défaut
+            if (label.equals("selection.aleatoire")) {
+                label = "Grille aléatoire";
+            }
+            setLabel(label);
+        }
+
+        @Override
+        public void appliquerAction() {
+            if (listeNiveaux != null && !listeNiveaux.isEmpty()) {
+                String niveauAleatoire = listeNiveaux.get(random.nextInt(listeNiveaux.size()));
+                jeu.chargerNiveau(niveauAleatoire);
+            }
+            super.appliquerAction();
+        }
+    }
+
     public Selection(Game game) {
         super(game);
         initClasses();
@@ -105,17 +140,24 @@ public class Selection extends Etats {
         nombreNiveaux = ids.size();
         Jeu jeu = game.getJeu();
 
+        // Ajouter le bouton "Grille aléatoire" en première position (centré)
+        indexBoutonAleatoire = 0;
+        boutons.add(new BoutonNiveauAleatoire(cx - bw / 2, startY, bw, bh, ids, jeu));
+
+        // Ajouter les niveaux normaux, avec un décalage de startY pour laisser place au bouton aléatoire
         int colGap = layoutScale.scaleUniform(GAP_COLONNES_REF);
         int leftX  = cx - colGap / 2 - bw;
         int rightX = cx + colGap / 2;
+        int nivelStartY = startY + gap; // Décaler d'une ligne pour le bouton aléatoire
 
         for (int i = 0; i < ids.size(); i++) {
             String id = ids.get(i);
             int bx = (i % 2 == 0) ? leftX : rightX;
-            int by = startY + (i / 2) * gap;
+            int by = nivelStartY + (i / 2) * gap;
             boutons.add(new BoutonNiveau(bx, by, bw, bh, id, jeu));
         }
 
+        indexBoutonRetour = 1 + nombreNiveaux;
         int retourY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_RETOUR_Y);
         boutons.add(new BoutonChangeurEtat(cx - bw / 2, retourY, bw, bh, EtatJeu.MENU, labelRetour));
 
@@ -135,20 +177,29 @@ public class Selection extends Etats {
         int gap = layoutScale.scaleUniform(ESPACEMENT_BOUTONS_REF);
         int startY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_BUTTONS_Y);
 
+        // Positionner le bouton aléatoire (centré)
+        Bouton btnAleatoire = boutons.get(indexBoutonAleatoire);
+        btnAleatoire.setX(cx - bw / 2);
+        btnAleatoire.setY(startY);
+        btnAleatoire.setLargeur(bw);
+        btnAleatoire.setHauteur(bh);
+
+        // Positionner les niveaux normaux
         int colGap = layoutScale.scaleUniform(GAP_COLONNES_REF);
         int leftX  = cx - colGap / 2 - bw;
         int rightX = cx + colGap / 2;
+        int nivelStartY = startY + gap;
 
         for (int i = 0; i < nombreNiveaux; i++) {
-            Bouton b = boutons.get(i);
+            Bouton b = boutons.get(1 + i); // Index 1 à 1+nombreNiveaux
             b.setX((i % 2 == 0) ? leftX : rightX);
-            b.setY(startY + (i / 2) * gap);
+            b.setY(nivelStartY + (i / 2) * gap);
             b.setLargeur(bw);
             b.setHauteur(bh);
         }
 
         int retourY = layoutScale.ratioY(Constants.Ratios.Selection.RATIO_SELECTION_RETOUR_Y);
-        Bouton retour = boutons.get(nombreNiveaux);
+        Bouton retour = boutons.get(indexBoutonRetour);
         retour.setX(cx - bw / 2);
         retour.setY(retourY);
         retour.setLargeur(bw);
@@ -232,34 +283,69 @@ public class Selection extends Etats {
 
         int current = indiceFocusClavierBouton;
         int next = current;
-        int retourIndex = nombreNiveaux;
+        int retourIndex = indexBoutonRetour;
 
         switch (code) {
             case KeyEvent.VK_RIGHT:
-                if (current < nombreNiveaux && current % 2 == 0 && current + 1 < nombreNiveaux) {
-                    next = current + 1;
+                // Si on est sur le bouton aléatoire, aller sur le premier niveau (gauche)
+                if (current == indexBoutonAleatoire && nombreNiveaux > 0) {
+                    next = 1; // Premier niveau
+                }
+                // Si on est sur un niveau gauche et qu'il y a un niveau droit correspondant
+                else if (current > indexBoutonAleatoire && current < indexBoutonRetour) {
+                    int levelIndex = current - 1; // Convertir l'index bouton en niveau
+                    if (levelIndex % 2 == 0 && levelIndex + 1 < nombreNiveaux) {
+                        next = current + 1;
+                    }
                 }
                 break;
 
             case KeyEvent.VK_LEFT:
-                if (current < nombreNiveaux && current % 2 == 1) {
-                    next = current - 1;
+                // Si on est sur un niveau droit, aller au niveau gauche correspondant
+                if (current > indexBoutonAleatoire && current < indexBoutonRetour) {
+                    int levelIndex = current - 1;
+                    if (levelIndex % 2 == 1) {
+                        next = current - 1;
+                    }
                 }
                 break;
 
             case KeyEvent.VK_DOWN:
-                if (current < nombreNiveaux) {
-                    int below = current + 2;
-                    next = (below < nombreNiveaux) ? below : retourIndex;
+                if (current == indexBoutonAleatoire) {
+                    // Du bouton aléatoire vers le premier niveau
+                    next = 1;
+                } else if (current < indexBoutonRetour) {
+                    // Entre les niveaux
+                    int levelIndex = current - 1;
+                    int below = levelIndex + 2;
+                    if (below < nombreNiveaux) {
+                        next = current + 2;
+                    } else {
+                        next = retourIndex;
+                    }
+                } else if (current == retourIndex) {
+                    // Rester sur retour
+                    next = retourIndex;
                 }
                 break;
 
             case KeyEvent.VK_UP:
                 if (current == retourIndex) {
-                    next = Math.max(0, nombreNiveaux - 1);
-                } else if (current < nombreNiveaux) {
-                    int above = current - 2;
-                    next = (above >= 0) ? above : current;
+                    // Du retour vers le dernier niveau
+                    if (nombreNiveaux > 0) {
+                        int lastLevelIndex = nombreNiveaux - 1;
+                        next = 1 + lastLevelIndex;
+                    }
+                } else if (current > indexBoutonAleatoire && current < indexBoutonRetour) {
+                    // Entre les niveaux
+                    int levelIndex = current - 1;
+                    int above = levelIndex - 2;
+                    if (above >= 0) {
+                        next = current - 2;
+                    } else {
+                        // Aller au bouton aléatoire
+                        next = indexBoutonAleatoire;
+                    }
                 }
                 break;
 
@@ -294,16 +380,27 @@ public class Selection extends Etats {
         labelTitre = LangManager.get("selection.titre");
         labelRetour = LangManager.get("common.retour");
 
-        if (boutons == null || boutons.size() <= nombreNiveaux) {
+        if (boutons == null || boutons.isEmpty()) {
             return;
         }
 
-        for(int i = 0; i < nombreNiveaux; i++){
-            Bouton b = boutons.get(i);
+        // Mettre à jour le bouton aléatoire
+        Bouton btnAleatoire = boutons.get(indexBoutonAleatoire);
+        if (btnAleatoire instanceof BoutonNiveauAleatoire) {
+            ((BoutonNiveauAleatoire) btnAleatoire).updateLabel();
+        }
+
+        // Mettre à jour les niveaux
+        for (int i = 0; i < nombreNiveaux; i++) {
+            Bouton b = boutons.get(1 + i);
             if (b instanceof BoutonNiveau) {
                 ((BoutonNiveau) b).updateLabel();
             }
         }
-        ((BoutonChangeurEtat) boutons.get(nombreNiveaux)).setLabel(labelRetour);
+
+        // Mettre à jour le bouton retour
+        if (boutons.size() > indexBoutonRetour && boutons.get(indexBoutonRetour) instanceof BoutonChangeurEtat) {
+            ((BoutonChangeurEtat) boutons.get(indexBoutonRetour)).setLabel(labelRetour);
+        }
     }
 }
